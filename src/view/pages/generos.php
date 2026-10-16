@@ -91,7 +91,7 @@ if ($q !== '') {
           <li><a href="instrumentos.php">Instrumentos</a></li>
           <li><a href="#generos" class="active">Géneros</a></li>
           <li class="secnav">Acções</li>
-          <li><a href="#">Exportar</a></li>
+          <!-- <li><a href="#">Exportar</a></li> -->
           <?php if($podeUsers): ?><li><a href="administracao.php">Administração</a></li><?php endif; ?>
           <?php if($podeLogs): ?><li><a href="logs.php">Logs</a></li><?php endif; ?> <li><a href="LogOut.php">Sair</a></li>
         </ul>

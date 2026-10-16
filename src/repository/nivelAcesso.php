@@ -137,7 +137,7 @@ class NivelAcessoDAO
         $ps->bind_param("i", $codigo);
         try {
             $ps->execute();
-            return true;
+            return true;    
         } catch (mysqli_sql_exception $e) {
             return false;
         }

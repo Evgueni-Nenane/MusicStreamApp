@@ -35,6 +35,9 @@ $edF = null;    // faixa a editar ("Editar Faixa" dentro de Ver Detalhes)
 $edFDisco = 0;  // disco da faixa em edição
 $edFComp = $edFMus = $edFCant = [];
 
+// Texto da pesquisa (vem por GET na pesquisa e nos botões Editar/Detalhes; por POST nas restantes acções)
+$q = trim($_GET['q'] ?? $_POST['q'] ?? '');
+
 /* ---------- Acções (POST) ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'];
@@ -188,6 +191,15 @@ if ($acaoGet !== '') {
 $discos = $discoDAO->listarTodos();   // depois das acções, para vir actualizado
 $todosGeneros = $generoDAO->listarTodos();
 
+/* ---------- Pesquisa: filtra por título, género, preço ou ano ---------- */
+if ($q !== '') {
+    $discos = array_filter($discos, function ($d) use ($q) {
+        $alvo = $d->getTitulo() . ' ' . $d->getGeneroMusicalTxt() . ' '
+              . number_format($d->getPreco(), 2, ',', '.') . ' ' . $d->getAnoEdicao();
+        return mb_stripos($alvo, $q) !== false;
+    });
+}
+
 /* ---------- Cabeçalho: foto do utilizador com sessão ---------- */
 $utilizadorController = new UtilizadorController();
 $fotoLogado = $utilizador->getFoto();
@@ -212,6 +224,32 @@ function nomes($lista, $g1, $g2)
     <title>Listagem de Discos | Sistema de Gestão</title>
     <link rel="stylesheet" href="../css/listagemdiscos.css">
     <link rel="stylesheet" href="../css/registro.css">
+    <style>
+        /* Barra de pesquisa ao lado do título do cartão */
+        .card-header.com-pesquisa {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .card-header.com-pesquisa .search-input {
+            width: 100%;
+            max-width: 320px;
+            padding: 0.6rem 0.9rem;
+            border: 1px solid #e4e4e7;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: #fff;
+        }
+
+        .card-header.com-pesquisa .search-input:focus {
+            outline: none;
+            border-color: #18181b;
+        }
+    </style>
 </head>
 
 <body>
@@ -238,7 +276,7 @@ function nomes($lista, $g1, $g2)
                     <li><a href="instrumentos.php">Instrumentos</a></li>
                     <li><a href="generos.php">Géneros</a></li>
                     <li class="secnav">Acções</li>
-                    <li><a href="#">Exportar</a></li>
+                    <!-- <li><a href="#">Exportar</a></li> -->
                     <?php if ($podeUsers): ?><li><a href="administracao.php">Administração</a></li><?php endif; ?>
                     <?php if ($podeLogs): ?><li><a href="logs.php">Logs</a></li><?php endif; ?>
                     <li><a href="LogOut.php">Sair</a></li>
@@ -263,8 +301,14 @@ function nomes($lista, $g1, $g2)
 
             <main>
                 <div class="card">
-                    <div class="card-header">
+                    <!-- Formulário GET da pesquisa (o input liga-se a ele via form="form-pesq"). -->
+                    <form method="get" action="listagemdiscos.php" id="form-pesq"></form>
+
+                    <div class="card-header com-pesquisa">
                         <h3>Discos Cadastrados no Sistema</h3>
+                        <input type="search" class="search-input" name="q" form="form-pesq"
+                            value="<?= h($q) ?>" placeholder="Pesquisar disco, género, ano..."
+                            aria-label="Pesquisar discos">
                     </div>
 
                     <?php if ($msg): ?>
@@ -272,6 +316,8 @@ function nomes($lista, $g1, $g2)
                     <?php endif; ?>
 
                     <form method="post" action="listagemdiscos.php">
+                        <!-- Mantém a pesquisa activa depois de Editar / Remover / Ver Detalhes -->
+                        <input type="hidden" name="q" value="<?= h($q) ?>">
                         <div class="table-wrapper">
                             <table>
                                 <thead>
@@ -293,6 +339,13 @@ function nomes($lista, $g1, $g2)
                                             <td><?= h($d->getAnoEdicao()) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <?php if (count($discos) === 0): ?>
+                                        <tr>
+                                            <td colspan="5">
+                                                <?= $q !== '' ? 'Nenhum disco encontrado para "' . h($q) . '".' : 'Ainda não há discos cadastrados.' ?>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -333,6 +386,7 @@ function nomes($lista, $g1, $g2)
             <form method="post" action="listagemdiscos.php" id="form-detalhes">
                 <input type="hidden" name="acao" value="removerfaixa" id="acao-detalhes">
                 <input type="hidden" name="id" value="<?= $det ? $dId : '' ?>">
+                <input type="hidden" name="q" value="<?= h($q) ?>">
                 <div class="modal-body">
                     <div class="detail-section">
                         <h4>Informações do Disco</h4>
@@ -414,6 +468,7 @@ function nomes($lista, $g1, $g2)
             <form method="post" action="listagemdiscos.php">
                 <input type="hidden" name="acao" value="atualizar">
                 <input type="hidden" name="id" value="<?= $ed ? $ed->getCodigoDisco() : '' ?>">
+                <input type="hidden" name="q" value="<?= h($q) ?>">
                 <div class="modal-body">
                     <div class="form-grid">
                         <div class="label-group form-grid-full">
@@ -468,6 +523,7 @@ function nomes($lista, $g1, $g2)
                 <input type="hidden" name="id" value="<?= $edF ? $edFDisco : '' ?>">
                 <input type="hidden" name="id_faixa" value="<?= $edF ? $edF->getIdFaixa() : '' ?>">
                 <input type="hidden" name="num" value="<?= $edF ? $edF->getNumeroFaixa() : '' ?>">
+                <input type="hidden" name="q" value="<?= h($q) ?>">
                 <div class="modal-body">
                     <div class="detail-section">
                         <h4>Informações da Faixa</h4>
@@ -541,6 +597,7 @@ function nomes($lista, $g1, $g2)
             <form method="post" action="listagemdiscos.php">
                 <input type="hidden" name="acao" value="addfaixa">
                 <input type="hidden" name="id" value="<?= $fx ? $fx->getCodigoDisco() : '' ?>">
+                <input type="hidden" name="q" value="<?= h($q) ?>">
                 <div class="modal-body">
                     <div class="detail-section">
                         <h4>Informações da Faixa<?= $fx ? ' — ' . h($fx->getTitulo()) : '' ?></h4>

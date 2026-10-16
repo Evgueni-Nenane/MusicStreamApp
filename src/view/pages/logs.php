@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../controller/logsController.php';
 $utilizador = Sessao::getUtilizadorLogado();
 if (!$utilizador) { header('Location: Login.php'); exit; }
 
-// Auditoria: só Administrador e Auditor vêem os logs.
+// Auditoria: Auditor vêem os logs.
 if (!Permissao::pode($utilizador, 'logs')) {
     header('Location: listagemdiscos.php');
     exit;
@@ -26,7 +26,7 @@ if ($q !== '') {
             $l->getCodigo() . ' ' . $l->getNome() . ' ' . $l->getApelido() . ' ' .
             $l->getEmail() . ' ' . $l->getPerfil() . ' ' . $l->getAccao() . ' ' . $l->getDataHora()
         );
-        return str_contains($alvo, strtolower($q));
+          return str_contains($alvo, strtolower($q));
     });
 }
 ?>
@@ -55,7 +55,7 @@ if ($q !== '') {
         <li><a href="instrumentos.php">Instrumentos</a></li>
         <li><a href="generos.php">Géneros</a></li>
         <li class="secnav">Acções</li>
-        <li><a href="#">Exportar</a></li>
+        <!-- <li><a href="#">Exportar</a></li> -->
         <?php if ($podeUsers): ?><li><a href="administracao.php">Administração</a></li><?php endif; ?>
         <li><a href="#logs" class="active">Logs</a></li>
         <li><a href="LogOut.php">Sair</a></li>

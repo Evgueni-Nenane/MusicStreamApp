@@ -262,7 +262,7 @@ if ($q !== '') {
           <li><a href="instrumentos.php">Instrumentos</a></li>
           <li><a href="generos.php">Géneros</a></li>
           <li class="secnav">Acções</li>
-          <li><a href="#">Exportar</a></li>
+          <!-- <li><a href="#">Exportar</a></li> -->
           <li><a href="#administracao" class="active">Administração</a></li>
           <?php if ($podeLogs): ?><li><a href="logs.php">Logs</a></li><?php endif; ?>
           <li><a href="LogOut.php">Sair</a></li>
@@ -286,9 +286,8 @@ if ($q !== '') {
       </header>
 
       <main>
-        <div class="card">
-          <!-- Formulário GET da pesquisa (o input liga-se a ele via form="form-pesq").
-               O campo escondido mantém a aba actual. -->
+        <div class="card">                                                                       
+          <!-- Formulário GET da pesquisa (o input liga-se a ele via form="form-pesq"). -->
           <form method="get" action="administracao.php" id="form-pesq">
             <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
           </form>
