@@ -21,6 +21,7 @@ $podeEditar    = Permissao::pode($utilizador, 'editar');
 $podeRemover   = Permissao::pode($utilizador, 'remover');
 $podeUsers     = Permissao::pode($utilizador, 'utilizadores');
 $podeLogs      = Permissao::pode($utilizador, 'logs');
+$podeSelFaixa  = $podeEditar || $podeRemover;
 
 $discoDAO      = new DiscoDAO();
 $faixaDAO      = new FaixaDAO();
@@ -168,7 +169,9 @@ if ($acaoGet !== '') {
         // Editar Faixa: a faixa vem de sel_faixa; o disco vem de id (ou deduz-se da faixa).
         $edFDisco = (int)($_GET['id'] ?? 0);
         $fId = (int)($_GET['sel_faixa'] ?? 0);
-        if ($fId > 0) {
+        if (!$podeEditar) {
+            $msg = 'Sem permissão para editar.';
+        } elseif ($fId > 0) {
             $edF = $faixaDAO->listarFaixaPorCodigo($fId);
             foreach ($faixaDAO->listarCompositoresPorFaixa($fId) as $c) $edFComp[] = $c->getCodigoCompositor();
             foreach ($faixaDAO->listarMusicosPorFaixa($fId) as $m)      $edFMus[]  = $m->getCodigoMusico();
@@ -424,7 +427,7 @@ function nomes($lista, $g1, $g2)
                                 <tbody>
                                     <?php if ($det): foreach ($dFaixas as $f): ?>
                                             <tr>
-                                                <td><input type="radio" name="sel_faixa" value="<?= $f->getIdFaixa() ?>"></td>
+                                                <td><input type="radio" name="sel_faixa" value="<?= $f->getIdFaixa() ?>" <?= $podeSelFaixa ? '' : 'disabled' ?>></td>
                                                 <td><?= h($f->getNumeroFaixa()) ?></td>
                                                 <td><?= h($f->getNomeFaixa()) ?></td>
                                                 <td><?= h($f->getArtistaPrincipal()) ?></td>

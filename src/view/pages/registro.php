@@ -35,7 +35,6 @@ $edicaoDAO     = new EdicaoDAO();
 $msg  = '';
 $erro = '';
 
-// Mensagem de sucesso vem do redirect (padrão POST-Redirect-GET)
 if (isset($_GET['ok'])) {
   $msg = 'Disco registado com sucesso';
 }
@@ -79,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         LogsController::registar('Registou o disco: ' . $titulo);
 
-        // redireciona: o formulário volta vazio e o F5 não regista outra vez
+        // redireciona: o formulário volta vazio
         header('Location: registro.php?ok=' . $codigo);
         exit;
       } else {

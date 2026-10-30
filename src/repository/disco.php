@@ -9,8 +9,6 @@ class DiscoDAO
     public function inserir($disco)
     {
         $conn = connection::connectionDB();
-        // O género NÃO é uma coluna do disco: é guardado na tabela de relação
-        // Disco_Genero (ver GeneroDAO::inserirRelacaoGeneroDisco).
         $sql = "INSERT INTO Disco_Compacto (Titulo, Preco, Ano_Edicao) VALUES (?, ?, ?)";
         $ps = $conn->prepare($sql);
         $Titulo = $disco->getTitulo();
@@ -27,9 +25,9 @@ class DiscoDAO
         }
         return -1;
     }
-
+    
     public function listarTodos()
-    {
+    { 
         $discos = [];
         $conn = connection::connectionDB();
         $sql = "SELECT d.Codigo_Disco, d.Titulo, "
