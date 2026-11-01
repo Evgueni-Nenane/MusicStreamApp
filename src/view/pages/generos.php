@@ -13,6 +13,8 @@ if (!$utilizador) {
   exit;
 }
 
+$podeAdicionar = Permissao::pode($utilizador, 'adicionar');
+$podeRemover   = Permissao::pode($utilizador, 'remover');
 $podeUsers     = Permissao::pode($utilizador, 'utilizadores');
 $podeLogs      = Permissao::pode($utilizador, 'logs');
 
@@ -24,28 +26,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $acao = $_POST['acao'] ?? '';
 
   if ($acao === 'salvar') {
-    $nome = trim($_POST['nome'] ?? '');
-    if ($nome === '') {
-      $erro = 'O nome do género é obrigatório.';
+    if (($bloq = Permissao::bloquear($utilizador, 'adicionar'))) {
+      $erro = $bloq;
     } else {
-      $novo = $generoController->adicionarGenero(new Genero(null, $nome));
-      if ($novo > 0) {
-        LogsController::registar('Registou o género: ' . $nome);
+      $nome = trim($_POST['nome'] ?? '');
+      if ($nome === '') {
+        $erro = 'O nome do género é obrigatório.';
+      } else {
+        $novo = $generoController->adicionarGenero(new Genero(null, $nome));
+        if ($novo > 0) {
+          LogsController::registar('Registou o género: ' . $nome);
+        }
+        $msg = $novo > 0 ? 'Género adicionado com sucesso.' : 'Erro ao adicionar (já existe?).';
       }
-      $msg = $novo > 0 ? 'Género adicionado com sucesso.' : 'Erro ao adicionar (já existe?).';
     }
   } elseif ($acao === 'remover') {
-    $id = (int)($_POST['sel'] ?? 0);
-    if ($id === 0) {
-      $erro = 'Seleccione um género.';
+    if (($bloq = Permissao::bloquear($utilizador, 'remover'))) {
+      $erro = $bloq;
     } else {
-      $removido = $generoController->removerGenero($id);
-      if ($removido) {
-        LogsController::registar('Removeu o género ID ' . $id);
+      $id = (int)($_POST['sel'] ?? 0);
+      if ($id === 0) {
+        $erro = 'Seleccione um género.';
+      } else {
+        $removido = $generoController->removerGenero($id);
+        if ($removido) {
+          LogsController::registar('Removeu o género ID ' . $id);
+        }
+        $msg = $removido
+          ? 'Género removido.'
+          : 'Não foi possível remover (o género está associado a discos).';
       }
-      $msg = $removido
-        ? 'Género removido.'
-        : 'Não foi possível remover (o género está associado a discos).';
     }
   }
 }
@@ -165,26 +175,30 @@ if ($q !== '') {
                 </table>
               </div>
               <div class="table-actions">
-                <label for="m-rem-gen" class="btn btn-secondary btn-sm">Remover</label>
-                <label for="tab-cad" class="btn btn-primary btn-sm">Adicionar</label>
+                <?php if ($podeRemover): ?><label for="m-rem-gen" class="btn btn-secondary btn-sm">Remover</label><?php endif; ?>
+                <?php if ($podeAdicionar): ?><label for="tab-cad" class="btn btn-primary btn-sm">Adicionar</label><?php endif; ?>
               </div>
             </form>
           </section>
 
           <!-- ===== CADASTRAR ===== -->
           <section class="panel panel-cad">
-            <form method="post" action="generos.php">
-              <input type="hidden" name="acao" value="salvar">
-              <div class="form-grid">
-                <div class="label-group full">
-                  <label for="cad-nome">Nome do Género *</label>
-                  <input type="text" id="cad-nome" name="nome" placeholder="Ex.: Kizomba" required>
+            <?php if ($podeAdicionar): ?>
+              <form method="post" action="generos.php">
+                <input type="hidden" name="acao" value="salvar">
+                <div class="form-grid">
+                  <div class="label-group full">
+                    <label for="cad-nome">Nome do Género *</label>
+                    <input type="text" id="cad-nome" name="nome" placeholder="Ex.: Kizomba" required>
+                  </div>
                 </div>
-              </div>
-              <div class="table-actions">
-                <button class="btn btn-primary" type="submit">Salvar Género</button>
-              </div>
-            </form>
+                <div class="table-actions">
+                  <button class="btn btn-primary" type="submit">Salvar Género</button>
+                </div>
+              </form>
+            <?php else: ?>
+              <p class="text-muted">O seu perfil não tem permissão para adicionar géneros.</p>
+            <?php endif; ?>
           </section>
         </div>
       </main>
