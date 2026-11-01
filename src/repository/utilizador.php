@@ -12,7 +12,7 @@ class UtilizadorDAO
     {
         $conn = connection::connectionDB();
         $sql = "INSERT INTO Utilizador (Nome, Apelido, UserName, Genero, Perfil, "
-            . "Email, Contacto, Senha, Primeiro_Acesso, foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            . "Email, Contacto, Senha, Primeiro_Acesso, foto, foto_tipo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $ps = $conn->prepare($sql);
 
         $nome = $utilizador->getNome();
@@ -24,10 +24,12 @@ class UtilizadorDAO
         $contacto = $utilizador->getContacto();
         $senha = $utilizador->getSenha();
         $primeiroAcesso = $utilizador->isPrimeiroAcesso() ? 1 : 0;
-        $foto = $utilizador->getFoto();
+        $foto = $utilizador->getFoto();          // conteudo binario da imagem (longblob) ou null
+        $fotoTipo = $utilizador->getFotoTipo();  // ex.: image/png
+        $fotoParam = null;                       // o blob segue por send_long_data()
 
         $ps->bind_param(
-            "ssssisssis",
+            "ssssisssibs",
             $nome,
             $apelido,
             $userName,
@@ -37,8 +39,13 @@ class UtilizadorDAO
             $contacto,
             $senha,
             $primeiroAcesso,
-            $foto
+            $fotoParam,
+            $fotoTipo
         );
+
+        if ($foto !== null && $foto !== '') {
+            $ps->send_long_data(9, $foto);
+        }
 
         try {
             $ps->execute();
@@ -61,15 +68,30 @@ class UtilizadorDAO
     public function atualizarUser($codigoUser, $utilizador)
     {
         $conn = connection::connectionDB();
-        $sql = "UPDATE Utilizador SET foto = ?, Perfil = ?, Email = ?, Contacto = ? WHERE Codigo_User = ?";
-        $ps = $conn->prepare($sql);
 
         $foto = $utilizador->getFoto();
+        $fotoTipo = $utilizador->getFotoTipo();
+        $temNovaFoto = ($foto !== null && $foto !== '');
+
+        // Sem nova imagem, mantem a que ja esta na base de dados
+        if ($temNovaFoto) {
+            $sql = "UPDATE Utilizador SET foto = ?, foto_tipo = ?, Perfil = ?, Email = ?, Contacto = ? WHERE Codigo_User = ?";
+        } else {
+            $sql = "UPDATE Utilizador SET Perfil = ?, Email = ?, Contacto = ? WHERE Codigo_User = ?";
+        }
+        $ps = $conn->prepare($sql);
+
         $perfil = $utilizador->getPerfil()->getCodigoNivel();
         $email = $utilizador->getEmail();
         $contacto = $utilizador->getContacto();
 
-        $ps->bind_param("sissi", $foto, $perfil, $email, $contacto, $codigoUser);
+        if ($temNovaFoto) {
+            $fotoParam = null; // o blob segue por send_long_data()
+            $ps->bind_param("bssisi", $fotoParam, $fotoTipo, $perfil, $email, $contacto, $codigoUser);
+            $ps->send_long_data(0, $foto);
+        } else {
+            $ps->bind_param("issi", $perfil, $email, $contacto, $codigoUser);
+        }
         $ps->execute();
         Sessao::getUtilizadorLogado();
 
@@ -89,11 +111,17 @@ class UtilizadorDAO
     public function adicionarFoto($codigoUser, $utilizador)
     {
         $conn = connection::connectionDB();
-        $sql = "UPDATE Utilizador SET foto = ? WHERE Codigo_User = ?";
+        $sql = "UPDATE Utilizador SET foto = ?, foto_tipo = ? WHERE Codigo_User = ?";
         $ps = $conn->prepare($sql);
 
         $foto = $utilizador->getFoto();
-        $ps->bind_param("si", $foto, $codigoUser);
+        $fotoTipo = $utilizador->getFotoTipo();
+        $fotoParam = null; // o blob segue por send_long_data()
+
+        $ps->bind_param("bsi", $fotoParam, $fotoTipo, $codigoUser);
+        if ($foto !== null && $foto !== '') {
+            $ps->send_long_data(0, $foto);
+        }
         $ps->execute();
         Sessao::getUtilizadorLogado();
 
@@ -110,16 +138,27 @@ class UtilizadorDAO
         return true;
     }
 
+    // Devolve ['dados' => binario, 'tipo' => mime] ou null
     public function buscarFoto($codigoUser)
     {
         $conn = connection::connectionDB();
-        $sql = "SELECT foto FROM Utilizador WHERE Codigo_User = ?";
+        $sql = "SELECT foto, foto_tipo FROM Utilizador WHERE Codigo_User = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigoUser);
         $ps->execute();
         $row = $ps->get_result()->fetch_assoc();
 
-        return $row ? $row['foto'] : null;
+        if (!$row || $row['foto'] === null || $row['foto'] === '') {
+            return null;
+        }
+
+        $tipo = $row['foto_tipo'];
+        if ($tipo === null || $tipo === '') {
+            $info = @getimagesizefromstring($row['foto']);
+            $tipo = $info ? $info['mime'] : 'application/octet-stream';
+        }
+
+        return ['dados' => $row['foto'], 'tipo' => $tipo];
     }
 
     public function listarTodos()
@@ -150,7 +189,7 @@ class UtilizadorDAO
     public function buscarPorId($codigoUser)
     {
         $conn = connection::connectionDB();
-        $sql = "SELECT Codigo_User, Nome, Apelido, UserName, Genero, Email, Contacto, Foto, NomeNivel, CodigoNivel"
+        $sql = "SELECT Codigo_User, Nome, Apelido, UserName, Genero, Email, Contacto, NomeNivel, CodigoNivel"
             . " FROM Utilizador"
             . " INNER JOIN NivelAcesso ON Utilizador.Perfil = NivelAcesso.CodigoNivel"
             . " WHERE Codigo_User = ?";
@@ -162,7 +201,6 @@ class UtilizadorDAO
         if ($row) {
             $perfil = new NivelAcesso($row['CodigoNivel'], $row['NomeNivel']);
             $utilizador = new Utilizador(
-                foto: $row['Foto'],
                 perfil: $perfil,
                 email: $row['Email'],
                 contacto: $row['Contacto']
@@ -172,7 +210,6 @@ class UtilizadorDAO
             $utilizador->setUser_name($row['UserName']);
             $utilizador->setGenero($row['Genero']);
             $utilizador->setCodigo($row['Codigo_User']);
-            $utilizador->setFoto($row['Foto']);
             return $utilizador;
         }
         return null;

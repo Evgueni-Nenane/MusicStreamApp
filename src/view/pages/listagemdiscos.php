@@ -298,7 +298,7 @@ function nomes($lista, $g1, $g2)
                         <?= h($utilizador->getNomeCompleto()) ?>
                         <p><?= h($utilizador->getPerfil()->getNome()) ?></p>
                     </div>
-                    <img src="<?= $fotoLogado ? '../resources/fotos/' . h($fotoLogado) : '../resources/user.png' ?>" alt="Foto de Perfil">
+                    <img src="foto.php" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto de Perfil">
                 </div>
             </header>
 

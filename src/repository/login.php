@@ -13,7 +13,7 @@ class LoginDAO
     {
         $conn = connection::connectionDB();
         $sql = "SELECT Codigo_User, Nome, Apelido, UserName, Genero, Email, Contacto, "
-            . "Foto, Perfil, NomeNivel"
+            . "Perfil, NomeNivel"
             . " FROM Utilizador u"
             . " INNER JOIN NivelAcesso n"
             . " ON u.Perfil = n.CodigoNivel"
@@ -27,8 +27,9 @@ class LoginDAO
         if ($row) {
             $perfil = new NivelAcesso($row['Perfil'], $row['NomeNivel']);
 
+            // A foto (blob) nao vai para a sessao: o avatar e servido por foto.php
             $userSessao = new Utilizador(
-                foto: $row['Foto'],
+                codigo: $row['Codigo_User'],
                 nome: $row['Nome'],
                 apelido: $row['Apelido'],
                 user_name: $row['UserName'],

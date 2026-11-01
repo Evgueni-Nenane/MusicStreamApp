@@ -4,6 +4,7 @@ class Utilizador
 {
 	private $codigo;
 	private $foto;
+	private $fotoTipo;
 	private $nome;
 	private $nomeCompleto;
 	private $apelido;
@@ -15,7 +16,7 @@ class Utilizador
 	private $senha;
 	private $primeiroAcesso;
 
-	public function __construct($codigo = null, $nome = null, $apelido = null, $user_name = null, $genero = null, $perfil = null, $email = null, $contacto = null, $senha = null, $primeiroAcesso = null, $foto = null)
+	public function __construct($codigo = null, $nome = null, $apelido = null, $user_name = null, $genero = null, $perfil = null, $email = null, $contacto = null, $senha = null, $primeiroAcesso = null, $foto = null, $fotoTipo = null)
 	{
 		$this->codigo = $codigo;
 		$this->nome = $nome;
@@ -28,6 +29,7 @@ class Utilizador
 		$this->senha = $senha;
 		$this->primeiroAcesso = $primeiroAcesso;
 		$this->foto = $foto;
+		$this->fotoTipo = $fotoTipo;
 
 		if ($this->nome && $this->apelido) {
 			$this->nomeCompleto = trim($this->nome . ' ' . $this->apelido);
@@ -128,6 +130,14 @@ class Utilizador
 	public function setFoto($foto)
 	{
 		return $this->foto = $foto;
+	}
+	public function getFotoTipo()
+	{
+		return $this->fotoTipo;
+	}
+	public function setFotoTipo($fotoTipo)
+	{
+		return $this->fotoTipo = $fotoTipo;
 	}
 
 	public function __toString()

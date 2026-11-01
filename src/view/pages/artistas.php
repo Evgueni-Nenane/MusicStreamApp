@@ -306,7 +306,7 @@ $edTitulo = ['musico' => 'Músico', 'compositor' => 'Compositor', 'cantor' => 'C
                         <?= htmlspecialchars($utilizador->getNomeCompleto()) ?>
                         <p><?= htmlspecialchars($utilizador->getPerfil()->getNome()) ?></p>
                     </div>
-                    <img src="<?= $fotoLogado ? '../resources/fotos/' . htmlspecialchars($fotoLogado) : '../resources/user.png' ?>" alt="Foto de Perfil">
+                    <img src="foto.php" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto de Perfil">
                 </div>
             </header>
 

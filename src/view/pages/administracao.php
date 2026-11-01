@@ -23,17 +23,28 @@ $podeLogs  = Permissao::pode($utilizador, 'logs');
 $ctrl = new UtilizadorController();
 $nivelDAO = new NivelAcessoDAO();
 
-// Guarda a foto enviada em ../resources/fotos/ e devolve o nome do ficheiro (ou null)
+// Le a foto enviada (valida o conteudo) e devolve ['dados' => binario, 'tipo' => mime] ou null
 function guardarFoto($campo)
 {
   if (!isset($_FILES[$campo]) || $_FILES[$campo]['error'] !== UPLOAD_ERR_OK) return null;
-  $ext = strtolower(pathinfo($_FILES[$campo]['name'], PATHINFO_EXTENSION));
-  if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) return null;
-  $pasta = __DIR__ . '/../resources/fotos/';
-  if (!is_dir($pasta)) mkdir($pasta, 0777, true);
-  $nome = uniqid('u_') . '.' . $ext;
-  move_uploaded_file($_FILES[$campo]['tmp_name'], $pasta . $nome);
-  return $nome;
+
+  $tmp     = $_FILES[$campo]['tmp_name'];
+  $tamanho = (int) $_FILES[$campo]['size'];
+  $maximo  = 2 * 1024 * 1024; // igual ao upload_max_filesize
+
+  if ($tamanho <= 0 || $tamanho > $maximo) return null;
+
+  $info = @getimagesize($tmp);
+  if ($info === false) return null; // nao e uma imagem valida
+
+  $tipos = [
+    IMAGETYPE_JPEG => 'image/jpeg',
+    IMAGETYPE_PNG  => 'image/png',
+    IMAGETYPE_WEBP => 'image/webp',
+  ];
+  if (!isset($tipos[$info[2]])) return null;
+
+  return ['dados' => file_get_contents($tmp), 'tipo' => $tipos[$info[2]]];
 }
 
 // Mostra "Sim" ou "Não" na tabela de perfis
@@ -54,6 +65,7 @@ if (in_array($_GET['tab'] ?? '', ['cad', 'lista', 'perfis'], true)) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if ($_POST['acao'] === 'salvar') {
+    $foto = guardarFoto('foto');
     $novo = new Utilizador(
       null,
       trim($_POST['nome']),
@@ -65,7 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       trim($_POST['telefone']),
       "PeixeFrito",
       true,   // primeiro acesso
-      guardarFoto('foto')
+      $foto['dados'] ?? null,
+      $foto['tipo'] ?? null
     );
     $criado = $ctrl->cadastrarUtilizador($novo);
     if ($criado) {
@@ -80,6 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tab   = 'lista';
     $id    = (int)$_POST['id'];
     $atual = $ctrl->listarPorId($id);
+    $foto  = guardarFoto('foto');
     $edit  = new Utilizador(
       null,
       null,
@@ -91,7 +105,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       trim($_POST['telefone']),
       null,
       null,
-      guardarFoto('foto') ?? $atual->getFoto()
+      $foto['dados'] ?? null,   // null = mantem a foto actual
+      $foto['tipo'] ?? null
     );
     $ctrl->atualizarUser($id, $edit);
     LogsController::registar('Actualizou o utilizador: ' . $atual->getNomeCompleto());
@@ -281,7 +296,7 @@ if ($q !== '') {
             <p><?= htmlspecialchars($utilizador->getNomeCompleto()) ?></p>
             <p><?= htmlspecialchars($utilizador->getPerfil()->getNome()) ?></p>
           </div>
-          <img src="<?= $fotoLogado ? '../resources/fotos/' . htmlspecialchars($fotoLogado) : '../resources/user.png' ?>" alt="Foto de Perfil">
+          <img src="foto.php" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto de Perfil">
         </div>
       </header>
 
@@ -488,7 +503,7 @@ if ($q !== '') {
           <div class="cadastro-layout sm">
             <div class="foto-user">
               <div class="foto-preview">
-                <img id="eu-preview" src="<?= ($ed && $ed->getFoto()) ? '../resources/fotos/' . htmlspecialchars($ed->getFoto()) : '../resources/user.png' ?>" alt="Foto do Utilizador">
+                <img id="eu-preview" src="<?= $ed ? 'foto.php?u=' . (int)$ed->getCodigo() : '../resources/user.png' ?>" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto do Utilizador">
               </div>
               <div class="foto-actions">
                 <input type="file" id="edit-foto" name="foto" accept="image/*" class="file-hidden"

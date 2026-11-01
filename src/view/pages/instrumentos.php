@@ -118,7 +118,7 @@ if ($q !== '') {
             <p><?= htmlspecialchars($utilizador->getNomeCompleto()) ?></p>
             <p><?= htmlspecialchars($utilizador->getPerfil()->getNome()) ?></p>
           </div>
-          <img src="<?= ($utilizador->getFoto() ? '../resources/fotos/' . htmlspecialchars($utilizador->getFoto()) : '../resources/user.png') ?>" alt="Foto de Perfil">
+          <img src="foto.php" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto de Perfil">
         </div>
       </header>
 

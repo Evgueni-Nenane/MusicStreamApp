@@ -690,7 +690,8 @@ CREATE TABLE `Utilizador` (
   `Contacto` varchar(20) DEFAULT NULL,
   `Senha` varchar(255) DEFAULT NULL,
   `Primeiro_Acesso` tinyint(1) DEFAULT 1,
-  `foto` varchar(255) DEFAULT NULL,
+  `foto` longblob DEFAULT NULL,
+  `foto_tipo` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`Codigo_User`),
   UNIQUE KEY `UserName` (`UserName`),
   KEY `Perfil` (`Perfil`),
@@ -704,7 +705,7 @@ CREATE TABLE `Utilizador` (
 
 LOCK TABLES `Utilizador` WRITE;
 /*!40000 ALTER TABLE `Utilizador` DISABLE KEYS */;
-INSERT INTO `Utilizador` VALUES (2,'Kennedy','Pietro','kenny','MASCULINO',3,'admin@discocompacto.com','845016115','kenny1',0,_binary 'u_6ac8241c8f5f3.png'),(3,'Julia','chauma','ju','FEMININO',1,'ju@discocompacto.com','84000000','julia1234',0,NULL),(4,'Evgueni','Nenane','EV','MASCULINO',4,'evgueni@gmail.com','849694252','Nenani123',0,_binary 'u_6ac816c4c9898.png'),(5,'Fernando white','Langa','Fernando','MASCULINO',2,'Fernando@gmail.com','8762017321','langa123',0,_binary 'u_6ac82dd16fdc8.png'),(11,'Ewen','Ali','ewen','MASCULINO',10,'ewen@gmail.com','845016115','ewen123',0,NULL);
+INSERT INTO `Utilizador` VALUES (2,'Kennedy','Pietro','kenny','MASCULINO',3,'admin@discocompacto.com','845016115','kenny1',0,NULL,NULL),(3,'Julia','chauma','ju','FEMININO',1,'ju@discocompacto.com','84000000','julia1234',0,NULL,NULL),(4,'Evgueni','Nenane','EV','MASCULINO',4,'evgueni@gmail.com','849694252','Nenani123',0,NULL,NULL),(5,'Fernando white','Langa','Fernando','MASCULINO',2,'Fernando@gmail.com','8762017321','langa123',0,NULL,NULL),(11,'Ewen','Ali','ewen','MASCULINO',10,'ewen@gmail.com','845016115','ewen123',0,NULL,NULL);
 /*!40000 ALTER TABLE `Utilizador` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
