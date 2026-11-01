@@ -120,7 +120,7 @@ class EditoraDAO
         $conn = connection::connectionDB();
         $sql = "SELECT e.* FROM Editora e INNER JOIN Edicao ed"
             . " ON e.Codigo_Editora = ed.Codigo_Editora"
-            . " WHERE ed.Codigo_DC = ?";
+            . " WHERE ed.Codigo_Disco = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigoDisco);
         $ps->execute();

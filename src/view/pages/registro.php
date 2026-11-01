@@ -74,8 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach (($_POST['gravadoras'] ?? []) as $g) $gravadoraDAO->inserirRelacaoDiscoGravadora($codigo, (int)$g);
         if ($codEditora > 0) $edicaoDAO->inserir(new Edicao($codigo, $codEditora, $dataEdicao));
 
-        if ($codEditora > 0) $edicaoDAO->inserir(new Edicao($codigo, $codEditora, $dataEdicao));
-
         LogsController::registar('Registou o disco: ' . $titulo);
 
         // redireciona: o formulário volta vazio
