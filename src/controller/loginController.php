@@ -1,6 +1,6 @@
 <?php 
 require_once __DIR__ . '/../repository/login.php';
-require_once __DIR__ . '/logscontroller.php';
+require_once __DIR__ . '/logsController.php';
 
  class LoginController {
 	private $loginDAO;
@@ -26,6 +26,6 @@ require_once __DIR__ . '/logscontroller.php';
 	}
 	
 	public function resetarSenha($codigoUser, $senha) {
-		return $this->loginDAO->resetarSenha($codigoUser,$senha);
+		return $this->loginDAO->resetarSenha($codigoUser);
 	}
 }

@@ -127,7 +127,7 @@ class NivelAcessoDAO
         $conn = connection::connectionDB();
 
         // Não apaga se houver utilizadores com este perfil.
-        $ps = $conn->prepare("SELECT COUNT(*) AS total FROM utilizador WHERE Perfil = ?");
+        $ps = $conn->prepare("SELECT COUNT(*) AS total FROM Utilizador WHERE Perfil = ?");
         $ps->bind_param("i", $codigo);
         $ps->execute();
         $row = $ps->get_result()->fetch_assoc();

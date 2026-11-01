@@ -6,7 +6,7 @@ Sessao::iniciar();
 
 // Só quem já fez login (mesmo que seja primeiro acesso) pode chegar aqui
 if (!Sessao::estaLogado()) {
-    header('Location: login.php');
+    header('Location: Login.php');
     exit;
 }
 
