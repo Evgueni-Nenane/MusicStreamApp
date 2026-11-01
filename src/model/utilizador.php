@@ -52,7 +52,9 @@ class Utilizador
 	}
 	public function setNome($nome)
 	{
-		return $this->nome = $nome;
+		$this->nome = $nome;
+		$this->recalcularNomeCompleto();
+		return $this->nome;
 	}
 	public function getApelido()
 	{
@@ -60,7 +62,17 @@ class Utilizador
 	}
 	public function setApelido($apelido)
 	{
-		return $this->apelido = $apelido;
+		$this->apelido = $apelido;
+		$this->recalcularNomeCompleto();
+		return $this->apelido;
+	}
+
+	// Chamado pelos setters: o DAO preenche nome/apelido depois do construtor
+	private function recalcularNomeCompleto()
+	{
+		$this->nomeCompleto = ($this->nome && $this->apelido)
+			? trim($this->nome . ' ' . $this->apelido)
+			: '';
 	}
 
 	public function getNomeCompleto()
