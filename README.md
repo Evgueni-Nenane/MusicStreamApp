@@ -1,107 +1,96 @@
-# DiscoGest — Sistema de Gestão de Discos
+# DiscoGest
 
-Aplicação web em PHP + MySQL para gerir discos compactos, artistas, produção, instrumentos, géneros e utilizadores, com autenticação por perfis e auditoria de acções.
+Catalogue management for compact discs, tracks, artists, production entities, instruments and genres, with session-based authentication, role-based permissions and audit logging.
 
-Projeto académico. Os dados incluídos no dump são **de desenvolvimento**.
-
----
-
-## Requisitos
-
-- **PHP 8.0+** com as extensões `mysqli` e `mbstring`
-  > A pesquisa usa `mb_strtolower()`/`mb_stripos()`. Sem `mbstring` as páginas com `?q=` rebentam com *Call to undefined function*.
-- **MySQL 8** ou **MariaDB 10.4+**
-- Linux ou Windows
-
-> Em Linux o MySQL distingue maiúsculas (`lower_case_table_names=0`). O dump cria as tabelas em **PascalCase** (`Utilizador`, `Disco_Compacto`, `NivelAcesso`, …) para coincidir com o SQL do código.
+Plain PHP 8 + MySQL. No framework, no Composer, no build step.
 
 ---
 
-## Instalação
+## 1. Requirements
 
-1. **Criar a base de dados** (o dump apaga e recria `discocompacto`):
-   ```bash
-   mysql -u root -p < Dump20261101.sql
-   ```
-
-2. **Configurar a ligação** em `src/repository/connection.php`:
-   ```php
-   private static $hostname = "127.0.0.1";
-   private static $username = "root";
-   private static $password = "...";
-   private static $database = "discocompacto";
-   ```
-   Usa `127.0.0.1` (TCP) e não `localhost`, para o PHP não tentar o socket Unix.
-
-3. **Arrancar a aplicação** a partir da raiz do projeto:
-   ```bash
-   php -S 127.0.0.1:8181
-   ```
-   ou servir a pasta com Apache/XAMPP.
-
-4. Abrir `http://127.0.0.1:8181/` — o `index.php` encaminha para a administração (com sessão) ou para o login.
-
----
-
-## Contas de desenvolvimento
-
-| Utilizador | Senha | Perfil |
+| Dependency | Version | Notes |
 |---|---|---|
-| `kenny` | `kenny1` | Administrador |
-| `ju` | `julia1234` | Operador |
-| `EV` | `Nenani123` | Auditor |
-| `Fernando` | `langa123` | SuperOperador |
-| `ewen` | `ewen123` | Estagiário |
+| PHP | 8.0+ | Uses named arguments and `str_contains()` |
+| `ext-mysqli` | — | All database access |
+| `ext-mbstring` | — | Search normalisation (`mb_strtolower`, `mb_stripos`). Without it, every `?q=` page fails with a fatal error |
+| MySQL / MariaDB | 8.0 / 10.4+ | InnoDB, `utf8mb4` |
 
 ---
 
-## Estrutura
+## 2. Installation
 
-```
-.
-├── index.php                  # entrada: redireciona para login/administração
-├── Dump20261101.sql           # dump completo (schema + dados de dev)
-└── src/
-    ├── controller/            # 14 controllers (orquestram os DAOs)
-    ├── model/                 # 14 entidades + Sessao + Permissao
-    ├── repository/            # 15 DAOs + connection.php
-    └── view/
-        ├── pages/             # 12 páginas .php (view + tratamento do POST)
-        ├── css/               # 1 CSS por página
-        └── resources/         # imagens estáticas (login.png, user.png)
+### 2.1 Database
+
+The dump drops and recreates the `discocompacto` schema, so it is safe to re-run:
+
+```bash
+mysql -u root -p < Dump20261101.sql
 ```
 
-**Fluxo:** `pages/*.php` → `controller/*.php` → `repository/*.php` (DAO) → `model/*.php` → MySQL.
+It contains the schema, reference data (`NivelAcesso`), and the demo catalogue. It contains **no user accounts and no audit rows** — those come from the seed step.
 
-Cada página começa por validar a sessão (`Sessao::getUtilizadorLogado()`) e as permissões (`Permissao::pode()`); sem sessão redireciona para `Login.php`.
+### 2.2 Connection
+
+Edit `src/repository/connection.php`:
+
+```php
+private static $hostname = "127.0.0.1";
+private static $username = "root";
+private static $password = "...";
+private static $database = "discocompacto";
+```
+
+Use `127.0.0.1` (TCP) rather than `localhost`: with `localhost`, `mysqli` tries the Unix socket, which fails when PHP and MySQL come from different installations.
+
+### 2.3 Seed
+
+```bash
+php seeds/seed.php [username] [password]
+```
+
+Defaults to `admin` / `admin123`. The script is idempotent (it checks the username first) and creates a user with the `Administrador` profile and `Primeiro_Acesso = 1`, so the application forces a password change on the first login.
+
+Password length is validated at 8 characters. The password is stored in clear text, matching the current authentication implementation (see §10).
+
+### 2.4 Run
+
+```bash
+php -S 127.0.0.1:8181
+```
+
+Then open `http://127.0.0.1:8181/`. The root `index.php` redirects to `Login.php` or to `administracao.php`, depending on the session. Serving the repository root with Apache works the same way.
 
 ---
 
-## Páginas
+## 3. Architecture
 
-| Página | Função |
-|---|---|
-| `Login.php` / `LogOut.php` | Autenticação e saída |
-| `mudar-senha.php` | Alteração da própria senha |
-| `registro.php` | Registo de discos, edição e faixas |
-| `listagemdiscos.php` | Listagem, detalhes, edição de discos e faixas |
-| `artistas.php` | Músicos, compositores e cantores |
-| `producao.php` | Produtores, gravadoras e editoras (3 abas) |
-| `instrumentos.php` | CRUD de instrumentos |
-| `generos.php` | CRUD de géneros |
-| `administracao.php` | Utilizadores, perfis e permissões |
-| `logs.php` | Auditoria (perfil Auditor) |
-| `foto.php` | Serve a foto de perfil a partir da base de dados |
+### 3.1 Layers
 
-As listagens aceitam `?q=` para pesquisa (filtragem feita em PHP, em memória; `logs.php` também).
+| Layer | Directory | Responsibility | Current state |
+|---|---|---|---|
+| View | `src/view/pages` | HTML rendering, session/permission bootstrap, **POST handling** | Fat: pages orchestrate controllers and contain use-case logic |
+| Controller | `src/controller` | Thin façade over DAOs | Mostly one-line pass-through methods |
+| Repository | `src/repository` | SQL via prepared statements, row → entity mapping | Mixed return types (`bool`/`int`/`array`/entity); some methods swallow `mysqli_sql_exception` |
+| Model | `src/model` | Entities (POJO), `Sessao`, `Permissao` | No behaviour beyond getters/setters |
+| Database | MySQL | Schema, FK constraints, permission flags | `connection.php` is a static singleton with hardcoded credentials |
 
----
+### 3.2 Request lifecycle
 
-## Perfis e permissões
+1. The page file bootstraps: `require_once` of `Sessao`, `Permissao`, controllers and repositories.
+2. `Sessao::getUtilizadorLogado()` restores the `Utilizador` object from `$_SESSION['utilizadorLogado']` (the object is serialised in the session; the photo blob is not).
+3. If there is no session, the page redirects to `Login.php`; if the profile lacks the required permission, it redirects or blocks.
+4. `POST` handling runs inline in the page: permission check (`Permissao::bloquear`), validation, DAO call, `LogsController::registar(...)`.
+5. The page loads the data it needs through controllers and renders the HTML.
 
-As regras vivem na tabela `NivelAcesso` e são lidas por `Permissao::pode($utilizador, $accao)`; a interface esconde os botões e o servidor volta a validar no `POST`.
+There is no router: every page is directly reachable and repeats the bootstrap block.
 
-| Perfil | Ler | Adicionar | Editar | Remover | Utilizadores | Logs |
+### 3.3 Permission model
+
+Permissions are stored as flags on `NivelAcesso` and read once per request by `Permissao::regras($nivel)` (cached in a static array). `Permissao::pode($utilizador, $accao)` accepts `ler`, `adicionar`, `editar`, `remover`, `utilizadores`, `logs`.
+
+The UI hides unavailable actions **and** the server re-validates every POST — hiding elements is presentation only.
+
+| Profile | read | add | edit | remove | users | logs |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|
 | Operador | ✅ | ✅ | — | — | — | — |
 | SuperOperador | ✅ | ✅ | ✅ | ✅ | — | — |
@@ -111,29 +100,133 @@ As regras vivem na tabela `NivelAcesso` e são lidas por `Permissao::pode($utili
 
 ---
 
-## Fotos de perfil
+## 4. Directory layout
 
-- Guardadas na base de dados: `Utilizador.foto` (`longblob`) + `Utilizador.foto_tipo` (MIME).
-- Upload validado pelo conteúdo (`getimagesize()`), aceita JPEG/PNG/WEBP até **2 MB**.
-- Servidas por `foto.php` (própria foto, ou qualquer uma para quem tem a permissão `utilizadores`), com `ETag`/304 e `nosniff`.
+```
+.
+├── index.php                   # entry point: session check + redirect
+├── Dump20261101.sql            # schema + reference/demo data (no users)
+├── seeds/
+│   └── seed.php                # CLI: creates the initial administrator
+└── src/
+    ├── controller/             # 14 controllers
+    ├── model/                  # 14 entities + Sessao + Permissao
+    ├── repository/             # 15 DAOs + connection.php
+    └── view/
+        ├── pages/              # 12 PHP pages (view + POST handling)
+        ├── css/                # one stylesheet per page
+        └── resources/          # static images (login.png, default avatar)
+```
 
 ---
 
-## Base de dados
+## 5. Database
 
-`discocompacto` — 25 tabelas, 26 chaves estrangeiras, com `ON DELETE CASCADE` nas tabelas de ligação.
+### 5.1 Schema
 
-O dump inclui o schema e os dados de desenvolvimento (5 utilizadores, 4 discos, 176 logs) e pode ser reexecutado a qualquer momento: apaga e recria a base de dados.
+25 tables, 26 foreign keys, InnoDB / `utf8mb4_general_ci`.
+
+Core tables:
+
+| Table | Purpose |
+|---|---|
+| `Utilizador` | Accounts, profile FK, `foto` (`longblob`) + `foto_tipo` |
+| `NivelAcesso` | Profile plus one boolean per permission |
+| `Logs` | Audit trail; denormalised actor data (`Nome`, `Apelido`, `Perfil`, `Email`), no FK to `Utilizador` |
+| `Disco_Compacto`, `Faixa`, `Edicao` | Discs, tracks and their publishers |
+| `Cantor`, `Compositor`, `Musico`, `Produtor`, `Gravadora`, `Editora`, `Instrumento`, `Genero` | Catalogue entities |
+| `*_DC`, `Faixa_*`, `Musico_Instrumento`, `Disco_Genero` | Many-to-many link tables, `ON DELETE CASCADE` |
+
+### 5.2 Identifier casing
+
+Table names are **PascalCase** (`Utilizador`, `Disco_Compacto`, `NivelAcesso`). On Linux, MySQL uses `lower_case_table_names = 0`, so table identifiers are case-sensitive and must match the SQL in the code exactly. On Windows the comparison is case-insensitive.
+
+### 5.3 Re-seeding
+
+`Dump20261101.sql` starts with `DROP DATABASE IF EXISTS discocompacto`, so importing it always yields a clean state. User accounts and audit rows are intentionally absent; run `seeds/seed.php` afterwards.
 
 ---
 
-## Limitações conhecidas
+## 6. Authentication
 
-- **Senhas em texto simples** e comparação com `BINARY` — adequado apenas a contexto académico.
-- **Sem proteção CSRF** nos formulários.
-- **Credenciais da base de dados** no código (`connection.php`).
-- O *reset* de senha em `administracao.php` usa um valor fixo.
-- **Sem autoload**: cada ficheiro faz `require_once` manual.
-- Pesquisa filtrada em memória, não em SQL.
-- `InstrumentoDAO` não tem `atualizar()` (só inserir/listar/remover).
-- Sem testes automatizados nem integração contínua.
+- `Login.php` posts `username` + `password`; `LoginDAO::login()` looks the account up with `WHERE BINARY username = ? AND BINARY senha = ?`.
+- On success, the `Utilizador` object (id, name, profile) is stored in `$_SESSION` and a login row is written to `Logs`.
+- `Primeiro_Acesso = 1` redirects the user to `mudar-senha.php` before any other page.
+- `LogOut.php` destroys the session.
+- There is no session id regeneration, and no `HttpOnly`/`SameSite` cookie configuration.
+
+---
+
+## 7. Pages
+
+| Page | Function |
+|---|---|
+| `Login.php`, `LogOut.php` | Authentication and sign-out |
+| `mudar-senha.php` | Password change (also used for first access) |
+| `registro.php` | Register a disc, its edition and tracks |
+| `listagemdiscos.php` | List, detail, edit and delete discs; edit tracks |
+| `artistas.php` | Musicians, composers and singers |
+| `producao.php` | Producers, labels and publishers (three tabs) |
+| `instrumentos.php`, `generos.php` | CRUD of instruments and genres |
+| `administracao.php` | Users, profiles and permissions |
+| `logs.php` | Audit trail (requires the `logs` permission) |
+| `foto.php` | Serves profile photos from the database |
+
+---
+
+## 8. Profile photos
+
+- Stored in `Utilizador.foto` (`longblob`) with the MIME type in `Utilizador.foto_tipo`. No filesystem path is involved.
+- Upload is validated by content (`getimagesize()`), restricted to JPEG/PNG/WEBP and capped at 2 MB (`upload_max_filesize`).
+- Written with `mysqli_stmt::send_long_data()`; when no new file is submitted the existing photo is preserved (`UPDATE ... SET` without the `foto` column).
+- Served by `foto.php`, which enforces the same permission rule as the UI: own photo, or any photo for profiles with `utilizadores`. Responses carry `ETag`, `304` revalidation, `Cache-Control: private, max-age=300` and `X-Content-Type-Options: nosniff`.
+- Templates fall back to `src/view/resources/user.png` via `onerror`.
+
+---
+
+## 9. Search
+
+List pages accept `?q=`, applied in PHP over the already-loaded collection (`array_filter`) after normalising case with `mb_strtolower`/`mb_stripos`. Complexity is O(n) in rows loaded and it does not use SQL indexes. This is the reason `ext-mbstring` is a hard requirement.
+
+---
+
+## 10. Security posture
+
+Known and accepted for an academic context, but not production-ready:
+
+- Passwords are stored in clear text and compared with `BINARY`.
+- No CSRF tokens on any form.
+- No `session_regenerate_id()` on login; no cookie hardening.
+- Database credentials are committed in `src/repository/connection.php`.
+- `administracao.php` resets passwords to a hardcoded value.
+- `Connection::connectionDB()` calls `die()` with the driver error message.
+- No rate limiting, no HTTPS enforcement, no security headers other than `nosniff` on photos.
+
+---
+
+## 11. Technical debt / next steps
+
+| Area | Issue |
+|---|---|
+| Bootstrap | No autoloader (PSR-4) — every file repeats `require_once`; no single entry point |
+| Naming | Inconsistent file casing (`Login.php`, `LogOut.php`, `nivelAcesso.php`, `generorepository.php`) — breaks on case-sensitive filesystems |
+| Layers | Views own use cases and POST handling; controllers are anemic |
+| Persistence | No transactions around multi-table writes (disc + edition + tracks + relations) |
+| Contracts | DAOs return `bool`/`int`/`array`/entity indifferently; some catch exceptions and return `false` |
+| Logging | `Logs` stores copied actor data instead of `Codigo_User` + FK |
+| Search | In-memory filtering instead of SQL `LIKE`/indices |
+| Quality | No automated tests, no CI, no static analysis, no migrations |
+| Instrumentos | `InstrumentoDAO` has no `update()` |
+
+---
+
+## 12. Development
+
+```bash
+# syntax check
+find . -name '*.php' -not -path './.git/*' -exec php -l {} \;
+
+# reset the database and recreate the administrator
+mysql -u root -p < Dump20261101.sql
+php seeds/seed.php admin admin123
+```
