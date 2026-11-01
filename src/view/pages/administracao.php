@@ -209,7 +209,6 @@ $meuCodigo = 0;
 foreach ($lista as $u) {
   if ($u->getUser_name() === $utilizador->getUser_name()) $meuCodigo = $u->getCodigo();
 }
-$fotoLogado = $utilizador->getFoto();
 $niveis  = $nivelDAO->listarNiveis();
 $perfis  = $nivelDAO->listarPerfis();
 

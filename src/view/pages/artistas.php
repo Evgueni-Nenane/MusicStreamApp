@@ -226,9 +226,6 @@ if ($q !== '') {
     }
 }
 
-/* ---------- Cabeçalho: foto e perfil do utilizador com sessão ---------- */
-$fotoLogado = $utilizador->getFoto();
-
 /* ---------- Campos do modal de edição (normaliza os 3 tipos de artista) ---------- */
 $edId = $edNome = $edApelido = $edContacto = $edEmail = '';
 if ($ed) {

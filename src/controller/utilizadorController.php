@@ -25,10 +25,6 @@ require_once __DIR__ . '/../repository/utilizador.php';
     	return $this->utilizadorDAO->remover($codigo);
     }
     
-    public function adicionarFotoUser($codigo,$utilizador) {
-        return $this->utilizadorDAO->adicionarFoto($codigo,$utilizador);
-    }
-    
     public function atualizarUser($codigo,$utilizador) {
         return $this->utilizadorDAO->atualizarUser($codigo,$utilizador);
     }

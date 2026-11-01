@@ -3,7 +3,6 @@ require_once __DIR__ . '/../../model/sessao.php';
 require_once __DIR__ . '/../../model/permissao.php';
 require_once __DIR__ . '/../../controller/loginController.php';
 require_once __DIR__ . '/../../controller/logsController.php';
-require_once __DIR__ . '/../../controller/utilizadorController.php';
 require_once __DIR__ . '/../../repository/disco.php';
 require_once __DIR__ . '/../../repository/faixa.php';
 require_once __DIR__ . '/../../repository/generorepository.php';
@@ -204,9 +203,6 @@ if ($q !== '') {
 }
 
 /* ---------- Cabeçalho: foto do utilizador com sessão ---------- */
-$utilizadorController = new UtilizadorController();
-$fotoLogado = $utilizador->getFoto();
-
 function h($v)
 {
     return htmlspecialchars((string)$v);

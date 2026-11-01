@@ -77,17 +77,4 @@ class LoginDAO
         $ps->execute();
         return $ps->affected_rows > 0;
     }
-
-    public function resetarSenha($codigoUser)
-    {
-        $conn = connection::connectionDB();
-        $sql = "UPDATE Utilizador SET Senha = ?, Primeiro_Acesso = 1 WHERE Codigo_User = ?";
-        $ps = $conn->prepare($sql);
-
-        $senhaPadrao = "user258";
-        $ps->bind_param("si", $senhaPadrao, $codigoUser);
-
-        $ps->execute();
-        return $ps->affected_rows > 0;
-    }
 }

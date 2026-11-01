@@ -24,8 +24,4 @@ require_once __DIR__ . '/logsController.php';
 	public function atualizarSenha($username,$senhaAntiga, $senhaNova) {
 		return $this->loginDAO->atualizarSenha($username,$senhaAntiga,$senhaNova);
 	}
-	
-	public function resetarSenha($codigoUser, $senha) {
-		return $this->loginDAO->resetarSenha($codigoUser);
-	}
 }
