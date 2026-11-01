@@ -20,6 +20,23 @@ class LogsController {
         return $this->logsDAO->listarLogs();
     }
 
+    // Lista já filtrada pela pesquisa em memória.
+    public function listarComPesquisa($q)
+    {
+        $logs = $this->listarLogs();
+        $q = trim($q);
+        if ($q === '') return $logs;
+
+        $qMin = strtolower($q);
+        return array_filter($logs, function ($l) use ($qMin) {
+            $alvo = strtolower(
+                $l->getCodigo() . ' ' . $l->getNome() . ' ' . $l->getApelido() . ' ' .
+                $l->getEmail() . ' ' . $l->getPerfil() . ' ' . $l->getAccao() . ' ' . $l->getDataHora()
+            );
+            return str_contains($alvo, $qMin);
+        });
+    }
+
     // Regista uma acção do utilizador que está logado.
     // Uso: LogsController::registar('Registou o disco ID 5');
     public static function registar($accao) {

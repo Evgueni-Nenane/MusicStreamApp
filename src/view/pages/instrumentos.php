@@ -1,9 +1,8 @@
 <?php
 require_once __DIR__ . '/../../model/sessao.php';
 require_once __DIR__ . '/../../model/permissao.php';
-require_once __DIR__ . '/../../model/instrumento.php';
-require_once __DIR__ . '/../../controller/loginController.php';
-require_once __DIR__ . '/../../controller/logsController.php';
+require_once __DIR__ . '/../../model/utilizador.php';
+require_once __DIR__ . '/../../model/nivelacesso.php';
 require_once __DIR__ . '/../../controller/instrumentoController.php';
 
 $utilizador = Sessao::getUtilizadorLogado();
@@ -21,53 +20,13 @@ $msg = '';
 $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $acao = $_POST['acao'] ?? '';
-
-  if ($acao === 'salvar') {
-    if (($bloq = Permissao::bloquear($utilizador, 'adicionar'))) {
-      $erro = $bloq;
-    } else {
-      $nome = trim($_POST['nome'] ?? '');
-      if ($nome === '') {
-        $erro = 'O nome do instrumento é obrigatório.';
-      } else {
-        $novo = $instrController->adicionarInstrumento(new Instrumento(null, $nome));
-        if ($novo > 0) {
-          LogsController::registar('Registou o instrumento: ' . $nome);
-        }
-        $msg = $novo > 0 ? 'Instrumento adicionado com sucesso.' : 'Erro ao adicionar (já existe?).';
-      }
-    }
-  } elseif ($acao === 'remover') {
-    if (($bloq = Permissao::bloquear($utilizador, 'remover'))) {
-      $erro = $bloq;
-    } else {
-      $id = (int)($_POST['sel'] ?? 0);
-      if ($id === 0) {
-        $erro = 'Seleccione um instrumento.';
-      } else {
-        $removido = $instrController->remover($id);
-        if ($removido) {
-          LogsController::registar('Removeu o instrumento ID ' . $id);
-        }
-        $msg = $removido
-          ? 'Instrumento removido.'
-          : 'Não foi possível remover (o instrumento está associado a músicos).';
-      }
-    }
-  }
+  $resultado = $instrController->processarPost($utilizador, $_POST);
+  $msg  = $resultado['msg'] ?? '';
+  $erro = $resultado['erro'] ?? '';
 }
 
-$instrumentos = $instrController->listarInstrumentos();
-
-// Pesquisa simples (filtra em memória pelo texto introduzido)
 $q = trim($_GET['q'] ?? '');
-if ($q !== '') {
-  $instrumentos = array_values(array_filter($instrumentos, function ($i) use ($q) {
-    $alvo = mb_strtolower($i->getCodigo() . ' ' . $i->getNome());
-    return str_contains($alvo, mb_strtolower($q));
-  }));
-}
+$instrumentos = $instrController->listarComPesquisa($q);
 ?>
 
 

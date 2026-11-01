@@ -1,10 +1,9 @@
 <?php
 require_once __DIR__ . '/../../model/sessao.php';
-require_once __DIR__ . '/../../model/genero.php';
-require_once __DIR__ . '/../../controller/loginController.php';
-require_once __DIR__ . '/../../controller/logsController.php';
-require_once __DIR__ . '/../../controller/generoController.php';
 require_once __DIR__ . '/../../model/permissao.php';
+require_once __DIR__ . '/../../model/utilizador.php';
+require_once __DIR__ . '/../../model/nivelacesso.php';
+require_once __DIR__ . '/../../controller/generoController.php';
 
 
 $utilizador = Sessao::getUtilizadorLogado();
@@ -23,53 +22,13 @@ $msg = '';
 $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $acao = $_POST['acao'] ?? '';
-
-  if ($acao === 'salvar') {
-    if (($bloq = Permissao::bloquear($utilizador, 'adicionar'))) {
-      $erro = $bloq;
-    } else {
-      $nome = trim($_POST['nome'] ?? '');
-      if ($nome === '') {
-        $erro = 'O nome do género é obrigatório.';
-      } else {
-        $novo = $generoController->adicionarGenero(new Genero(null, $nome));
-        if ($novo > 0) {
-          LogsController::registar('Registou o género: ' . $nome);
-        }
-        $msg = $novo > 0 ? 'Género adicionado com sucesso.' : 'Erro ao adicionar (já existe?).';
-      }
-    }
-  } elseif ($acao === 'remover') {
-    if (($bloq = Permissao::bloquear($utilizador, 'remover'))) {
-      $erro = $bloq;
-    } else {
-      $id = (int)($_POST['sel'] ?? 0);
-      if ($id === 0) {
-        $erro = 'Seleccione um género.';
-      } else {
-        $removido = $generoController->removerGenero($id);
-        if ($removido) {
-          LogsController::registar('Removeu o género ID ' . $id);
-        }
-        $msg = $removido
-          ? 'Género removido.'
-          : 'Não foi possível remover (o género está associado a discos).';
-      }
-    }
-  }
+  $resultado = $generoController->processarPost($utilizador, $_POST);
+  $msg  = $resultado['msg'] ?? '';
+  $erro = $resultado['erro'] ?? '';
 }
 
-$generos = $generoController->listarGeneros();
-
-// Pesquisa simples (filtra em memória pelo texto introduzido)
 $q = trim($_GET['q'] ?? '');
-if ($q !== '') {
-  $generos = array_values(array_filter($generos, function ($g) use ($q) {
-    $alvo = mb_strtolower($g->getCodigoGenero() . ' ' . $g->getNomeGenero());
-    return str_contains($alvo, mb_strtolower($q));
-  }));
-}
+$generos = $generoController->listarComPesquisa($q);
 ?>
 
 <!DOCTYPE html>
