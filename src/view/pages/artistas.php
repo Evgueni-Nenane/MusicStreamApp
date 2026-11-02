@@ -1,26 +1,17 @@
 <?php
 require_once __DIR__ . '/../../model/sessao.php';
 require_once __DIR__ . '/../../model/permissao.php';
-require_once __DIR__ . '/../../controller/loginController.php';
-require_once __DIR__ . '/../../controller/logsController.php';
-require_once __DIR__ . '/../../repository/musico.php';
-require_once __DIR__ . '/../../repository/cantor.php';
-require_once __DIR__ . '/../../repository/compositor.php';
-require_once __DIR__ . '/../../repository/instrumento.php';
+require_once __DIR__ . '/../../model/utilizador.php';
+require_once __DIR__ . '/../../model/nivelacesso.php';
+require_once __DIR__ . '/../../controller/artistasController.php';
 
 $utilizador = Sessao::getUtilizadorLogado();
 if (!$utilizador) { header('Location: Login.php'); exit; }
-$username = $utilizador->getUser_name();
 $podeAdicionar = Permissao::pode($utilizador, 'adicionar');
 $podeEditar    = Permissao::pode($utilizador, 'editar');
 $podeRemover   = Permissao::pode($utilizador, 'remover');
 $podeUsers     = Permissao::pode($utilizador, 'utilizadores');
 $podeLogs      = Permissao::pode($utilizador, 'logs');
-
-$musicoDAO = new MusicoDAO();
-$cantorDAO = new CantorDAO();
-$compositorDAO = new CompositorDAO();
-$instrDAO = new InstrumentoDAO();
 
 // Botões de acção de uma aba. Cada aba tem o seu formulário (form-musico,
 // form-compositor, form-cantor), por isso o Editar envia o rádio seleccionado
@@ -40,216 +31,34 @@ function acoes($tipo, $podeRemover, $podeEditar, $podeAdicionar)
     echo '</div>';
 }
 
+$artistasController = new ArtistasController();
+
 /* ---------- Cadastrar / Atualizar / Remover (POST) ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $acao = $_POST['acao'] ?? '';
-    $tipo = $_POST['tipo'] ?? '';
-
-    if ($acao === 'cadastrar') {
-        if (($bloq = Permissao::bloquear($utilizador, 'adicionar'))) { $msg = $bloq; }
-        else {
-        $nome     = trim($_POST['nome'] ?? '');
-        $apelido  = trim($_POST['apelido'] ?? '');
-        $contacto = trim($_POST['contacto'] ?? '');
-        $email    = trim($_POST['email'] ?? '');
-        $id = -1;
-
-        if ($nome === '' || $apelido === '') {
-            $msg = 'Preencha pelo menos o nome e o apelido.';
-        } elseif ($tipo === 'musico') {
-            $id = $musicoDAO->inserir(new Musico(0, $nome, $apelido, [], $contacto, $email));
-            if ($id > 0) {
-                foreach (($_POST['instrumentos'] ?? []) as $cod) {
-                    $instrDAO->inserirRelacaoMusicoInstrumento($id, (int)$cod);
-                }
-            }
-            $msg = $id > 0 ? 'Artista cadastrado.' : 'Erro ao cadastrar.';
-        } elseif ($tipo === 'cantor') {
-            $id = $cantorDAO->inserir(new Cantor(0, $nome, $apelido, $contacto, $email));
-            $msg = $id > 0 ? 'Artista cadastrado.' : 'Erro ao cadastrar.';
-        } elseif ($tipo === 'compositor') {
-            $id = $compositorDAO->inserir(new Compositor(0, $nome, $apelido, $contacto, $email));
-            $msg = $id > 0 ? 'Artista cadastrado.' : 'Erro ao cadastrar.';
-        } else {
-            $msg = 'Escolha o tipo de artista.';
-        }
-
-        if ($id > 0) {
-            LogsController::registar('Registou o artista (' . $tipo . '): ' . $nome . ' ' . $apelido);
-        }
-        }
-    }
-
-    if ($acao === 'atualizar') {
-        if (($bloq = Permissao::bloquear($utilizador, 'editar'))) { $msg = $bloq; }
-        else {
-        $id       = (int)($_POST['id'] ?? 0);
-        $nome     = trim($_POST['nome'] ?? '');
-        $apelido  = trim($_POST['apelido'] ?? '');
-        $contacto = trim($_POST['contacto'] ?? '');
-        $email    = trim($_POST['email'] ?? '');
-
-        if ($id === 0 || $nome === '' || $apelido === '') {
-            $msg = 'Dados inválidos para atualizar.';
-        } elseif ($tipo === 'musico') {
-            $ok = $musicoDAO->atualizar(new Musico($id, $nome, $apelido, [], $contacto, $email));
-            $instrDAO->removerRelacoesPorMusico($id);
-            foreach (($_POST['instrumentos'] ?? []) as $cod) {
-                $instrDAO->inserirRelacaoMusicoInstrumento($id, (int)$cod);
-            }
-            $msg = $ok ? 'Músico atualizado.' : 'Sem alterações.';
-        } elseif ($tipo === 'cantor') {
-            $ok = $cantorDAO->atualizar(new Cantor($id, $nome, $apelido, $contacto, $email));
-            $msg = $ok ? 'Cantor atualizado.' : 'Sem alterações.';
-        } elseif ($tipo === 'compositor') {
-            $ok = $compositorDAO->atualizar(new Compositor($id, $nome, $apelido, $contacto, $email));
-            $msg = $ok ? 'Compositor atualizado.' : 'Sem alterações.';
-        } else {
-            $msg = 'Dados inválidos para atualizar.';
-        }
-        }
-    }
-
-    if ($acao === 'remover') {
-        if (($bloq = Permissao::bloquear($utilizador, 'remover'))) { $msg = $bloq; }
-        else {
-        // Cada aba selecciona pelo seu próprio name; mantém-se o formato antigo "tipo:id".
-        $id = (int)($_POST['sel_' . $tipo] ?? 0);
-        if ($id === 0) {
-            [$tipoAntigo, $idAntigo] = array_pad(explode(':', $_POST['sel'] ?? ''), 2, '');
-            if ($tipo === '' && $tipoAntigo !== '') $tipo = $tipoAntigo;
-            $id = (int)$idAntigo;
-        }
-        if ($tipo === 'musico')          $ok = $id > 0 && $musicoDAO->remover($id);
-        elseif ($tipo === 'cantor')      $ok = $id > 0 && $cantorDAO->remover($id);
-        elseif ($tipo === 'compositor')  $ok = $id > 0 && $compositorDAO->remover($id);
-        else                             $ok = false;
-
-        if ($ok) {
-            LogsController::registar('Removeu o artista (' . $tipo . ') ID ' . $id);
-        }
-
-        $msg = $ok ? 'Artista removido.' : 'Não foi possível remover (seleccione um artista que não esteja em discos).';
-        }
-    }
-
-    // Volta para a mesma aba depois de gravar (padrão POST-Redirect-GET).
-    $aba = ['musico' => 'musicos', 'compositor' => 'compositores', 'cantor' => 'cantores'][$tipo] ?? 'musicos';
-    header('Location: artistas.php?tab=' . $aba . '&msg=' . urlencode($msg));
+    $resultado = $artistasController->processarPost($utilizador, $_POST);
+    header('Location: artistas.php?tab=' . $resultado['aba'] . '&msg=' . urlencode($resultado['msg']));
     exit;
 }
 
-$msg = $_GET['msg'] ?? '';
+/* ---------- Estado da página ---------- */
+$estado = $artistasController->prepararEcra($_GET);
 
-/* ---------- Aba visível ---------- */
-$tab = $_GET['tab'] ?? 'musicos';
-if (!in_array($tab, ['musicos', 'compositores', 'cantores'], true)) $tab = 'musicos';
-
-/* ---------- Botão Editar (GET): carrega o artista seleccionado ---------- */
-$ed = null;             // artista a editar
-$edTipo = '';           // 'musico' | 'compositor' | 'cantor'
-$edInstrumentos = [];   // instrumentos do músico em edição
-if (($_GET['acao'] ?? '') === 'editar') {
-    $edTipo = $_GET['tipo'] ?? '';
-    // fica na aba onde o utilizador estava, mesmo que não tenha seleccionado ninguém
-    $tab = ['musico' => 'musicos', 'compositor' => 'compositores', 'cantor' => 'cantores'][$edTipo] ?? $tab;
-    $edId = (int)($_GET['sel_' . $edTipo] ?? 0);
-    if ($edId === 0) { // compatibilidade com o formato antigo "tipo:id"
-        [$tipoAntigo, $idAntigo] = array_pad(explode(':', $_GET['sel'] ?? ''), 2, '');
-        if ($edTipo === '' && $tipoAntigo !== '') $edTipo = $tipoAntigo;
-        $edId = (int)$idAntigo;
-    }
-    if ($edId > 0 && $edTipo === 'musico') {
-        $ed = $musicoDAO->buscarPorCodigo($edId);
-        if ($ed->getCodigoMusico()) {
-            foreach ($musicoDAO->buscarInstrumentosDoMusico($edId) as $i) $edInstrumentos[] = $i->getCodigo();
-            $tab = 'musicos';
-        } else {
-            $ed = null;
-        }
-    } elseif ($edId > 0 && $edTipo === 'compositor') {
-        $ed = $compositorDAO->buscarPorCodigo($edId);
-        if ($ed->getCodigoCompositor()) $tab = 'compositores';
-        else $ed = null;
-    } elseif ($edId > 0 && $edTipo === 'cantor') {
-        $ed = $cantorDAO->buscarPorCodigo($edId);
-        if ($ed->getCodigoCantor()) $tab = 'cantores';
-        else $ed = null;
-    } else {
-        $edTipo = '';
-    }
-    if (!$ed && $msg === '') $msg = 'Seleccione um artista.';
-}
-$musicos      = $musicoDAO->listarTodos();
-$cantores     = $cantorDAO->listarTodos();
-$compositores = $compositorDAO->listarTodos();
-$instrumentos = $instrDAO->listarTodos();
-
-/* ---------- Pesquisa simples (filtra em memória as 3 listas) ---------- */
-$q = trim($_GET['q'] ?? '');
-if ($q !== '') {
-    $qMin = mb_strtolower($q);
-
-    $musicos = array_values(array_filter($musicos, function ($m) use ($qMin, $musicoDAO) {
-        $nomesInstr = array_map(fn($i) => $i->getNome(), $musicoDAO->buscarInstrumentosDoMusico($m->getCodigoMusico()));
-        $alvo = mb_strtolower(
-            $m->getCodigoMusico() . ' ' . $m->getNomeMusico() . ' ' . $m->getApelidoMusico() . ' ' .
-            implode(' ', $nomesInstr) . ' ' . $m->getEmailMusico() . ' ' . $m->getContactoMusico()
-        );
-        return str_contains($alvo, $qMin);
-    }));
-
-    $compositores = array_values(array_filter($compositores, function ($c) use ($qMin) {
-        $alvo = mb_strtolower(
-            $c->getCodigoCompositor() . ' ' . $c->getNomeCompositor() . ' ' . $c->getApelidoCompositor() . ' ' .
-            $c->getEmailCompositor() . ' ' . $c->getContactoCompositor()
-        );
-        return str_contains($alvo, $qMin);
-    }));
-
-    $cantores = array_values(array_filter($cantores, function ($c) use ($qMin) {
-        $alvo = mb_strtolower(
-            $c->getCodigoCantor() . ' ' . $c->getNomeCantor() . ' ' . $c->getApelidoCantor() . ' ' .
-            $c->getEmailCantor() . ' ' . $c->getContactoCantor()
-        );
-        return str_contains($alvo, $qMin);
-    }));
-
-    // Se a aba actual ficou sem resultados, abre a primeira que tenha
-    if (($_GET['acao'] ?? '') !== 'editar') {
-        $listasPorAba = ['musicos' => $musicos, 'compositores' => $compositores, 'cantores' => $cantores];
-        if (empty($listasPorAba[$tab])) {
-            foreach ($listasPorAba as $nomeAba => $lista) {
-                if ($lista) { $tab = $nomeAba; break; }
-            }
-        }
-    }
-}
-
-/* ---------- Campos do modal de edição (normaliza os 3 tipos de artista) ---------- */
-$edId = $edNome = $edApelido = $edContacto = $edEmail = '';
-if ($ed) {
-    if ($edTipo === 'musico') {
-        $edId = $ed->getCodigoMusico();
-        $edNome = $ed->getNomeMusico();
-        $edApelido = $ed->getApelidoMusico();
-        $edContacto = $ed->getContactoMusico();
-        $edEmail = $ed->getEmailMusico();
-    } elseif ($edTipo === 'compositor') {
-        $edId = $ed->getCodigoCompositor();
-        $edNome = $ed->getNomeCompositor();
-        $edApelido = $ed->getApelidoCompositor();
-        $edContacto = $ed->getContactoCompositor();
-        $edEmail = $ed->getEmailCompositor();
-    } else {
-        $edId = $ed->getCodigoCantor();
-        $edNome = $ed->getNomeCantor();
-        $edApelido = $ed->getApelidoCantor();
-        $edContacto = $ed->getContactoCantor();
-        $edEmail = $ed->getEmailCantor();
-    }
-}
-$edTitulo = ['musico' => 'Músico', 'compositor' => 'Compositor', 'cantor' => 'Cantor'][$edTipo] ?? 'Artista';
+$msg            = $estado['msg'];
+$tab            = $estado['tab'];
+$ed             = $estado['ed'];
+$edTipo         = $estado['edTipo'];
+$edInstrumentos = $estado['edInstrumentos'];
+$edId           = $estado['edId'];
+$edNome         = $estado['edNome'];
+$edApelido      = $estado['edApelido'];
+$edContacto     = $estado['edContacto'];
+$edEmail        = $estado['edEmail'];
+$edTitulo       = $estado['edTitulo'];
+$musicos        = $estado['musicos'];
+$cantores       = $estado['cantores'];
+$compositores   = $estado['compositores'];
+$instrumentos   = $estado['instrumentos'];
+$q              = $estado['q'];
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -339,7 +148,7 @@ $edTitulo = ['musico' => 'Músico', 'compositor' => 'Compositor', 'cantor' => 'C
                                     </thead>
                                     <tbody>
                                         <?php foreach ($musicos as $m): ?>
-                                            <?php $nomes = array_map(fn($i) => $i->getNome(), $musicoDAO->buscarInstrumentosDoMusico($m->getCodigoMusico())); ?>
+                                            <?php $nomes = array_map(fn($i) => $i->getNome(), $m->getInstrumento() ?? []); ?>
                                             <tr>
                                                 <td><input type="radio" name="sel_musico" value="<?= $m->getCodigoMusico() ?>"></td>
                                                 <td><?= htmlspecialchars($m->getNomeMusico() . ' ' . $m->getApelidoMusico()) ?></td>

@@ -1,10 +1,9 @@
 <?php
 require_once __DIR__ . '/../../model/sessao.php';
 require_once __DIR__ . '/../../model/permissao.php';
-require_once __DIR__ . '/../../controller/loginController.php';
-require_once __DIR__ . '/../../controller/utilizadorController.php';
-require_once __DIR__ . '/../../controller/logsController.php';
-require_once __DIR__ . '/../../repository/nivelAcesso.php';
+require_once __DIR__ . '/../../model/utilizador.php';
+require_once __DIR__ . '/../../model/nivelacesso.php';
+require_once __DIR__ . '/../../controller/administracaoController.php';
 
 $utilizador = Sessao::getUtilizadorLogado();
 if (!$utilizador) {
@@ -20,38 +19,13 @@ if (!Permissao::pode($utilizador, 'utilizadores')) {
 $podeUsers = true;
 $podeLogs  = Permissao::pode($utilizador, 'logs');
 
-$ctrl = new UtilizadorController();
-$nivelDAO = new NivelAcessoDAO();
-
-// Le a foto enviada (valida o conteudo) e devolve ['dados' => binario, 'tipo' => mime] ou null
-function guardarFoto($campo)
-{
-  if (!isset($_FILES[$campo]) || $_FILES[$campo]['error'] !== UPLOAD_ERR_OK) return null;
-
-  $tmp     = $_FILES[$campo]['tmp_name'];
-  $tamanho = (int) $_FILES[$campo]['size'];
-  $maximo  = 2 * 1024 * 1024; // igual ao upload_max_filesize
-
-  if ($tamanho <= 0 || $tamanho > $maximo) return null;
-
-  $info = @getimagesize($tmp);
-  if ($info === false) return null; // nao e uma imagem valida
-
-  $tipos = [
-    IMAGETYPE_JPEG => 'image/jpeg',
-    IMAGETYPE_PNG  => 'image/png',
-    IMAGETYPE_WEBP => 'image/webp',
-  ];
-  if (!isset($tipos[$info[2]])) return null;
-
-  return ['dados' => file_get_contents($tmp), 'tipo' => $tipos[$info[2]]];
-}
-
 // Mostra "Sim" ou "Não" na tabela de perfis
 function sn($valor)
 {
   return $valor ? 'Sim' : 'Não';
 }
+
+$administracaoController = new AdministracaoController();
 
 $msg = '';
 $tab = 'cad';
@@ -63,188 +37,23 @@ if (in_array($_GET['tab'] ?? '', ['cad', 'lista', 'perfis'], true)) {
 
 /* ---------- Cadastrar / Atualizar / Remover ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-  if ($_POST['acao'] === 'salvar') {
-    $foto = guardarFoto('foto');
-    $novo = new Utilizador(
-      null,
-      trim($_POST['nome']),
-      trim($_POST['apelido']),
-      trim($_POST['username']),
-      $_POST['genero'],
-      new NivelAcesso((int)$_POST['perfil'], ''),
-      trim($_POST['email']),
-      trim($_POST['telefone']),
-      "PeixeFrito",
-      true,   // primeiro acesso
-      $foto['dados'] ?? null,
-      $foto['tipo'] ?? null
-    );
-    $criado = $ctrl->cadastrarUtilizador($novo);
-    if ($criado) {
-      LogsController::registar('Criou o utilizador: ' . trim($_POST['nome']) . " " . trim($_POST['apelido']));
-    }
-    $msg = $criado
-      ? 'Utilizador criado. '
-      : 'Erro ao criar (o nome de utilizador já existe?).';
-  }
-
-  if ($_POST['acao'] === 'atualizar') {
-    $tab   = 'lista';
-    $id    = (int)$_POST['id'];
-    $atual = $ctrl->listarPorId($id);
-    $foto  = guardarFoto('foto');
-    $edit  = new Utilizador(
-      null,
-      null,
-      null,
-      null,
-      null,
-      new NivelAcesso((int)$_POST['perfil'], ''),
-      trim($_POST['email']),
-      trim($_POST['telefone']),
-      null,
-      null,
-      $foto['dados'] ?? null,   // null = mantem a foto actual
-      $foto['tipo'] ?? null
-    );
-    $ctrl->atualizarUser($id, $edit);
-    LogsController::registar('Actualizou o utilizador: ' . $atual->getNomeCompleto());
-    $msg = 'Utilizador atualizado.';
-  }
-
-  if ($_POST['acao'] === 'remover') {
-    $tab = 'lista';
-    $id  = (int)($_POST['sel'] ?? 0);
-    if ($id === 0) {
-      $msg = 'Seleccione um utilizador.';
-    } elseif (($alvo = $ctrl->listarPorId($id)) && $alvo->getUser_name() === $utilizador->getUser_name()) {
-      $msg = 'Não pode remover o seu próprio utilizador.';
-    } else {
-      $ctrl->suspenderUtilizador($id);
-      LogsController::registar('Removeu o utilizador: ' . ($alvo ? $alvo->getNomeCompleto() : 'ID ' . $id)); //Econtrar um jeito melhor de colocar este log
-      $msg = 'Utilizador removido.';
-    }
-  }
-
-  if ($_POST['acao'] === 'resetar') {
-    $tab = 'lista';
-    $id  = (int)($_POST['sel'] ?? 0);
-    if ($id === 0) {
-      $msg = 'Seleccione um utilizador.';
-    } else {
-      $alvo = $ctrl->listarPorId($id);
-      $nova = "Maguinhas123"; //VOU TROCAR
-      $ctrl->resetarSenha($id, $nova);
-      LogsController::registar('Resetou a senha do utilizador: ' . ($alvo ? $alvo->getNomeCompleto() : 'ID ' . $id)); //Econtrar um jeito melhor de colocar este log
-      $msg = 'Senha resetada.';
-    }
-  }
-
-  /* ----- Perfis ----- */
-  if ($_POST['acao'] === 'criar_perfil') {
-    $tab  = 'perfis';
-    $nome = trim($_POST['nome_perfil'] ?? '');
-    if ($nome === '') {
-      $msg = 'O nome do perfil é obrigatório.';
-    } elseif ($nivelDAO->criar($nome, $_POST['perm'] ?? [])) {
-      LogsController::registar('Criou o perfil: ' . $nome);
-      $msg = 'Perfil criado.';
-    } else {
-      $msg = 'Erro ao criar o perfil.';
-    }
-  }
-
-  if ($_POST['acao'] === 'atualizar_perfil') {
-    $tab  = 'perfis';
-    $id   = (int)($_POST['id_perfil'] ?? 0);
-    $nome = trim($_POST['nome_perfil'] ?? '');
-    if ($nome === '') {
-      $msg = 'O nome do perfil é obrigatório.';
-    } elseif ($nivelDAO->atualizar($id, $nome, $_POST['perm'] ?? [])) {
-      LogsController::registar('Actualizou o perfil: ' . $nome);
-      $msg = 'Perfil atualizado.';
-    } else {
-      $msg = 'Não foi possível atualizar (os perfis base não se editam).';
-    }
-  }
-
-  if ($_POST['acao'] === 'remover_perfil') {
-    $tab = 'perfis';
-    $id  = (int)($_POST['sel_perfil'] ?? 0);
-    if ($id === 0) {
-      $msg = 'Seleccione um perfil.';
-    } elseif ($nivelDAO->remover($id)) {
-      LogsController::registar('Removeu o perfil ID ' . $id);
-      $msg = 'Perfil removido.';
-    } else {
-      $msg = 'Não foi possível remover (perfil base ou com utilizadores associados).';
-    }
-  }
+  $resultado = $administracaoController->processarPost($utilizador, $_POST, $tab);
+  $tab = $resultado['tab'];
+  $msg = $resultado['msg'];
 }
 
-/* ---------- Botão Editar: abre o modal preenchido ---------- */
-$ed = null;
-if (($_GET['acao'] ?? '') === 'editar') {
-  $tab = 'lista';
-  $ed  = $ctrl->listarPorId((int)($_GET['sel'] ?? 0));
-  if (!$ed) $msg = 'Seleccione um utilizador.';
-}
+/* ---------- Estado da página ---------- */
+$estado = $administracaoController->prepararEcra($utilizador, $_GET, $tab, $msg);
 
-/* ---------- Botão Editar Perfil: abre o modal preenchido ---------- */
-$edPerfil = null;
-if (($_GET['acao'] ?? '') === 'editar_perfil') {
-  $tab = 'perfis';
-  $edPerfil = $nivelDAO->buscarPorCodigo((int)($_GET['sel_perfil'] ?? 0));
-  if (!$edPerfil) {
-    $msg = 'Seleccione um perfil.';
-  } elseif ($edPerfil['CodigoNivel'] <= 4) {
-    $msg = 'Os perfis base não se editam.';
-    $edPerfil = null;
-  }
-}
-
-$lista  = $ctrl->listarUtilizador();
-$meuCodigo = 0;
-foreach ($lista as $u) {
-  if ($u->getUser_name() === $utilizador->getUser_name()) $meuCodigo = $u->getCodigo();
-}
-$niveis  = $nivelDAO->listarNiveis();
-$perfis  = $nivelDAO->listarPerfis();
-
-/* ---------- Pesquisa simples (filtra em memória as duas listas) ---------- */
-$q = trim($_GET['q'] ?? '');
-if ($q !== '') {
-  $qMin = mb_strtolower($q);
-
-  $lista = array_values(array_filter($lista, function ($u) use ($qMin) {
-    $alvo = mb_strtolower(
-      $u->getCodigo() . ' ' . $u->getNomeCompleto() . ' ' . $u->getUser_name() . ' ' .
-      $u->getEmail() . ' ' . $u->getGenero() . ' ' . $u->getPerfil()->getNome() . ' ' .
-      $u->getContacto()
-    );
-    return str_contains($alvo, $qMin);
-  }));
-
-  $perfis = array_values(array_filter($perfis, function ($p) use ($qMin) {
-    // Inclui o nome das permissões que o perfil tem (ex.: "logs", "editar")
-    $perms = '';
-    if ($p['PodeLer'])          $perms .= ' listar';
-    if ($p['PodeAdicionar'])    $perms .= ' criar adicionar';
-    if ($p['PodeEditar'])       $perms .= ' editar';
-    if ($p['PodeRemover'])      $perms .= ' remover';
-    if ($p['PodeUtilizadores']) $perms .= ' utilizadores gerir';
-    if ($p['PodeLogs'])         $perms .= ' logs';
-    $alvo = mb_strtolower($p['CodigoNivel'] . ' ' . $p['NomeNivel'] . $perms);
-    return str_contains($alvo, $qMin);
-  }));
-
-  // Se a aba actual ficou sem resultados e a outra tem, muda para a outra
-  if (!$ed && !$edPerfil) {
-    if (($tab === 'lista' || $tab === 'cad') && !$lista && $perfis) $tab = 'perfis';
-    elseif (($tab === 'perfis' || $tab === 'cad') && !$perfis && $lista) $tab = 'lista';
-  }
-}
+$msg       = $estado['msg'];
+$tab       = $estado['tab'];
+$ed        = $estado['ed'];
+$edPerfil  = $estado['edPerfil'];
+$lista     = $estado['lista'];
+$meuCodigo = $estado['meuCodigo'];
+$niveis    = $estado['niveis'];
+$perfis    = $estado['perfis'];
+$q         = $estado['q'];
 ?>
 <!DOCTYPE html>
 <html lang="pt">

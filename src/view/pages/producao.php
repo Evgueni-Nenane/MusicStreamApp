@@ -1,14 +1,9 @@
 <?php
 require_once __DIR__ . '/../../model/sessao.php';
 require_once __DIR__ . '/../../model/permissao.php';
-require_once __DIR__ . '/../../controller/loginController.php';
-require_once __DIR__ . '/../../controller/logsController.php';
-require_once __DIR__ . '/../../controller/produtorController.php';
-require_once __DIR__ . '/../../controller/gravadoraController.php';
-require_once __DIR__ . '/../../controller/editoraController.php';
-require_once __DIR__ . '/../../model/produtor.php';
-require_once __DIR__ . '/../../model/gravadora.php';
-require_once __DIR__ . '/../../model/editora.php';
+require_once __DIR__ . '/../../model/utilizador.php';
+require_once __DIR__ . '/../../model/nivelacesso.php';
+require_once __DIR__ . '/../../controller/producaoController.php';
 
 $utilizador = Sessao::getUtilizadorLogado();
 if (!$utilizador) { header('Location: Login.php'); exit; }
@@ -18,173 +13,26 @@ $podeRemover   = Permissao::pode($utilizador, 'remover');
 $podeUsers     = Permissao::pode($utilizador, 'utilizadores');
 $podeLogs      = Permissao::pode($utilizador, 'logs');
 
-$prodController = new ProdutorController();
-$gravController = new GravadoraController();
-$editController = new EditoraController();
-
-$msg = '';
-$edProd = $edGrav = $edEdit = null;
+$producaoController = new ProducaoController();
 
 /* ---------- Acções (POST) ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $tipo = $_POST['tipo'] ?? '';
-    $acao = $_POST['acao'] ?? '';
-
-    // Níveis de acesso: adicionar / editar(atualizar) / remover.
-    $permissaoPedido = $acao === 'adicionar' ? 'adicionar'
-        : ($acao === 'atualizar' ? 'editar'
-        : ($acao === 'remover' ? 'remover' : ''));
-    if ($permissaoPedido === '' || ($bloq = Permissao::bloquear($utilizador, $permissaoPedido))) {
-        $msg = $permissaoPedido === '' ? 'Acção inválida.' : $bloq;
-    } elseif ($tipo === 'produtor') {
-        if ($acao === 'adicionar') {
-            $novo = $prodController->cadastrarProdutor(new Produtor(
-                null, trim($_POST['nome'] ?? ''), trim($_POST['apelido'] ?? ''),
-                trim($_POST['contacto'] ?? ''), trim($_POST['email'] ?? '')
-            ));
-            if ($novo > 0) {
-                LogsController::registar('Registou o produtor: ' . trim($_POST['nome'] ?? '') . ' ' . trim($_POST['apelido'] ?? ''));
-            }
-            $msg = $novo > 0 ? 'Produtor adicionado.' : 'Erro ao adicionar produtor.';
-        } elseif ($acao === 'atualizar') {
-            $p = new Produtor(
-                (int)$_POST['id'], trim($_POST['nome'] ?? ''), trim($_POST['apelido'] ?? ''),
-                trim($_POST['contacto'] ?? ''), trim($_POST['email'] ?? '')
-            );
-            $msg = $prodController->atualizarProdutor($p) ? 'Produtor atualizado.' : 'Sem alterações.';
-        } elseif ($acao === 'remover') {
-            $id = (int)($_POST['sel'] ?? 0);
-            $removido = $id > 0 && $prodController->removerProdutor($id);
-            if ($removido) {
-                LogsController::registar('Removeu o produtor ID ' . $id);
-            }
-            $msg = $removido
-                ? 'Produtor removido.'
-                : 'Seleccione um produtor que não esteja em discos.';
-        }
-    } elseif ($tipo === 'gravadora') {
-        if ($acao === 'adicionar') {
-            $novo = $gravController->cadastrarGravadora(new Gravadora(
-                null, trim($_POST['nome'] ?? ''), trim($_POST['contacto'] ?? ''),
-                trim($_POST['endereco'] ?? ''), trim($_POST['email'] ?? '')
-            ));
-            if ($novo > 0) {
-                LogsController::registar('Registou a gravadora: ' . trim($_POST['nome'] ?? ''));
-            }
-            $msg = $novo > 0 ? 'Gravadora adicionada.' : 'Erro ao adicionar gravadora.';
-        } elseif ($acao === 'atualizar') {
-            $g = new Gravadora(
-                (int)$_POST['id'], trim($_POST['nome'] ?? ''), trim($_POST['contacto'] ?? ''),
-                trim($_POST['endereco'] ?? ''), trim($_POST['email'] ?? '')
-            );
-            $msg = $gravController->atualizarGravadora($g) ? 'Gravadora atualizada.' : 'Sem alterações.';
-        } elseif ($acao === 'remover') {
-            $id = (int)($_POST['sel'] ?? 0);
-            $removido = $id > 0 && $gravController->removerGravadora($id);
-            if ($removido) {
-                LogsController::registar('Removeu a gravadora ID ' . $id);
-            }
-            $msg = $removido
-                ? 'Gravadora removida.'
-                : 'Seleccione uma gravadora que não esteja em discos.';
-        }
-    } elseif ($tipo === 'editora') {
-        if ($acao === 'adicionar') {
-            $novo = $editController->cadastrarEditora(new Editora(
-                null, trim($_POST['nome'] ?? ''), trim($_POST['contacto'] ?? ''),
-                trim($_POST['email'] ?? ''), trim($_POST['endereco'] ?? '')
-            ));
-            if ($novo > 0) {
-                LogsController::registar('Registou a editora: ' . trim($_POST['nome'] ?? ''));
-            }
-            $msg = $novo > 0 ? 'Editora adicionada.' : 'Erro ao adicionar editora.';
-        } elseif ($acao === 'atualizar') {
-            $e = new Editora(
-                (int)$_POST['id'], trim($_POST['nome'] ?? ''), trim($_POST['contacto'] ?? ''),
-                trim($_POST['email'] ?? ''), trim($_POST['endereco'] ?? '')
-            );
-            $msg = $editController->atualizarEditora($e) ? 'Editora atualizada.' : 'Sem alterações.';
-        } elseif ($acao === 'remover') {
-            $id = (int)($_POST['sel'] ?? 0);
-            $removido = $id > 0 && $editController->removerEditora($id);
-            if ($removido) {
-                LogsController::registar('Removeu a editora ID ' . $id);
-            }
-            $msg = $removido
-                ? 'Editora removida.'
-                : 'Seleccione uma editora que não esteja em discos.';
-        } else {
-            $msg = 'Tipo inválido.';
-        }
-    }
-
+    $msg = $producaoController->processarPost($utilizador, $_POST);
     header('Location: producao.php?msg=' . urlencode($msg));
     exit;
 }
 
-$msg = $_GET['msg'] ?? '';
-
-/* ---------- Abrir o modal de edição preenchido ---------- */
-$tab = 'prod';
-if (($_GET['acao'] ?? '') === 'editar') {
-    $sel  = (int)($_GET['sel'] ?? 0);
-    $tipo = $_GET['tipo'] ?? '';
-
-    if ($tipo === 'produtor') {
-        $edProd = $prodController->buscarPorCodigo($sel);
-        $tab = 'prod';
-    } elseif ($tipo === 'gravadora') {
-        $edGrav = $gravController->buscarPorCodigo($sel);
-        $tab = 'grav';
-    } elseif ($tipo === 'editora') {
-        $edEdit = $editController->buscarPorCodigo($sel);
-        $tab = 'edit';
-    }
-    if (!$edProd && !$edGrav && !$edEdit) $msg = 'Seleccione um registo para editar.';
-}
-
-$produtores = $prodController->listarProdutor();
-$gravadoras = $gravController->listarGravadoras();
-$editoras   = $editController->listarEditoras();
-
-// Pesquisa simples (filtra em memória as 3 listas pelo texto introduzido)
-$q = trim($_GET['q'] ?? '');
-if ($q !== '') {
-    $qMin = mb_strtolower($q);
-
-    $produtores = array_values(array_filter($produtores, function ($p) use ($qMin) {
-        $alvo = mb_strtolower(
-            $p->getCodigoProdutor() . ' ' . $p->getNomeCompleto() . ' ' .
-            $p->getContactoProdutor() . ' ' . $p->getEmailProdutor()
-        );
-        return str_contains($alvo, $qMin);
-    }));
-
-    $gravadoras = array_values(array_filter($gravadoras, function ($g) use ($qMin) {
-        $alvo = mb_strtolower(
-            $g->getCodigoGravadora() . ' ' . $g->getNomeGravadora() . ' ' .
-            $g->getContactoGravadora() . ' ' . $g->getEmailGravadora() . ' ' .
-            $g->getEnderecoGravadora()
-        );
-        return str_contains($alvo, $qMin);
-    }));
-
-    $editoras = array_values(array_filter($editoras, function ($e) use ($qMin) {
-        $alvo = mb_strtolower(
-            $e->getCodigoEditora() . ' ' . $e->getNomeEditora() . ' ' .
-            $e->getContactoEditora() . ' ' . $e->getEmailEditora() . ' ' .
-            $e->getEndereco()
-        );
-        return str_contains($alvo, $qMin);
-    }));
-
-    // Abre automaticamente a primeira aba que tenha resultados
-    if (($_GET['acao'] ?? '') !== 'editar') {
-        if ($produtores)      $tab = 'prod';
-        elseif ($gravadoras)  $tab = 'grav';
-        elseif ($editoras)    $tab = 'edit';
-    }
-}
+/* ---------- Estado da página ---------- */
+$estado = $producaoController->prepararEcra($_GET);
+$msg        = $estado['msg'];
+$tab        = $estado['tab'];
+$edProd     = $estado['edProd'];
+$edGrav     = $estado['edGrav'];
+$edEdit     = $estado['edEdit'];
+$q          = $estado['q'];
+$produtores = $estado['produtores'];
+$gravadoras = $estado['gravadoras'];
+$editoras   = $estado['editoras'];
 ?>
 <!DOCTYPE html>
 <html lang="pt">

@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . '/../../model/sessao.php';
 require_once __DIR__ . '/../../model/permissao.php';
-require_once __DIR__ . '/../../controller/loginController.php';
+require_once __DIR__ . '/../../model/utilizador.php';
+require_once __DIR__ . '/../../model/nivelacesso.php';
 require_once __DIR__ . '/../../controller/logsController.php';
 
 $utilizador = Sessao::getUtilizadorLogado();
@@ -16,19 +17,8 @@ $podeUsers = Permissao::pode($utilizador, 'utilizadores');
 $podeLogs  = true;
 
 $logsController = new LogsController();
-$logs = $logsController->listarLogs();
-
-// Pesquisa simples (filtra em memória pelo texto introduzido)
 $q = trim($_GET['q'] ?? '');
-if ($q !== '') {
-    $logs = array_filter($logs, function ($l) use ($q) {
-        $alvo = strtolower(
-            $l->getCodigo() . ' ' . $l->getNome() . ' ' . $l->getApelido() . ' ' .
-            $l->getEmail() . ' ' . $l->getPerfil() . ' ' . $l->getAccao() . ' ' . $l->getDataHora()
-        );
-          return str_contains($alvo, strtolower($q));
-    });
-}
+$logs = $logsController->listarComPesquisa($q);
 ?>
 <!DOCTYPE html>
 <html lang="pt">

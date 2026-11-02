@@ -1,17 +1,9 @@
 <?php
 require_once __DIR__ . '/../../model/sessao.php';
 require_once __DIR__ . '/../../model/permissao.php';
-require_once __DIR__ . '/../../controller/loginController.php';
-require_once __DIR__ . '/../../repository/disco.php';
-require_once __DIR__ . '/../../repository/generorepository.php';
-require_once __DIR__ . '/../../repository/compositor.php';
-require_once __DIR__ . '/../../repository/musico.php';
-require_once __DIR__ . '/../../repository/cantor.php';
-require_once __DIR__ . '/../../repository/produtor.php';
-require_once __DIR__ . '/../../repository/gravadora.php';
-require_once __DIR__ . '/../../repository/editora.php';
-require_once __DIR__ . '/../../repository/edicao.php';
-require_once __DIR__ . '/../../controller/logsController.php';
+require_once __DIR__ . '/../../model/utilizador.php';
+require_once __DIR__ . '/../../model/nivelacesso.php';
+require_once __DIR__ . '/../../controller/registroDiscoController.php';
 
 $utilizador = Sessao::getUtilizadorLogado();
 if (!$utilizador) {
@@ -22,91 +14,31 @@ $podeAdicionar = Permissao::pode($utilizador, 'adicionar');
 $podeUsers     = Permissao::pode($utilizador, 'utilizadores');
 $podeLogs      = Permissao::pode($utilizador, 'logs');
 
-$discoDAO      = new DiscoDAO();
-$generoDAO     = new GeneroDAO();
-$compositorDAO = new CompositorDAO();
-$musicoDAO     = new MusicoDAO();
-$cantorDAO     = new CantorDAO();
-$produtorDAO   = new ProdutorDAO();
-$gravadoraDAO  = new GravadoraDAO();
-$editoraDAO    = new EditoraDAO();
-$edicaoDAO     = new EdicaoDAO();
+$registoController = new RegistoDiscoController();
 
 $msg  = '';
 $erro = '';
 
-if (isset($_GET['ok'])) {
-  $msg = 'Disco registado com sucesso';
-}
-
 /* ---------- Registar o disco (POST) ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  if (($bloq = Permissao::bloquear($utilizador, 'adicionar'))) {
-    $erro = $bloq;
-  } else {
-    $titulo     = trim($_POST['titulo'] ?? '');
-    $preco      = ($_POST['preco'] ?? '') !== '' ? (float)$_POST['preco'] : 0;
-    $dataEdicao = $_POST['ano_edicao'] ?? '';
-    $ano        = $dataEdicao !== '' ? (int)substr($dataEdicao, 0, 4) : null;   // o disco guarda só o ano
-    $codEditora = (int)($_POST['editora'] ?? 0);
-
-    if ($titulo === '') {
-      $erro = 'O título é obrigatório.';
-    } elseif (empty($_POST['generos'])) {
-      $erro = 'Escolha pelo menos um género.';
-    } elseif ($codEditora > 0 && $dataEdicao === '') {
-      $erro = 'Escolha a data de edição para associar a editora.';
-    } else {
-      $disco  = new DiscoCompacto(0, $titulo, $preco, $ano, [], [], [], [], [], [], [], null, []);
-      $codigo = $discoDAO->inserir($disco);
-
-      if ($codigo > 0) {
-        // género(s)
-        foreach ($_POST['generos'] as $g) $generoDAO->inserirRelacaoGeneroDisco($codigo, (int)$g);
-
-        // participantes
-        foreach (($_POST['compositores'] ?? []) as $c) $compositorDAO->inserirRelacaoDiscoCompositor($codigo, (int)$c);
-        foreach (($_POST['musicos'] ?? [])      as $m) $musicoDAO->inserirRelacaoDiscoMusico($codigo, (int)$m);
-        foreach (($_POST['cantores'] ?? [])     as $c) $cantorDAO->inserirRelacaoDiscoCantor($codigo, (int)$c);
-
-        // produção
-        foreach (($_POST['produtores'] ?? []) as $p) $produtorDAO->inserirRelacaoDiscoProdutor($codigo, (int)$p);
-        foreach (($_POST['gravadoras'] ?? []) as $g) $gravadoraDAO->inserirRelacaoDiscoGravadora($codigo, (int)$g);
-        if ($codEditora > 0) $edicaoDAO->inserir(new Edicao($codigo, $codEditora, $dataEdicao));
-
-        LogsController::registar('Registou o disco: ' . $titulo);
-
-        // redireciona: o formulário volta vazio
-        header('Location: registro.php?ok=' . $codigo);
-        exit;
-      } else {
-        $erro = 'Erro ao registar o disco.';
-      }
-    }
+  $resultado = $registoController->processarPost($utilizador, $_POST);
+  if (isset($resultado['redirect'])) {
+    header('Location: ' . $resultado['redirect']);
+    exit;
   }
+  $erro = $resultado['erro'] ?? '';
 }
 
-/* ---------- Listas para os modais (código => texto) ---------- */
-$generos = [];
-foreach ($generoDAO->listarTodos() as $g) $generos[$g->getCodigoGenero()] = $g->getNomeGenero();
-
-$compositores = [];
-foreach ($compositorDAO->listarTodos() as $c) $compositores[$c->getCodigoCompositor()] = $c->getNomeCompositor() . ' ' . $c->getApelidoCompositor();
-
-$musicos = [];
-foreach ($musicoDAO->listarTodos() as $m) $musicos[$m->getCodigoMusico()] = $m->getNomeMusico() . ' ' . $m->getApelidoMusico();
-
-$cantores = [];
-foreach ($cantorDAO->listarTodos() as $c) $cantores[$c->getCodigoCantor()] = $c->getNomeCantor() . ' ' . $c->getApelidoCantor();
-
-$produtores = [];
-foreach ($produtorDAO->listarTodos() as $p) $produtores[$p->getCodigoProdutor()] = $p->getNomeProdutor() . ' ' . $p->getApelidoProdutor();
-
-$gravadoras = [];
-foreach ($gravadoraDAO->listarTodos() as $g) $gravadoras[$g->getCodigoGravadora()] = $g->getNomeGravadora();
-
-$editoras = [];
-foreach ($editoraDAO->listarTodos() as $e) $editoras[$e->getCodigoEditora()] = $e->getNomeEditora();
+/* ---------- Estado da página (listas dos modais) ---------- */
+$estado = $registoController->prepararEcra($_GET);
+$msg         = $estado['msg'];
+$generos     = $estado['generos'];
+$compositores = $estado['compositores'];
+$musicos     = $estado['musicos'];
+$cantores    = $estado['cantores'];
+$produtores  = $estado['produtores'];
+$gravadoras  = $estado['gravadoras'];
+$editoras    = $estado['editoras'];
 
 // Desenha as linhas de uma lista. Os inputs usam form="form-registo" porque
 // os modais ficam fora do <form>, mas os valores têm de ir com ele.
