@@ -68,19 +68,21 @@ Then open `http://127.0.0.1:8181/`. The root `index.php` redirects to `Login.php
 
 | Layer | Directory | Responsibility | Current state |
 |---|---|---|---|
-| View | `src/view/pages` | HTML rendering, session/permission bootstrap, **POST handling** | Fat: pages orchestrate controllers and contain use-case logic |
-| Controller | `src/controller` | Thin façade over DAOs | Mostly one-line pass-through methods |
+| View | `src/view/pages` | Session guard, permission flags for the UI, HTML helpers and rendering | No request handling, validation or data access |
+| Controller | `src/controller` | Entity controllers are thin façades over DAOs; **page controllers** handle POST, validation, permission re-checks, audit logging, filtering and view-model preparation | Page controllers may use DAOs directly where the fine-grained controllers lack the needed orchestration |
 | Repository | `src/repository` | SQL via prepared statements, row → entity mapping | Mixed return types (`bool`/`int`/`array`/entity); some methods swallow `mysqli_sql_exception` |
 | Model | `src/model` | Entities (POJO), `Sessao`, `Permissao` | No behaviour beyond getters/setters |
 | Database | MySQL | Schema, FK constraints, permission flags | `connection.php` is a static singleton with hardcoded credentials |
 
 ### 3.2 Request lifecycle
 
-1. The page file bootstraps: `require_once` of `Sessao`, `Permissao`, controllers and repositories.
+1. The page file bootstraps: `require_once` of `Sessao`, `Permissao` and the page controller.
 2. `Sessao::getUtilizadorLogado()` restores the `Utilizador` object from `$_SESSION['utilizadorLogado']` (the object is serialised in the session; the photo blob is not).
 3. If there is no session, the page redirects to `Login.php`; if the profile lacks the required permission, it redirects or blocks.
-4. `POST` handling runs inline in the page: permission check (`Permissao::bloquear`), validation, DAO call, `LogsController::registar(...)`.
-5. The page loads the data it needs through controllers and renders the HTML.
+4. On `POST`, the page delegates to the page controller (`processarPost`): permission check (`Permissao::bloquear`), validation, DAO calls and `LogsController::registar(...)`.
+5. The page asks the controller for the ready-to-render state (`prepararEcra`) and only outputs HTML.
+
+Page controllers: `ProducaoController`, `ArtistasController`, `RegistoDiscoController`, `ListagemDiscosController` and `AdministracaoController`. Simple pages reuse the entity controllers directly (`GeneroController`, `InstrumentoController`, `LogsController`, `NivelController`, `LoginController`, `MusicoController`). There is no service layer: the flow is view → controller → repository → model.
 
 There is no router: every page is directly reachable and repeats the bootstrap block.
 
@@ -109,11 +111,11 @@ The UI hides unavailable actions **and** the server re-validates every POST — 
 ├── seeds/
 │   └── seed.php                # CLI: creates the initial administrator
 └── src/
-    ├── controller/             # 14 controllers
+    ├── controller/             # 19 controllers (5 page controllers + 14 entity controllers)
     ├── model/                  # 14 entities + Sessao + Permissao
     ├── repository/             # 15 DAOs + connection.php
     └── view/
-        ├── pages/              # 12 PHP pages (view + POST handling)
+        ├── pages/              # 12 PHP pages (rendering only)
         ├── css/                # one stylesheet per page
         └── resources/          # static images (login.png, default avatar)
 ```
@@ -210,7 +212,7 @@ Known and accepted for an academic context, but not production-ready:
 |---|---|
 | Bootstrap | No autoloader (PSR-4) — every file repeats `require_once`; no single entry point |
 | Naming | Inconsistent file casing (`Login.php`, `LogOut.php`, `nivelAcesso.php`, `generorepository.php`) — breaks on case-sensitive filesystems |
-| Layers | Views own use cases and POST handling; controllers are anemic |
+| Layers | Page controllers still reach some DAOs directly where entity controllers lack the needed orchestration; no service layer |
 | Persistence | No transactions around multi-table writes (disc + edition + tracks + relations) |
 | Contracts | DAOs return `bool`/`int`/`array`/entity indifferently; some catch exceptions and return `false` |
 | Logging | `Logs` stores copied actor data instead of `Codigo_User` + FK |
