@@ -47,7 +47,7 @@ $logs = $logsController->listarComPesquisa($q);
         <li class="secnav">Acções</li>
         <!-- <li><a href="#">Exportar</a></li> -->
         <?php if ($podeUsers): ?><li><a href="administracao.php">Administração</a></li><?php endif; ?>
-        <li><a href="#logs" class="active">Logs</a></li>
+        <li><a href="logs.php" class="active">Logs</a></li>
         <li><a href="LogOut.php">Sair</a></li>
       </ul>
     </nav>

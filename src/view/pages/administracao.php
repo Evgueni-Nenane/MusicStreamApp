@@ -86,7 +86,7 @@ $q         = $estado['q'];
           <li><a href="generos.php">Géneros</a></li>
           <li class="secnav">Acções</li>
           <!-- <li><a href="#">Exportar</a></li> -->
-          <li><a href="#administracao" class="active">Administração</a></li>
+          <li><a href="administracao.php" class="active">Administração</a></li>
           <?php if ($podeLogs): ?><li><a href="logs.php">Logs</a></li><?php endif; ?>
           <li><a href="LogOut.php">Sair</a></li>
         </ul>
@@ -130,7 +130,7 @@ $q         = $estado['q'];
           </div>
 
           <?php if ($msg): ?>
-            <p><?= htmlspecialchars($msg) ?></p>
+            <div class="alert alert-ok"><?= htmlspecialchars($msg) ?></div>
           <?php endif; ?>
 
           <!-- ===== CADASTRAR ===== -->

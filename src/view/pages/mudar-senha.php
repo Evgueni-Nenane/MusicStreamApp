@@ -33,28 +33,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/login.css">
-    <title>Mudar Senha | Spotify</title>
+    <title>Mudar Senha | DiscoGest</title>
 </head>
 
 <body>
     <div class="container">
         <div class="img">
-            <img src="../resources/login.png" alt="bro">
+            <img src="../resources/login.png" alt="Ilustração de um DJ">
         </div>
         <div class="card">
             <div class="title">
                 <h1>Primeiro Acesso</h1>
             </div>
-            <p>Olá, <?= htmlspecialchars($utilizador->getNome()) ?>. Como é o teu primeiro acesso, define uma nova senha.</p>
+            <p class="intro">Olá, <?= htmlspecialchars($utilizador->getNome()) ?>. Como é o teu primeiro acesso, define uma nova senha.</p>
 
             <?php if ($erro !== ''): ?>
-                <p style="color: red;"><?= htmlspecialchars($erro) ?></p>
+                <div class="alert alert-erro"><?= htmlspecialchars($erro) ?></div>
             <?php endif; ?>
 
             <form method="post">

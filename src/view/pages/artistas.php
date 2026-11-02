@@ -109,7 +109,7 @@ $q              = $estado['q'];
                 </div>
                 <div class="userdetails">
                     <div class="userdetailstxt">
-                        <?= htmlspecialchars($utilizador->getNomeCompleto()) ?>
+                        <p><?= htmlspecialchars($utilizador->getNomeCompleto()) ?></p>
                         <p><?= htmlspecialchars($utilizador->getPerfil()->getNome()) ?></p>
                     </div>
                     <img src="foto.php" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto de Perfil">

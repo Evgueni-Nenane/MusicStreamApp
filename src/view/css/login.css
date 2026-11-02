@@ -23,7 +23,7 @@ body {
 
 .card {
     width: 35%;
-    height: 70vh;
+    min-height: 420px;
     margin: 0 0 0 5rem;
     padding: 2em;
     border-radius: 6px;
@@ -63,10 +63,11 @@ label {
 }
 
 button {
+    width: 100%;
     background: #066f16;
     color: white;
     border: none;
-    padding: 10px 150px;
+    padding: 10px 1rem;
     border-radius: 6px;
     font-size: 1rem;
     cursor: pointer;
@@ -75,7 +76,7 @@ button {
 }
 
 button:hover {
-    background: #92E3A9; 
+    background: #055a12;
 }
 
 hr {
@@ -102,4 +103,76 @@ form:has(#mostrar:checked) .pw { -webkit-text-security: none; }
     width: auto;
     padding: 0;
     margin: 0;
+}
+
+/* Mensagens e texto de apoio */
+.card > p,
+.card .intro {
+    margin-bottom: 1.25rem;
+}
+
+.alert {
+    padding: .7rem 1rem;
+    border-radius: 8px;
+    font-size: .85rem;
+    border: 1px solid;
+    margin-bottom: 1.25rem;
+}
+
+.alert-erro {
+    background: #fdf1f1;
+    border-color: #f0c4c4;
+    color: #a12626;
+}
+
+/* Ecrãs pequenos: empilha a ilustração e o formulário */
+@media (max-width: 1024px) {
+    .container {
+        width: 100%;
+        padding: 2rem;
+        gap: 2rem;
+    }
+
+    .img img {
+        width: min(45vw, 420px);
+    }
+
+    .card {
+        width: 100%;
+        max-width: 420px;
+        margin-left: 0;
+    }
+
+    .card .title {
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        padding: 2rem 1.25rem;
+        gap: 1.5rem;
+    }
+
+    .img img {
+        width: min(70vw, 360px);
+    }
+
+    .card {
+        max-width: 420px;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .img {
+        display: none;
+    }
+
+    .card {
+        max-width: 100%;
+    }
 }

@@ -30,19 +30,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/login.css">
-    <title>Login | Spotify</title>
+    <title>Login | DiscoGest</title>
 </head>
 
 <body>
     <div class="container">
         <div class="img">
-            <img src="../resources/login.png" alt="bro">
+            <img src="../resources/login.png" alt="Ilustração de um DJ">
         </div>
         <div class="card">
             <div class="title">
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <?php if ($erro !== ''): ?>
-                <p style="color: red;"><?= htmlspecialchars($erro) ?></p>
+                <div class="alert alert-erro"><?= htmlspecialchars($erro) ?></div>
             <?php endif; ?>
             <form method="post">
                 <div class="campo">
@@ -62,16 +62,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="password">Palavra-Passe</label>
                     <input type="text" id="password" name="password" class="pw" placeholder="Tua palavra-passe" autocomplete="off">
                     <label class="mostrar">
-                   <input type="checkbox" id="mostrar"> Mostrar senhas</label>
-                   </div>
-
+                        <input type="checkbox" id="mostrar"> Mostrar senhas</label>
+                </div>
 
                 <div class="campo">
                     <div class="center">
                         <button type="submit">Login</button>
                     </div>
-                    <hr>
-                   <!-- <div class="center"><a href="#">Pedir reset de senha</a></div>-->
                 </div>
             </form>
         </div>

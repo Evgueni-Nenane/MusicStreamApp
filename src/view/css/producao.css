@@ -286,6 +286,31 @@ header {
     border-radius: 6px;
 }
 
+/* Mensagens */
+.alert {
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    border: 1px solid;
+    margin-bottom: 1rem;
+}
+
+.alert-ok {
+    background: #f0faf3;
+    border-color: #bfe3c8;
+    color: #1d6b34;
+}
+
+.alert-erro {
+    background: #fdf1f1;
+    border-color: #f0c4c4;
+    color: #a12626;
+}
+
+.text-muted {
+    color: #8e8e8e;
+}
+
 label.btn {
     cursor: pointer;
 }

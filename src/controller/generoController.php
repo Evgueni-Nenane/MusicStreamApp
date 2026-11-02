@@ -44,7 +44,9 @@ require_once __DIR__ . '/logsController.php';
             if ($novo > 0) {
                 LogsController::registar('Registou o género: ' . $nome);
             }
-            return ['msg' => $novo > 0 ? 'Género adicionado com sucesso.' : 'Erro ao adicionar (já existe?).'];
+            return $novo > 0
+                ? ['msg' => 'Género adicionado com sucesso.']
+                : ['erro' => 'Erro ao adicionar (já existe?).'];
         }
 
         if ($acao === 'remover') {
@@ -61,9 +63,9 @@ require_once __DIR__ . '/logsController.php';
             if ($removido) {
                 LogsController::registar('Removeu o género ID ' . $id);
             }
-            return ['msg' => $removido
-                ? 'Género removido.'
-                : 'Não foi possível remover (o género está associado a discos).'];
+            return $removido
+                ? ['msg' => 'Género removido.']
+                : ['erro' => 'Não foi possível remover (o género está associado a discos).'];
         }
 
         return [];

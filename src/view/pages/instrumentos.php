@@ -56,7 +56,7 @@ $instrumentos = $instrController->listarComPesquisa($q);
           <li><a href="artistas.php">Artistas</a></li>
           <li><a href="producao.php">Produção</a></li>
           <li class="secnav">Cadastros</li>
-          <li><a href="#instrumentos" class="active">Instrumentos</a></li>
+          <li><a href="instrumentos.php" class="active">Instrumentos</a></li>
           <li><a href="generos.php">Géneros</a></li>
           <li class="secnav">Acções</li>
           <!-- <li><a href="#">Exportar</a></li> -->

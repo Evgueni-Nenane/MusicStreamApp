@@ -54,7 +54,7 @@ $editoras   = $estado['editoras'];
         <li><a href="listagemdiscos.php">Listar Discos</a></li>
         <li class="secnav">Intervenientes</li>
         <li><a href="artistas.php">Artistas</a></li>
-        <li><a href="#producao" class="active">Produção</a></li>
+        <li><a href="producao.php" class="active">Produção</a></li>
         <li class="secnav">Cadastros</li>
         <li><a href="instrumentos.php">Instrumentos</a></li>
         <li><a href="generos.php">Géneros</a></li>

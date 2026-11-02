@@ -56,7 +56,9 @@ require_once __DIR__ . '/logsController.php';
 			if ($novo > 0) {
 				LogsController::registar('Registou o instrumento: ' . $nome);
 			}
-			return ['msg' => $novo > 0 ? 'Instrumento adicionado com sucesso.' : 'Erro ao adicionar (já existe?).'];
+			return $novo > 0
+				? ['msg' => 'Instrumento adicionado com sucesso.']
+				: ['erro' => 'Erro ao adicionar (já existe?).'];
 		}
 
 		if ($acao === 'remover') {
@@ -73,9 +75,9 @@ require_once __DIR__ . '/logsController.php';
 			if ($removido) {
 				LogsController::registar('Removeu o instrumento ID ' . $id);
 			}
-			return ['msg' => $removido
-				? 'Instrumento removido.'
-				: 'Não foi possível remover (o instrumento está associado a músicos).'];
+			return $removido
+				? ['msg' => 'Instrumento removido.']
+				: ['erro' => 'Não foi possível remover (o instrumento está associado a músicos).'];
 		}
 
 		return [];

@@ -73,6 +73,11 @@ function nomes($lista, $g1, $g2)
     foreach ($lista as $p) $r[] = $p->$g1() . ' ' . $p->$g2();
     return implode(', ', $r);
 }
+function duracaoCurta($valor)
+{   // O MySQL devolve TIME como HH:MM:SS; a interface mostra HH:MM.
+    $valor = (string)$valor;
+    return $valor === '' ? '' : substr($valor, 0, 5);
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -127,7 +132,7 @@ function nomes($lista, $g1, $g2)
                 <ul>
                     <li class="secnav">Menu Principal</li>
                     <li><a href="registro.php">Registar</a></li>
-                    <li><a href="#listar" class="active">Listar Discos</a></li>
+                    <li><a href="listagemdiscos.php" class="active">Listar Discos</a></li>
                     <li class="secnav">Intervenientes</li>
                     <li><a href="artistas.php">Artistas</a></li>
                     <li><a href="producao.php">Produção</a></li>
@@ -151,7 +156,7 @@ function nomes($lista, $g1, $g2)
                 </div>
                 <div class="userdetails">
                     <div class="userdetailstxt">
-                        <?= h($utilizador->getNomeCompleto()) ?>
+                        <p><?= h($utilizador->getNomeCompleto()) ?></p>
                         <p><?= h($utilizador->getPerfil()->getNome()) ?></p>
                     </div>
                     <img src="foto.php" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto de Perfil">
@@ -280,7 +285,7 @@ function nomes($lista, $g1, $g2)
                                                 <td><?= h($f->getNumeroFaixa()) ?></td>
                                                 <td><?= h($f->getNomeFaixa()) ?></td>
                                                 <td><?= h($f->getArtistaPrincipal()) ?></td>
-                                                <td><?= h($f->getDuracao()) ?></td>
+                                                <td><?= h(duracaoCurta($f->getDuracao())) ?></td>
                                             </tr>
                                     <?php endforeach;
                                     endif; ?>

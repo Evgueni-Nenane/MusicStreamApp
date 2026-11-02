@@ -58,7 +58,7 @@ $generos = $generoController->listarComPesquisa($q);
           <li><a href="producao.php">Produção</a></li>
           <li class="secnav">Cadastros</li>
           <li><a href="instrumentos.php">Instrumentos</a></li>
-          <li><a href="#generos" class="active">Géneros</a></li>
+          <li><a href="generos.php" class="active">Géneros</a></li>
           <li class="secnav">Acções</li>
           <!-- <li><a href="#">Exportar</a></li> -->
           <?php if($podeUsers): ?><li><a href="administracao.php">Administração</a></li><?php endif; ?>
