@@ -96,7 +96,7 @@ The UI hides unavailable actions **and** the server re-validates every POST — 
 | SuperOperador | ✅ | ✅ | ✅ | ✅ | — | — |
 | Administrador | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | Auditor | ✅ | ✅ | ✅ | ✅ | — | ✅ |
-| Estagiário | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
 
 ---
 
