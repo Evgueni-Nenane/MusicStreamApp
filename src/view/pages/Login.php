@@ -15,28 +15,16 @@ $erro = '';
 $usernamePreenchido = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = trim($_POST['password'] ?? '');
-    $usernamePreenchido = $username;
+    $loginController = new LoginController();
+    $resultado = $loginController->autenticar($_POST['username'] ?? '', $_POST['password'] ?? '');
+    $usernamePreenchido = $resultado['username'];
 
-    if ($username === '' || $password === '') {
-        $erro = 'Preenche todos campos corretamente.';
-    } else {
-        $loginController = new LoginController();
-        $sucesso = $loginController->login($username, $password);
-
-        if ($sucesso) {
-            // Se for o primeiro acesso, obriga a pessoa a mudar a senha antes de continuar
-            if ($loginController->isPrimeiroAcesso($username, $password)) {
-                header('Location: mudar-senha.php');
-                exit;
-            }
-            header('Location: administracao.php');
-            exit;
-        } else {
-            $erro = 'Utilizador ou Palavra-passe incorretos.';
-        }
+    if (isset($resultado['redirect'])) {
+        header('Location: ' . $resultado['redirect']);
+        exit;
     }
+
+    $erro = $resultado['erro'];
 }
 ?>
 

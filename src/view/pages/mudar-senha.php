@@ -16,29 +16,20 @@ $username = $utilizador->getUser_name();
 $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $senhaAtual = $_POST['senha_atual'] ?? '';
-    $novaSenha = $_POST['nova_senha'] ?? '';
-    $confirmarSenha = $_POST['confirmar_senha'] ?? '';
+    $loginController = new LoginController();
+    $resultado = $loginController->alterarSenha(
+        $username,
+        $_POST['senha_atual'] ?? '',
+        $_POST['nova_senha'] ?? '',
+        $_POST['confirmar_senha'] ?? ''
+    );
 
-    if ($senhaAtual === '' || $novaSenha === '' || $confirmarSenha === '') {
-        $erro = 'Preenche todos os campos.';
-    } elseif ($novaSenha !== $confirmarSenha) {
-        $erro = 'A nova senha e a confirmação não coincidem.';
-    } elseif (strlen($novaSenha) < 6) {
-        $erro = 'A nova senha deve ter pelo menos 6 caracteres.';
-    } elseif ($novaSenha === $senhaAtual) {
-        $erro = 'A nova senha não pode ser igual à senha atual.';
-    } else {
-        $loginController = new LoginController();
-        $sucesso = $loginController->atualizarSenha($username, $senhaAtual, $novaSenha);
-
-        if ($sucesso) {
-            header('Location: administracao.php');
-            exit;
-        } else {
-            $erro = 'Não foi possível atualizar a senha. Confirma a senha atual.';
-        }
+    if (isset($resultado['redirect'])) {
+        header('Location: ' . $resultado['redirect']);
+        exit;
     }
+
+    $erro = $resultado['erro'];
 }
 ?>
 <!DOCTYPE html>
