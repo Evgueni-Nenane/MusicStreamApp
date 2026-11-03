@@ -309,6 +309,10 @@
             cursor: pointer;
         }
 
+        .col-sel {
+            width: 2.5rem;
+        }
+
         /* ----- TABLE ACTIONS FOOTER ----- */
         .table-actions {
             display: flex;

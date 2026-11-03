@@ -186,7 +186,7 @@ function duracaoCurta($valor)
                             <table>
                                 <thead>
                                     <tr>
-                                        <th></th>
+                                        <th class="col-sel"></th>
                                         <th>Título</th>
                                         <th>Género</th>
                                         <th>Preço</th>
@@ -271,7 +271,7 @@ function duracaoCurta($valor)
                             <table>
                                 <thead>
                                     <tr>
-                                        <th></th>
+                                        <th class="col-sel"></th>
                                         <th>Nº</th>
                                         <th>Nome da Faixa</th>
                                         <th>Artista Principal</th>
