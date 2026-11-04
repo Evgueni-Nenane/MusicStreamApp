@@ -55,7 +55,6 @@ label {
     margin-bottom: 18px;
 }
 
-
 .center {
     display: flex;
     align-items: center;
@@ -89,8 +88,13 @@ a {
     font-size: 0.9rem;
 }
 
-.pw { -webkit-text-security: disc; }
-form:has(#mostrar:checked) .pw { -webkit-text-security: none; }
+.pw {
+    -webkit-text-security: disc;
+}
+
+form:has(#mostrar:checked) .pw {
+    -webkit-text-security: none;
+}
 
 .campo label.mostrar {
     display: flex;
@@ -106,8 +110,7 @@ form:has(#mostrar:checked) .pw { -webkit-text-security: none; }
 }
 
 /* Mensagens e texto de apoio */
-.card > p,
-.card .intro {
+.card > p, .card .intro {
     margin-bottom: 1.25rem;
 }
 

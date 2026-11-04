@@ -21,13 +21,13 @@ class LogsController {
     }
 
     // Lista já filtrada pela pesquisa em memória.
-    public function listarComPesquisa($q)
+    public function listarComPesquisa($termoPesquisa)
     {
         $logs = $this->listarLogs();
-        $q = trim($q);
-        if ($q === '') return $logs;
+        $termoPesquisa = trim($termoPesquisa);
+        if ($termoPesquisa === '') return $logs;
 
-        $qMin = strtolower($q);
+        $qMin = strtolower($termoPesquisa);
         return array_filter($logs, function ($l) use ($qMin) {
             $alvo = strtolower(
                 $l->getCodigo() . ' ' . $l->getNome() . ' ' . $l->getApelido() . ' ' .

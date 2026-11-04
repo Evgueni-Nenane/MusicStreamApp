@@ -6,7 +6,7 @@ class EditoraDAO
 {
     public function inserir($editora)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO Editora (Nome_Editora, Email_Editora, Contacto_Editora, Endereco) VALUES (?, ?, ?, ?)";
         $ps = $conn->prepare($sql);
 
@@ -30,7 +30,7 @@ class EditoraDAO
     public function listarTodos()
     {
         $editoras = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT * FROM Editora";
         $result = $conn->prepare($sql);
         $result->execute();
@@ -50,7 +50,7 @@ class EditoraDAO
 
     public function buscarPorCodigo($codigoEditora)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT * FROM Editora WHERE Codigo_Editora = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigoEditora);
@@ -71,7 +71,7 @@ class EditoraDAO
 
     public function atualizar($editora)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "UPDATE Editora SET Nome_Editora = ?, Email_Editora = ?, Contacto_Editora = ?, Endereco = ? "
             . "WHERE Codigo_Editora = ?";
         $ps = $conn->prepare($sql);
@@ -88,7 +88,7 @@ class EditoraDAO
 
     public function temRelacionamento($codigo)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT COUNT(*) AS Quantidade "
             . "FROM Edicao "
             . "WHERE Codigo_Editora = ?";
@@ -106,7 +106,7 @@ class EditoraDAO
             return false;
         }
 
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "DELETE FROM Editora WHERE Codigo_Editora = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigo);
@@ -117,7 +117,7 @@ class EditoraDAO
     public function listarPorCodigo($codigoDisco)
     {
         $editoras = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT e.* FROM Editora e INNER JOIN Edicao ed"
             . " ON e.Codigo_Editora = ed.Codigo_Editora"
             . " WHERE ed.Codigo_Disco = ?";

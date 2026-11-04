@@ -16,11 +16,11 @@ if (!Permissao::pode($utilizador, 'utilizadores')) {
   header('Location: listagemdiscos.php');
   exit;
 }
-$podeUsers = true;
+$podeUtilizadores = true;
 $podeLogs  = Permissao::pode($utilizador, 'logs');
 
 // Mostra "Sim" ou "Não" na tabela de perfis
-function sn($valor)
+function formatarSimNao($valor)
 {
   return $valor ? 'Sim' : 'Não';
 }
@@ -45,15 +45,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /* ---------- Estado da página ---------- */
 $estado = $administracaoController->prepararEcra($utilizador, $_GET, $tab, $msg);
 
-$msg       = $estado['msg'];
-$tab       = $estado['tab'];
-$ed        = $estado['ed'];
-$edPerfil  = $estado['edPerfil'];
-$lista     = $estado['lista'];
+$msg = $estado['msg'];
+$tab = $estado['tab'];
+$utilizadorEdicao = $estado['utilizadorEdicao'];
+$perfilEdicao = $estado['perfilEdicao'];
+$lista = $estado['lista'];
 $meuCodigo = $estado['meuCodigo'];
-$niveis    = $estado['niveis'];
-$perfis    = $estado['perfis'];
-$q         = $estado['q'];
+$niveis = $estado['niveis'];
+$perfis = $estado['perfis'];
+$termoPesquisa = $estado['termoPesquisa'];
+$paginaAtiva = 'administracao';
+$subtituloPagina = 'Administração de utilizadores';
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -69,47 +71,13 @@ $q         = $estado['q'];
 <body>
 
   <div class="app-container">
-    <aside>
-      <div class="title" id="administracao">
-        <h1>DiscoGest</h1>
-      </div>
-      <nav>
-        <ul>
-          <li class="secnav">Menu Principal</li>
-          <li><a href="registro.php">Registar</a></li>
-          <li><a href="listagemdiscos.php">Listar Discos</a></li>
-          <li class="secnav">Intervenientes</li>
-          <li><a href="artistas.php">Artistas</a></li>
-          <li><a href="producao.php">Produção</a></li>
-          <li class="secnav">Cadastros</li>
-          <li><a href="instrumentos.php">Instrumentos</a></li>
-          <li><a href="generos.php">Géneros</a></li>
-          <li class="secnav">Acções</li>
-          <!-- <li><a href="#">Exportar</a></li> -->
-          <li><a href="administracao.php" class="active">Administração</a></li>
-          <?php if ($podeLogs): ?><li><a href="logs.php">Logs</a></li><?php endif; ?>
-          <li><a href="LogOut.php">Sair</a></li>
-        </ul>
-      </nav>
-    </aside>
+    <?php require __DIR__ . '/../partials/sidebar.php'; ?>
 
     <div class="containermain">
-      <header>
-        <div class="pagetitle">
-          <h2>Sistema de Gestão de Discos</h2>
-          <p>Administração de utilizadores</p>
-        </div>
-        <div class="userdetails">
-          <div class="userdetailstxt">
-            <p><?= htmlspecialchars($utilizador->getNomeCompleto()) ?></p>
-            <p><?= htmlspecialchars($utilizador->getPerfil()->getNome()) ?></p>
-          </div>
-          <img src="foto.php" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto de Perfil">
-        </div>
-      </header>
+      <?php require __DIR__ . '/../partials/header.php'; ?>
 
       <main>
-        <div class="card">                                                                       
+        <div class="card">
           <!-- Formulário GET da pesquisa (o input liga-se a ele via form="form-pesq"). -->
           <form method="get" action="administracao.php" id="form-pesq">
             <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
@@ -126,7 +94,7 @@ $q         = $estado['q'];
               <label for="tab-perfis" class="tab-label">Perfis</label>
             </div>
             <input type="search" class="search-input" name="q" form="form-pesq"
-              value="<?= htmlspecialchars($q) ?>" placeholder="Pesquisar utilizador ou perfil...">
+              value="<?= htmlspecialchars($termoPesquisa) ?>" placeholder="Pesquisar utilizador ou perfil...">
           </div>
 
           <?php if ($msg): ?>
@@ -206,7 +174,7 @@ $q         = $estado['q'];
                     <?php endforeach; ?>
                     <?php if (!$lista): ?>
                       <tr>
-                        <td colspan="7"><?= $q !== '' ? 'Nenhum utilizador encontrado.' : 'Nenhum utilizador cadastrado.' ?></td>
+                        <td colspan="7"><?= $termoPesquisa !== '' ? 'Nenhum utilizador encontrado.' : 'Nenhum utilizador cadastrado.' ?></td>
                       </tr>
                     <?php endif; ?>
                   </tbody>
@@ -270,17 +238,17 @@ $q         = $estado['q'];
                         <td><input type="radio" name="sel_perfil" value="<?= $p['CodigoNivel'] ?>"></td>
                         <td><?= $p['CodigoNivel'] ?></td>
                         <td><?= htmlspecialchars($p['NomeNivel']) ?></td>
-                        <td><?= sn($p['PodeLer']) ?></td>
-                        <td><?= sn($p['PodeAdicionar']) ?></td>
-                        <td><?= sn($p['PodeEditar']) ?></td>
-                        <td><?= sn($p['PodeRemover']) ?></td>
-                        <td><?= sn($p['PodeUtilizadores']) ?></td>
-                        <td><?= sn($p['PodeLogs']) ?></td>
+                        <td><?= formatarSimNao($p['PodeLer']) ?></td>
+                        <td><?= formatarSimNao($p['PodeAdicionar']) ?></td>
+                        <td><?= formatarSimNao($p['PodeEditar']) ?></td>
+                        <td><?= formatarSimNao($p['PodeRemover']) ?></td>
+                        <td><?= formatarSimNao($p['PodeUtilizadores']) ?></td>
+                        <td><?= formatarSimNao($p['PodeLogs']) ?></td>
                       </tr>
                     <?php endforeach; ?>
                     <?php if (!$perfis): ?>
                       <tr>
-                        <td colspan="9"><?= $q !== '' ? 'Nenhum perfil encontrado.' : 'Nenhum perfil cadastrado.' ?></td>
+                        <td colspan="9"><?= $termoPesquisa !== '' ? 'Nenhum perfil encontrado.' : 'Nenhum perfil cadastrado.' ?></td>
                       </tr>
                     <?php endif; ?>
                   </tbody>
@@ -298,7 +266,7 @@ $q         = $estado['q'];
   </div>
 
   <!-- ============ MODAL: EDITAR UTILIZADOR ============ -->
-  <input type="checkbox" id="m-edit-user" class="modal-toggle" <?= $ed ? 'checked' : '' ?>>
+  <input type="checkbox" id="m-edit-user" class="modal-toggle" <?= $utilizadorEdicao ? 'checked' : '' ?>>
   <div class="modal-overlay">
     <div class="modal">
       <div class="modal-header">
@@ -306,12 +274,12 @@ $q         = $estado['q'];
       </div>
       <form method="post" action="administracao.php" enctype="multipart/form-data">
         <input type="hidden" name="acao" value="atualizar">
-        <input type="hidden" name="id" value="<?= $ed ? $ed->getCodigo() : '' ?>">
+        <input type="hidden" name="id" value="<?= $utilizadorEdicao ? $utilizadorEdicao->getCodigo() : '' ?>">
         <div class="modal-body">
           <div class="cadastro-layout sm">
             <div class="foto-user">
               <div class="foto-preview">
-                <img id="eu-preview" src="<?= $ed ? 'foto.php?u=' . (int)$ed->getCodigo() : '../resources/user.png' ?>" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto do Utilizador">
+                <img id="eu-preview" src="<?= $utilizadorEdicao ? 'foto.php?u=' . (int)$utilizadorEdicao->getCodigo() : '../resources/user.png' ?>" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto do Utilizador">
               </div>
               <div class="foto-actions">
                 <input type="file" id="edit-foto" name="foto" accept="image/*" class="file-hidden"
@@ -320,18 +288,18 @@ $q         = $estado['q'];
               </div>
             </div>
             <div class="form-grid">
-              <div class="label-group"><label>Primeiro Nome</label><input type="text" value="<?= htmlspecialchars($ed ? $ed->getNome() : '') ?>" readonly></div>
-              <div class="label-group"><label>Último Nome</label><input type="text" value="<?= htmlspecialchars($ed ? $ed->getApelido() : '') ?>" readonly></div>
+              <div class="label-group"><label>Primeiro Nome</label><input type="text" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getNome() : '') ?>" readonly></div>
+              <div class="label-group"><label>Último Nome</label><input type="text" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getApelido() : '') ?>" readonly></div>
               <div class="label-group full">
                 <label for="eu-perfil">Perfil</label>
                 <select id="eu-perfil" name="perfil">
                   <?php foreach ($niveis as $n): ?>
-                    <option value="<?= $n->getCodigoNivel() ?>" <?= ($ed && $ed->getPerfil()->getCodigoNivel() == $n->getCodigoNivel()) ? 'selected' : '' ?>><?= htmlspecialchars($n->getNome()) ?></option>
+                    <option value="<?= $n->getCodigoNivel() ?>" <?= ($utilizadorEdicao && $utilizadorEdicao->getPerfil()->getCodigoNivel() == $n->getCodigoNivel()) ? 'selected' : '' ?>><?= htmlspecialchars($n->getNome()) ?></option>
                   <?php endforeach; ?>
                 </select>
               </div>
-              <div class="label-group full"><label for="eu-email">E-mail Corporativo</label><input type="email" id="eu-email" name="email" value="<?= htmlspecialchars($ed ? $ed->getEmail() : '') ?>"></div>
-              <div class="label-group full"><label for="eu-tel">Número de Telemóvel</label><input type="tel" id="eu-tel" name="telefone" value="<?= htmlspecialchars($ed ? $ed->getContacto() : '') ?>"></div>
+              <div class="label-group full"><label for="eu-email">E-mail Corporativo</label><input type="email" id="eu-email" name="email" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getEmail() : '') ?>"></div>
+              <div class="label-group full"><label for="eu-tel">Número de Telemóvel</label><input type="tel" id="eu-tel" name="telefone" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getContacto() : '') ?>"></div>
             </div>
           </div>
         </div>
@@ -344,7 +312,7 @@ $q         = $estado['q'];
   </div>
 
   <!-- ============ MODAL: EDITAR PERFIL ============ -->
-  <input type="checkbox" id="m-edit-perfil" class="modal-toggle" <?= $edPerfil ? 'checked' : '' ?>>
+  <input type="checkbox" id="m-edit-perfil" class="modal-toggle" <?= $perfilEdicao ? 'checked' : '' ?>>
   <div class="modal-overlay">
     <div class="modal">
       <div class="modal-header">
@@ -352,22 +320,22 @@ $q         = $estado['q'];
       </div>
       <form method="post" action="administracao.php">
         <input type="hidden" name="acao" value="atualizar_perfil">
-        <input type="hidden" name="id_perfil" value="<?= $edPerfil ? $edPerfil['CodigoNivel'] : '' ?>">
+        <input type="hidden" name="id_perfil" value="<?= $perfilEdicao ? $perfilEdicao['CodigoNivel'] : '' ?>">
         <div class="modal-body">
           <div class="form-grid">
             <div class="label-group full">
               <label for="ep-nome">Nome do Perfil *</label>
-              <input type="text" id="ep-nome" name="nome_perfil" required value="<?= htmlspecialchars($edPerfil ? $edPerfil['NomeNivel'] : '') ?>">
+              <input type="text" id="ep-nome" name="nome_perfil" required value="<?= htmlspecialchars($perfilEdicao ? $perfilEdicao['NomeNivel'] : '') ?>">
             </div>
             <div class="label-group full">
               <label>Permissões</label>
               <div class="perm-grid">
                 <label class="perm-check"><input type="checkbox" checked disabled> Listar</label>
-                <label class="perm-check"><input type="checkbox" name="perm[adicionar]" value="1" <?= ($edPerfil && $edPerfil['PodeAdicionar']) ? 'checked' : '' ?>> Criar</label>
-                <label class="perm-check"><input type="checkbox" name="perm[editar]" value="1" <?= ($edPerfil && $edPerfil['PodeEditar']) ? 'checked' : '' ?>> Editar</label>
-                <label class="perm-check"><input type="checkbox" name="perm[remover]" value="1" <?= ($edPerfil && $edPerfil['PodeRemover']) ? 'checked' : '' ?>> Remover</label>
-                <label class="perm-check"><input type="checkbox" name="perm[utilizadores]" value="1" <?= ($edPerfil && $edPerfil['PodeUtilizadores']) ? 'checked' : '' ?>> Gerir utilizadores</label>
-                <label class="perm-check"><input type="checkbox" name="perm[logs]" value="1" <?= ($edPerfil && $edPerfil['PodeLogs']) ? 'checked' : '' ?>> Ver logs</label>
+                <label class="perm-check"><input type="checkbox" name="perm[adicionar]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeAdicionar']) ? 'checked' : '' ?>> Criar</label>
+                <label class="perm-check"><input type="checkbox" name="perm[editar]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeEditar']) ? 'checked' : '' ?>> Editar</label>
+                <label class="perm-check"><input type="checkbox" name="perm[remover]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeRemover']) ? 'checked' : '' ?>> Remover</label>
+                <label class="perm-check"><input type="checkbox" name="perm[utilizadores]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeUtilizadores']) ? 'checked' : '' ?>> Gerir utilizadores</label>
+                <label class="perm-check"><input type="checkbox" name="perm[logs]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeLogs']) ? 'checked' : '' ?>> Ver logs</label>
               </div>
             </div>
           </div>

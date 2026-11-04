@@ -13,12 +13,14 @@ if (!Permissao::pode($utilizador, 'logs')) {
     header('Location: listagemdiscos.php');
     exit;
 }
-$podeUsers = Permissao::pode($utilizador, 'utilizadores');
+$podeUtilizadores = Permissao::pode($utilizador, 'utilizadores');
 $podeLogs  = true;
 
 $logsController = new LogsController();
-$q = trim($_GET['q'] ?? '');
-$logs = $logsController->listarComPesquisa($q);
+$termoPesquisa = trim($_GET['q'] ?? '');
+$logs = $logsController->listarComPesquisa($termoPesquisa);
+$paginaAtiva = 'logs';
+$subtituloPagina = 'Auditoria do sistema';
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -31,48 +33,16 @@ $logs = $logsController->listarComPesquisa($q);
 <body>
 
 <div class="app-container">
-  <aside>
-    <div class="title" id="logs"><h1>DiscoGest</h1></div>
-    <nav>
-      <ul>
-        <li class="secnav">Menu Principal</li>
-        <li><a href="registro.php">Registar</a></li>
-        <li><a href="listagemdiscos.php">Listar Discos</a></li>
-        <li class="secnav">Intervenientes</li>
-        <li><a href="artistas.php">Artistas</a></li>
-        <li><a href="producao.php">Produção</a></li>
-        <li class="secnav">Cadastros</li>
-        <li><a href="instrumentos.php">Instrumentos</a></li>
-        <li><a href="generos.php">Géneros</a></li>
-        <li class="secnav">Acções</li>
-        <!-- <li><a href="#">Exportar</a></li> -->
-        <?php if ($podeUsers): ?><li><a href="administracao.php">Administração</a></li><?php endif; ?>
-        <li><a href="logs.php" class="active">Logs</a></li>
-        <li><a href="LogOut.php">Sair</a></li>
-      </ul>
-    </nav>
-  </aside>
+  <?php require __DIR__ . '/../partials/sidebar.php'; ?>
 
   <div class="containermain">
-    <header>
-      <div class="pagetitle">
-        <h2>Sistema de Gestão de Discos</h2>
-        <p>Auditoria do sistema</p>
-      </div>
-      <div class="userdetails">
-        <div class="userdetailstxt">
-          <p><?= htmlspecialchars($utilizador->getNomeCompleto()) ?></p>
-          <p><?= htmlspecialchars($utilizador->getPerfil()->getNome()) ?></p>
-        </div>
-        <img src="foto.php" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto de Perfil">
-      </div>
-    </header>
+    <?php require __DIR__ . '/../partials/header.php'; ?>
 
     <main>
       <div class="card">
         <div class="card-header">
           <h3>Logs do Sistema</h3>
-          <form method="get"><input type="search" name="q" class="search-input" placeholder="Pesquisar nos logs..." value="<?= htmlspecialchars($q) ?>"></form>
+          <form method="get"><input type="search" name="q" class="search-input" placeholder="Pesquisar nos logs..." value="<?= htmlspecialchars($termoPesquisa) ?>"></form>
         </div>
         <div class="table-wrapper">
           <table>

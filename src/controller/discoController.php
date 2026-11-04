@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 require_once __DIR__ . '/../repository/disco.php';
 require_once __DIR__ . '/../repository/gravadora.php';
@@ -144,19 +144,19 @@ class DiscoController
 
         if ($faixa->getCompositores() !== null) {
             foreach ($this->compositorDAO->listarPorCodigo($codigoDisco) as $compositor) {
-                $this->faixaDAO->InserRelacaoCompositor($idFaixa, $compositor->getCodigoCompositor());
+                $this->faixaDAO->inserirRelacaoCompositor($idFaixa, $compositor->getCodigoCompositor());
             }
         }
 
         if ($faixa->getMusicos() !== null) {
             foreach ($this->musicoDAO->listarPorCodigo($codigoDisco) as $musico) {
-                $this->faixaDAO->InserRelacaoMusico($idFaixa, $musico->getCodigoMusico());
+                $this->faixaDAO->inserirRelacaoMusico($idFaixa, $musico->getCodigoMusico());
             }
         }
 
         if ($faixa->getCantores() !== null) {
             foreach ($this->cantorDAO->listarPorCodigo($codigoDisco) as $cantor) {
-                $this->faixaDAO->InserRelacaoCantor($idFaixa, $cantor->getCodigoCantor());
+                $this->faixaDAO->inserirRelacaoCantor($idFaixa, $cantor->getCodigoCantor());
             }
         }
 

@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ . '/../model/utilizador.php';
 require_once __DIR__ . '/../model/nivelacesso.php';
 require_once __DIR__ . '/connection.php';
@@ -7,36 +8,36 @@ class UtilizadorDAO
 {
     public function inserir($utilizador)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO Utilizador (Nome, Apelido, UserName, Genero, Perfil, "
             . "Email, Contacto, Senha, Primeiro_Acesso, foto, foto_tipo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $ps = $conn->prepare($sql);
 
         $nome = $utilizador->getNome();
         $apelido = $utilizador->getApelido();
-        $userName = $utilizador->getUser_name();
+        $nomeUtilizador = $utilizador->getUserName();
         $genero = $utilizador->getGenero();
         $perfil = $utilizador->getPerfil()->getCodigoNivel();
         $email = $utilizador->getEmail();
         $contacto = $utilizador->getContacto();
         $senha = $utilizador->getSenha();
         $primeiroAcesso = $utilizador->isPrimeiroAcesso() ? 1 : 0;
-        $foto = $utilizador->getFoto();          // conteudo binario da imagem (longblob) ou null
+        $foto = $utilizador->getFoto();          // conteúdo binário da imagem (longblob) ou null
         $fotoTipo = $utilizador->getFotoTipo();  // ex.: image/png
-        $fotoParam = null;                       // o blob segue por send_long_data()
+        $parametroFoto = null;                   // o blob segue por send_long_data()
 
         $ps->bind_param(
             "ssssisssibs",
             $nome,
             $apelido,
-            $userName,
+            $nomeUtilizador,
             $genero,
             $perfil,
             $email,
             $contacto,
             $senha,
             $primeiroAcesso,
-            $fotoParam,
+            $parametroFoto,
             $fotoTipo
         );
 
@@ -52,15 +53,15 @@ class UtilizadorDAO
         }
     }
 
-    public function atualizarUser($codigoUser, $utilizador)
+    public function atualizar($codigoUtilizador, $utilizador)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
 
         $foto = $utilizador->getFoto();
         $fotoTipo = $utilizador->getFotoTipo();
         $temNovaFoto = ($foto !== null && $foto !== '');
 
-        // Sem nova imagem, mantem a que ja esta na base de dados
+        // Sem nova imagem, mantém a que já está na base de dados.
         if ($temNovaFoto) {
             $sql = "UPDATE Utilizador SET foto = ?, foto_tipo = ?, Perfil = ?, Email = ?, Contacto = ? WHERE Codigo_User = ?";
         } else {
@@ -73,23 +74,26 @@ class UtilizadorDAO
         $contacto = $utilizador->getContacto();
 
         if ($temNovaFoto) {
-            $fotoParam = null; // o blob segue por send_long_data()
-            $ps->bind_param("bssisi", $fotoParam, $fotoTipo, $perfil, $email, $contacto, $codigoUser);
+            $parametroFoto = null; // o blob segue por send_long_data()
+            $ps->bind_param("bssisi", $parametroFoto, $fotoTipo, $perfil, $email, $contacto, $codigoUtilizador);
             $ps->send_long_data(0, $foto);
         } else {
-            $ps->bind_param("issi", $perfil, $email, $contacto, $codigoUser);
+            $ps->bind_param("issi", $perfil, $email, $contacto, $codigoUtilizador);
         }
+
         $ps->execute();
         return true;
     }
 
-    // Devolve ['dados' => binario, 'tipo' => mime] ou null
-    public function buscarFoto($codigoUser)
+    /**
+     * Devolve ['dados' => binário, 'tipo' => mime] ou null.
+     */
+    public function buscarFoto($codigoUtilizador)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT foto, foto_tipo FROM Utilizador WHERE Codigo_User = ?";
         $ps = $conn->prepare($sql);
-        $ps->bind_param("i", $codigoUser);
+        $ps->bind_param("i", $codigoUtilizador);
         $ps->execute();
         $row = $ps->get_result()->fetch_assoc();
 
@@ -109,7 +113,7 @@ class UtilizadorDAO
     public function listarTodos()
     {
         $utilizadores = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT Codigo_User, Nome, Apelido, UserName, Genero, Email, Contacto, NomeNivel, Utilizador.Perfil "
             . "FROM Utilizador "
             . "INNER JOIN NivelAcesso ON Utilizador.Perfil = NivelAcesso.CodigoNivel";
@@ -128,65 +132,65 @@ class UtilizadorDAO
                 contacto: $row['Contacto']
             );
         }
+
         return $utilizadores;
     }
 
-    public function buscarPorId($codigoUser)
+    public function buscarPorId($codigoUtilizador)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT Codigo_User, Nome, Apelido, UserName, Genero, Email, Contacto, NomeNivel, CodigoNivel"
             . " FROM Utilizador"
             . " INNER JOIN NivelAcesso ON Utilizador.Perfil = NivelAcesso.CodigoNivel"
             . " WHERE Codigo_User = ?";
         $ps = $conn->prepare($sql);
-        $ps->bind_param("i", $codigoUser);
+        $ps->bind_param("i", $codigoUtilizador);
         $ps->execute();
         $row = $ps->get_result()->fetch_assoc();
 
-        if ($row) {
-            $perfil = new NivelAcesso($row['CodigoNivel'], $row['NomeNivel']);
-            $utilizador = new Utilizador(
-                perfil: $perfil,
-                email: $row['Email'],
-                contacto: $row['Contacto']
-            );
-            $utilizador->setNome($row['Nome']);
-            $utilizador->setApelido($row['Apelido']);
-            $utilizador->setUser_name($row['UserName']);
-            $utilizador->setGenero($row['Genero']);
-            $utilizador->setCodigo($row['Codigo_User']);
-            return $utilizador;
+        if (!$row) {
+            return null;
         }
-        return null;
+
+        $perfil = new NivelAcesso($row['CodigoNivel'], $row['NomeNivel']);
+        $utilizador = new Utilizador(
+            perfil: $perfil,
+            email: $row['Email'],
+            contacto: $row['Contacto']
+        );
+        $utilizador->setNome($row['Nome']);
+        $utilizador->setApelido($row['Apelido']);
+        $utilizador->setUserName($row['UserName']);
+        $utilizador->setGenero($row['Genero']);
+        $utilizador->setCodigo($row['Codigo_User']);
+
+        return $utilizador;
     }
 
-   public function remover($codigoUser)
-{
-    $conn = Connection::connectionDB();
+    public function remover($codigoUtilizador)
+    {
+        $conn = Connection::connectionDB();
 
-    // 1. Buscar ANTES de apagar
-    $utilizador = $this->buscarPorId($codigoUser);
-    if ($utilizador === null) {
-        return false;   // não existe, nada a remover
+        // Confirma que o utilizador existe antes de apagar.
+        if ($this->buscarPorId($codigoUtilizador) === null) {
+            return false;
+        }
+
+        $sql = "DELETE FROM Utilizador WHERE Codigo_User = ?";
+        $ps = $conn->prepare($sql);
+        $ps->bind_param("i", $codigoUtilizador);
+        $ps->execute();
+
+        return true;
     }
 
-    // 2. Apagar
-    $sql = "DELETE FROM Utilizador WHERE Codigo_User = ?";
-    $ps = $conn->prepare($sql);
-    $ps->bind_param("i", $codigoUser);
-    $ps->execute();
+    public function resetarSenha($codigoUtilizador, $novaSenha)
+    {
+        $conn = Connection::connectionDB();
+        $ps = $conn->prepare("UPDATE Utilizador SET Senha = ?, Primeiro_Acesso = 1 WHERE Codigo_User = ?");
+        $ps->bind_param("si", $novaSenha, $codigoUtilizador);
+        $ps->execute();
 
-    return true;
-}
-
-
-    public function resetarSenha($codigoUser, $novaSenha)
-{
-    $conn = connection::connectionDB();
-    $ps = $conn->prepare("UPDATE Utilizador SET Senha = ?, Primeiro_Acesso = 1 WHERE Codigo_User = ?");
-    $ps->bind_param("si", $novaSenha, $codigoUser);
-    $ps->execute();
-
-    return $ps->affected_rows > 0;
-}
+        return $ps->affected_rows > 0;
+    }
 }

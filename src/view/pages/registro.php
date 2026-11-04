@@ -11,17 +11,17 @@ if (!$utilizador) {
   exit;
 }
 $podeAdicionar = Permissao::pode($utilizador, 'adicionar');
-$podeUsers     = Permissao::pode($utilizador, 'utilizadores');
+$podeUtilizadores     = Permissao::pode($utilizador, 'utilizadores');
 $podeLogs      = Permissao::pode($utilizador, 'logs');
 
-$registoController = new RegistoDiscoController();
+$registoDiscoController = new RegistoDiscoController();
 
 $msg  = '';
 $erro = '';
 
 /* ---------- Registar o disco (POST) ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $resultado = $registoController->processarPost($utilizador, $_POST);
+  $resultado = $registoDiscoController->processarPost($utilizador, $_POST);
   if (isset($resultado['redirect'])) {
     header('Location: ' . $resultado['redirect']);
     exit;
@@ -30,32 +30,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 /* ---------- Estado da página (listas dos modais) ---------- */
-$estado = $registoController->prepararEcra($_GET);
-$msg         = $estado['msg'];
-$generos     = $estado['generos'];
+$estado = $registoDiscoController->prepararEcra($_GET);
+$msg          = $estado['mensagem'];
+$generos      = $estado['generos'];
 $compositores = $estado['compositores'];
-$musicos     = $estado['musicos'];
-$cantores    = $estado['cantores'];
-$produtores  = $estado['produtores'];
-$gravadoras  = $estado['gravadoras'];
-$editoras    = $estado['editoras'];
+$musicos      = $estado['musicos'];
+$cantores     = $estado['cantores'];
+$produtores   = $estado['produtores'];
+$gravadoras   = $estado['gravadoras'];
+$editoras     = $estado['editoras'];
 
 // Desenha as linhas de uma lista. Os inputs usam form="form-registo" porque
 // os modais ficam fora do <form>, mas os valores têm de ir com ele.
-function itens($campo, $lista, $contador, $radio = false)
+function renderizarItens($campo, $lista, $contador, $selecaoUnica = false)
 {
-  foreach ($lista as $codigo => $texto) {
-    $id   = $campo . $codigo;
-    $tipo = $radio ? 'radio' : 'checkbox';
-    $nome = $radio ? $campo : $campo . '[]';
-    echo '<div class="list-item">';
-    echo '<input type="' . $tipo . '" name="' . $nome . '" id="' . $id . '" value="' . $codigo . '"';
-    echo ' form="form-registo" data-nome="' . htmlspecialchars($texto) . '" onchange="contar(this, \'' . $contador . '\')">';
-    echo '<label for="' . $id . '">' . htmlspecialchars($texto) . '</label>';
-    echo '</div>';
+  if ($lista === []) {
+    return '<div class="list-item text-muted">Sem registos.</div>';
   }
-  if (!$lista) echo '<div class="list-item text-muted">Sem registos.</div>';
+
+  $tipo = $selecaoUnica ? 'radio' : 'checkbox';
+  $nome = $selecaoUnica ? $campo : $campo . '[]';
+  $html = '';
+
+  foreach ($lista as $codigo => $texto) {
+    $id = $campo . $codigo;
+    $textoEscapado = htmlspecialchars($texto);
+
+    $html .= '<div class="list-item">'
+      . '<input type="' . $tipo . '" name="' . $nome . '" id="' . $id . '" value="' . $codigo . '"'
+      . ' form="form-registo" data-nome="' . $textoEscapado . '"'
+      . ' onchange="contar(this, \'' . $contador . '\')">'
+      . '<label for="' . $id . '">' . $textoEscapado . '</label>'
+      . '</div>';
+  }
+
+  return $html;
 }
+$paginaAtiva = 'registro';
+$subtituloPagina = 'Registar disco';
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -75,44 +87,10 @@ function itens($campo, $lista, $contador, $radio = false)
   <input type="checkbox" id="modal-producao-toggle" class="modal-toggle">
 
   <div class="app-container">
-    <aside>
-      <div class="title">
-        <h1>DiscoGest</h1>
-      </div>
-      <nav>
-        <ul>
-          <li class="secnav">Menu Principal</li>
-          <li><a href="registro.php" class="active">Registar</a></li>
-          <li><a href="listagemdiscos.php">Listar Discos</a></li>
-          <li class="secnav">Intervenientes</li>
-          <li><a href="artistas.php">Artistas</a></li>
-          <li><a href="producao.php">Produção</a></li>
-          <li class="secnav">Cadastros</li>
-          <li><a href="instrumentos.php">Instrumentos</a></li>
-          <li><a href="generos.php">Géneros</a></li>
-          <li class="secnav">Acções</li>
-          <!-- <li><a href="#">Exportar</a></li> -->
-          <?php if ($podeUsers): ?><li><a href="administracao.php">Administração</a></li><?php endif; ?>
-          <?php if ($podeLogs): ?><li><a href="logs.php">Logs</a></li><?php endif; ?>
-          <li><a href="LogOut.php">Sair</a></li>
-        </ul>
-      </nav>
-    </aside>
+    <?php require __DIR__ . '/../partials/sidebar.php'; ?>
 
     <div class="containermain">
-      <header>
-        <div class="pagetitle">
-          <h2>Sistema de Gestão de Discos</h2>
-          <p>Registar disco</p>
-        </div>
-        <div class="userdetails">
-          <div class="userdetailstxt">
-            <p><?= htmlspecialchars($utilizador->getNomeCompleto()) ?></p>
-            <p><?= htmlspecialchars($utilizador->getPerfil()->getNome()) ?></p>
-          </div>
-          <img src="foto.php" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto de Perfil">
-        </div>
-      </header>
+      <?php require __DIR__ . '/../partials/header.php'; ?>
 
       <main>
         <?php if ($msg): ?><div class="alert alert-ok"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
@@ -193,7 +171,7 @@ function itens($campo, $lista, $contador, $radio = false)
         <label for="modal-generos-toggle" class="modal-close">&times;</label>
       </div>
       <div class="modal-body">
-        <div class="list-box"><?php itens('generos', $generos, 'n-generos'); ?></div>
+        <div class="list-box"><?= renderizarItens('generos', $generos, 'n-generos') ?></div>
       </div>
       <div class="modal-footer">
         <label for="modal-generos-toggle" class="btn btn-primary">Concluir</label>
@@ -212,15 +190,15 @@ function itens($campo, $lista, $contador, $radio = false)
         <div class="participant-grid">
           <div class="participant-col">
             <h4>Compositores</h4>
-            <div class="list-box"><?php itens('compositores', $compositores, 'n-compositores'); ?></div>
+            <div class="list-box"><?= renderizarItens('compositores', $compositores, 'n-compositores') ?></div>
           </div>
           <div class="participant-col">
             <h4>Músicos</h4>
-            <div class="list-box"><?php itens('musicos', $musicos, 'n-musicos'); ?></div>
+            <div class="list-box"><?= renderizarItens('musicos', $musicos, 'n-musicos') ?></div>
           </div>
           <div class="participant-col">
             <h4>Cantores</h4>
-            <div class="list-box"><?php itens('cantores', $cantores, 'n-cantores'); ?></div>
+            <div class="list-box"><?= renderizarItens('cantores', $cantores, 'n-cantores') ?></div>
           </div>
         </div>
       </div>
@@ -241,15 +219,15 @@ function itens($campo, $lista, $contador, $radio = false)
         <div class="participant-grid">
           <div class="participant-col">
             <h4>Produtores</h4>
-            <div class="list-box"><?php itens('produtores', $produtores, 'n-produtores'); ?></div>
+            <div class="list-box"><?= renderizarItens('produtores', $produtores, 'n-produtores') ?></div>
           </div>
           <div class="participant-col">
             <h4>Gravadoras</h4>
-            <div class="list-box"><?php itens('gravadoras', $gravadoras, 'n-gravadoras'); ?></div>
+            <div class="list-box"><?= renderizarItens('gravadoras', $gravadoras, 'n-gravadoras') ?></div>
           </div>
           <div class="participant-col">
             <h4>Editora (uma só)</h4>
-            <div class="list-box"><?php itens('editora', $editoras, 'n-editora', true); ?></div>
+            <div class="list-box"><?= renderizarItens('editora', $editoras, 'n-editora', true) ?></div>
           </div>
         </div>
       </div>

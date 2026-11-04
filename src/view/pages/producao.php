@@ -10,7 +10,7 @@ if (!$utilizador) { header('Location: Login.php'); exit; }
 $podeAdicionar = Permissao::pode($utilizador, 'adicionar');
 $podeEditar    = Permissao::pode($utilizador, 'editar');
 $podeRemover   = Permissao::pode($utilizador, 'remover');
-$podeUsers     = Permissao::pode($utilizador, 'utilizadores');
+$podeUtilizadores     = Permissao::pode($utilizador, 'utilizadores');
 $podeLogs      = Permissao::pode($utilizador, 'logs');
 
 $producaoController = new ProducaoController();
@@ -24,15 +24,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 /* ---------- Estado da página ---------- */
 $estado = $producaoController->prepararEcra($_GET);
-$msg        = $estado['msg'];
-$tab        = $estado['tab'];
-$edProd     = $estado['edProd'];
-$edGrav     = $estado['edGrav'];
-$edEdit     = $estado['edEdit'];
-$q          = $estado['q'];
+$msg = $estado['msg'];
+$tab = $estado['tab'];
+$produtorEdicao = $estado['produtorEdicao'];
+$gravadoraEdicao = $estado['gravadoraEdicao'];
+$editoraEdicao = $estado['editoraEdicao'];
+$termoPesquisa = $estado['termoPesquisa'];
 $produtores = $estado['produtores'];
 $gravadoras = $estado['gravadoras'];
-$editoras   = $estado['editoras'];
+$editoras = $estado['editoras'];
+$paginaAtiva = 'producao';
+$subtituloPagina = 'Gestão de produção';
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -45,42 +47,10 @@ $editoras   = $estado['editoras'];
 <body>
 
 <div class="app-container">
-  <aside>
-    <div class="title" id="producao"><h1>DiscoGest</h1></div>
-    <nav>
-      <ul>
-        <li class="secnav">Menu Principal</li>
-        <li><a href="registro.php">Registar</a></li>
-        <li><a href="listagemdiscos.php">Listar Discos</a></li>
-        <li class="secnav">Intervenientes</li>
-        <li><a href="artistas.php">Artistas</a></li>
-        <li><a href="producao.php" class="active">Produção</a></li>
-        <li class="secnav">Cadastros</li>
-        <li><a href="instrumentos.php">Instrumentos</a></li>
-        <li><a href="generos.php">Géneros</a></li>
-        <li class="secnav">Acções</li>
-        <!-- <li><a href="#">Exportar</a></li> -->
-        <?php if ($podeUsers): ?><li><a href="administracao.php">Administração</a></li><?php endif; ?>
-        <?php if ($podeLogs): ?><li><a href="logs.php">Logs</a></li><?php endif; ?>
-        <li><a href="LogOut.php">Sair</a></li>
-      </ul>
-    </nav>
-  </aside>
+  <?php require __DIR__ . '/../partials/sidebar.php'; ?>
 
   <div class="containermain">
-    <header>
-      <div class="pagetitle">
-        <h2>Sistema de Gestão de Discos</h2>
-        <p>Gestão de produção</p>
-      </div>
-      <div class="userdetails">
-        <div class="userdetailstxt">
-          <p><?= htmlspecialchars($utilizador->getNomeCompleto()) ?></p>
-          <p><?= htmlspecialchars($utilizador->getPerfil()->getNome()) ?></p>
-        </div>
-        <img src="foto.php" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto de Perfil">
-      </div>
-    </header>
+    <?php require __DIR__ . '/../partials/header.php'; ?>
 
     <main>
       <div class="card">
@@ -97,7 +67,7 @@ $editoras   = $estado['editoras'];
             <label for="tab-edit" class="tab-label">Editoras</label>
           </div>
           <input type="search" class="search-input" name="q" form="form-pesq"
-              value="<?= htmlspecialchars($q) ?>" placeholder="Pesquisar...">
+              value="<?= htmlspecialchars($termoPesquisa) ?>" placeholder="Pesquisar...">
         </div>
 
         <?php if ($msg): ?><div class="alert alert-ok"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
@@ -118,7 +88,7 @@ $editoras   = $estado['editoras'];
                       <td><?= htmlspecialchars($p->getEmailProdutor()) ?></td>
                     </tr>
                   <?php endforeach; ?>
-                  <?php if (!$produtores): ?><tr><td colspan="4"><?= $q !== '' ? 'Nenhum produtor encontrado.' : 'Nenhum produtor cadastrado.' ?></td></tr><?php endif; ?>
+                  <?php if (!$produtores): ?><tr><td colspan="4"><?= $termoPesquisa !== '' ? 'Nenhum produtor encontrado.' : 'Nenhum produtor cadastrado.' ?></td></tr><?php endif; ?>
                 </tbody>
               </table>
             </div>
@@ -147,7 +117,7 @@ $editoras   = $estado['editoras'];
                       <td><?= htmlspecialchars($g->getEnderecoGravadora()) ?></td>
                     </tr>
                   <?php endforeach; ?>
-                  <?php if (!$gravadoras): ?><tr><td colspan="5"><?= $q !== '' ? 'Nenhuma gravadora encontrada.' : 'Nenhuma gravadora cadastrada.' ?></td></tr><?php endif; ?>
+                  <?php if (!$gravadoras): ?><tr><td colspan="5"><?= $termoPesquisa !== '' ? 'Nenhuma gravadora encontrada.' : 'Nenhuma gravadora cadastrada.' ?></td></tr><?php endif; ?>
                 </tbody>
               </table>
             </div>
@@ -176,7 +146,7 @@ $editoras   = $estado['editoras'];
                       <td><?= htmlspecialchars($e->getEndereco()) ?></td>
                     </tr>
                   <?php endforeach; ?>
-                  <?php if (!$editoras): ?><tr><td colspan="5"><?= $q !== '' ? 'Nenhuma editora encontrada.' : 'Nenhuma editora cadastrada.' ?></td></tr><?php endif; ?>
+                  <?php if (!$editoras): ?><tr><td colspan="5"><?= $termoPesquisa !== '' ? 'Nenhuma editora encontrada.' : 'Nenhuma editora cadastrada.' ?></td></tr><?php endif; ?>
                 </tbody>
               </table>
             </div>
@@ -209,18 +179,18 @@ $editoras   = $estado['editoras'];
   </form>
 </div></div>
 
-<input type="checkbox" id="m-edit-prod" class="modal-toggle" <?= $edProd ? 'checked' : '' ?>>
+<input type="checkbox" id="m-edit-prod" class="modal-toggle" <?= $produtorEdicao ? 'checked' : '' ?>>
 <div class="modal-overlay"><div class="modal">
   <div class="modal-header"><h2>Editar Produtor</h2><label for="m-edit-prod" class="modal-close">&times;</label></div>
   <form method="post" action="producao.php">
   <input type="hidden" name="tipo" value="produtor">
   <input type="hidden" name="acao" value="atualizar">
-  <input type="hidden" name="id" value="<?= $edProd ? $edProd->getCodigoProdutor() : '' ?>">
+  <input type="hidden" name="id" value="<?= $produtorEdicao ? $produtorEdicao->getCodigoProdutor() : '' ?>">
   <div class="modal-body"><div class="form-grid">
-    <div class="label-group"><label for="ep-nome">Nome</label><input id="ep-nome" name="nome" type="text" value="<?= htmlspecialchars($edProd ? $edProd->getNomeProdutor() : '') ?>" required></div>
-    <div class="label-group"><label for="ep-apelido">Apelido</label><input id="ep-apelido" name="apelido" type="text" value="<?= htmlspecialchars($edProd ? $edProd->getApelidoProdutor() : '') ?>" required></div>
-    <div class="label-group full"><label for="ep-contacto">Contacto</label><input id="ep-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($edProd ? $edProd->getContactoProdutor() : '') ?>"></div>
-    <div class="label-group full"><label for="ep-email">E-mail</label><input id="ep-email" name="email" type="email" value="<?= htmlspecialchars($edProd ? $edProd->getEmailProdutor() : '') ?>"></div>
+    <div class="label-group"><label for="ep-nome">Nome</label><input id="ep-nome" name="nome" type="text" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getNomeProdutor() : '') ?>" required></div>
+    <div class="label-group"><label for="ep-apelido">Apelido</label><input id="ep-apelido" name="apelido" type="text" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getApelidoProdutor() : '') ?>" required></div>
+    <div class="label-group full"><label for="ep-contacto">Contacto</label><input id="ep-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getContactoProdutor() : '') ?>"></div>
+    <div class="label-group full"><label for="ep-email">E-mail</label><input id="ep-email" name="email" type="email" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getEmailProdutor() : '') ?>"></div>
   </div></div>
   <div class="modal-footer"><label for="m-edit-prod" class="btn btn-secondary">Cancelar</label><button class="btn btn-primary" type="submit">Salvar Alterações</button></div>
   </form>
@@ -250,18 +220,18 @@ $editoras   = $estado['editoras'];
   </form>
 </div></div>
 
-<input type="checkbox" id="m-edit-grav" class="modal-toggle" <?= $edGrav ? 'checked' : '' ?>>
+<input type="checkbox" id="m-edit-grav" class="modal-toggle" <?= $gravadoraEdicao ? 'checked' : '' ?>>
 <div class="modal-overlay"><div class="modal">
   <div class="modal-header"><h2>Editar Gravadora</h2><label for="m-edit-grav" class="modal-close">&times;</label></div>
   <form method="post" action="producao.php">
   <input type="hidden" name="tipo" value="gravadora">
   <input type="hidden" name="acao" value="atualizar">
-  <input type="hidden" name="id" value="<?= $edGrav ? $edGrav->getCodigoGravadora() : '' ?>">
+  <input type="hidden" name="id" value="<?= $gravadoraEdicao ? $gravadoraEdicao->getCodigoGravadora() : '' ?>">
   <div class="modal-body"><div class="form-grid">
-    <div class="label-group full"><label for="eg-nome">Nome</label><input id="eg-nome" name="nome" type="text" value="<?= htmlspecialchars($edGrav ? $edGrav->getNomeGravadora() : '') ?>" required></div>
-    <div class="label-group full"><label for="eg-contacto">Contacto</label><input id="eg-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($edGrav ? $edGrav->getContactoGravadora() : '') ?>"></div>
-    <div class="label-group full"><label for="eg-email">E-mail</label><input id="eg-email" name="email" type="email" value="<?= htmlspecialchars($edGrav ? $edGrav->getEmailGravadora() : '') ?>"></div>
-    <div class="label-group full"><label for="eg-endereco">Endereço</label><input id="eg-endereco" name="endereco" type="text" value="<?= htmlspecialchars($edGrav ? $edGrav->getEnderecoGravadora() : '') ?>"></div>
+    <div class="label-group full"><label for="eg-nome">Nome</label><input id="eg-nome" name="nome" type="text" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getNomeGravadora() : '') ?>" required></div>
+    <div class="label-group full"><label for="eg-contacto">Contacto</label><input id="eg-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getContactoGravadora() : '') ?>"></div>
+    <div class="label-group full"><label for="eg-email">E-mail</label><input id="eg-email" name="email" type="email" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getEmailGravadora() : '') ?>"></div>
+    <div class="label-group full"><label for="eg-endereco">Endereço</label><input id="eg-endereco" name="endereco" type="text" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getEnderecoGravadora() : '') ?>"></div>
   </div></div>
   <div class="modal-footer"><label for="m-edit-grav" class="btn btn-secondary">Cancelar</label><button class="btn btn-primary" type="submit">Salvar Alterações</button></div>
   </form>
@@ -291,18 +261,18 @@ $editoras   = $estado['editoras'];
   </form>
 </div></div>
 
-<input type="checkbox" id="m-edit-edit" class="modal-toggle" <?= $edEdit ? 'checked' : '' ?>>
+<input type="checkbox" id="m-edit-edit" class="modal-toggle" <?= $editoraEdicao ? 'checked' : '' ?>>
 <div class="modal-overlay"><div class="modal">
   <div class="modal-header"><h2>Editar Editora</h2><label for="m-edit-edit" class="modal-close">&times;</label></div>
   <form method="post" action="producao.php">
   <input type="hidden" name="tipo" value="editora">
   <input type="hidden" name="acao" value="atualizar">
-  <input type="hidden" name="id" value="<?= $edEdit ? $edEdit->getCodigoEditora() : '' ?>">
+  <input type="hidden" name="id" value="<?= $editoraEdicao ? $editoraEdicao->getCodigoEditora() : '' ?>">
   <div class="modal-body"><div class="form-grid">
-    <div class="label-group full"><label for="ee-nome">Nome</label><input id="ee-nome" name="nome" type="text" value="<?= htmlspecialchars($edEdit ? $edEdit->getNomeEditora() : '') ?>" required></div>
-    <div class="label-group full"><label for="ee-contacto">Contacto</label><input id="ee-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($edEdit ? $edEdit->getContactoEditora() : '') ?>"></div>
-    <div class="label-group full"><label for="ee-email">E-mail</label><input id="ee-email" name="email" type="email" value="<?= htmlspecialchars($edEdit ? $edEdit->getEmailEditora() : '') ?>"></div>
-    <div class="label-group full"><label for="ee-endereco">Endereço</label><input id="ee-endereco" name="endereco" type="text" value="<?= htmlspecialchars($edEdit ? $edEdit->getEndereco() : '') ?>"></div>
+    <div class="label-group full"><label for="ee-nome">Nome</label><input id="ee-nome" name="nome" type="text" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getNomeEditora() : '') ?>" required></div>
+    <div class="label-group full"><label for="ee-contacto">Contacto</label><input id="ee-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getContactoEditora() : '') ?>"></div>
+    <div class="label-group full"><label for="ee-email">E-mail</label><input id="ee-email" name="email" type="email" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getEmailEditora() : '') ?>"></div>
+    <div class="label-group full"><label for="ee-endereco">Endereço</label><input id="ee-endereco" name="endereco" type="text" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getEndereco() : '') ?>"></div>
   </div></div>
   <div class="modal-footer"><label for="m-edit-edit" class="btn btn-secondary">Cancelar</label><button class="btn btn-primary" type="submit">Salvar Alterações</button></div>
   </form>

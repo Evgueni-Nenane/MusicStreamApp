@@ -14,7 +14,7 @@ if (!$utilizador) {
 
 $podeAdicionar = Permissao::pode($utilizador, 'adicionar');
 $podeRemover   = Permissao::pode($utilizador, 'remover');
-$podeUsers     = Permissao::pode($utilizador, 'utilizadores');
+$podeUtilizadores     = Permissao::pode($utilizador, 'utilizadores');
 $podeLogs      = Permissao::pode($utilizador, 'logs');
 
 $generoController = new GeneroController();
@@ -27,8 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $erro = $resultado['erro'] ?? '';
 }
 
-$q = trim($_GET['q'] ?? '');
-$generos = $generoController->listarComPesquisa($q);
+$termoPesquisa = trim($_GET['q'] ?? '');
+$generos = $generoController->listarComPesquisa($termoPesquisa);
+$paginaAtiva = 'generos';
+$subtituloPagina = 'Gestão de géneros musicais';
 ?>
 
 <!DOCTYPE html>
@@ -44,43 +46,10 @@ $generos = $generoController->listarComPesquisa($q);
 <body>
 
   <div class="app-container">
-    <aside>
-      <div class="title" id="generos">
-        <h1>DiscoGest</h1>
-      </div>
-      <nav>
-        <ul>
-          <li class="secnav">Menu Principal</li>
-          <li><a href="registro.php">Registar</a></li>
-          <li><a href="listagemdiscos.php">Listar Discos</a></li>
-          <li class="secnav">Intervenientes</li>
-          <li><a href="artistas.php">Artistas</a></li>
-          <li><a href="producao.php">Produção</a></li>
-          <li class="secnav">Cadastros</li>
-          <li><a href="instrumentos.php">Instrumentos</a></li>
-          <li><a href="generos.php" class="active">Géneros</a></li>
-          <li class="secnav">Acções</li>
-          <!-- <li><a href="#">Exportar</a></li> -->
-          <?php if($podeUsers): ?><li><a href="administracao.php">Administração</a></li><?php endif; ?>
-          <?php if($podeLogs): ?><li><a href="logs.php">Logs</a></li><?php endif; ?> <li><a href="LogOut.php">Sair</a></li>
-        </ul>
-      </nav>
-    </aside>
+    <?php require __DIR__ . '/../partials/sidebar.php'; ?>
 
     <div class="containermain">
-      <header>
-        <div class="pagetitle">
-          <h2>Sistema de Gestão de Discos</h2>
-          <p>Gestão de géneros musicais</p>
-        </div>
-        <div class="userdetails">
-          <div class="userdetailstxt">
-            <p><?= htmlspecialchars($utilizador->getNomeCompleto()) ?></p>
-            <p><?= htmlspecialchars($utilizador->getPerfil()->getNome()) ?></p>
-          </div>
-          <img src="foto.php" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto de Perfil">
-        </div>
-      </header>
+      <?php require __DIR__ . '/../partials/header.php'; ?>
 
       <main>
         <div class="card">
@@ -97,7 +66,7 @@ $generos = $generoController->listarComPesquisa($q);
               <label for="tab-cad" class="tab-label">Cadastrar Género</label>
             </div>
             <input type="search" class="search-input" name="q" form="form-pesq"
-              value="<?= htmlspecialchars($q) ?>" placeholder="Pesquisar género...">
+              value="<?= htmlspecialchars($termoPesquisa) ?>" placeholder="Pesquisar género...">
           </div>
 
           <?php if ($msg): ?><div class="alert alert-ok"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
@@ -126,7 +95,7 @@ $generos = $generoController->listarComPesquisa($q);
                     <?php if (!$generos): ?>
                       <tr>
                         <td colspan="3">
-                          <?= $q !== '' ? 'Nenhum género encontrado para "' . htmlspecialchars($q) . '".' : 'Nenhum género cadastrado.' ?>
+                          <?= $termoPesquisa !== '' ? 'Nenhum género encontrado para "' . htmlspecialchars($termoPesquisa) . '".' : 'Nenhum género cadastrado.' ?>
                         </td>
                       </tr>
                     <?php endif; ?>

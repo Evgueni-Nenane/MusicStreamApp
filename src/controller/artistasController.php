@@ -42,20 +42,16 @@ class ArtistasController
      */
     public function processarPost($utilizador, $post)
     {
-        $acao = $post['acao'] ?? '';
         $tipo = $post['tipo'] ?? '';
-        $msg = '';
 
-        if ($acao === 'cadastrar') {
-            $msg = $this->cadastrar($utilizador, $tipo, $post);
-        } elseif ($acao === 'atualizar') {
-            $msg = $this->atualizar($utilizador, $tipo, $post);
-        } elseif ($acao === 'remover') {
-            $msg = $this->remover($utilizador, $tipo, $post);
-        }
+        $mensagem = match ($post['acao'] ?? '') {
+            'cadastrar' => $this->cadastrar($utilizador, $tipo, $post),
+            'atualizar' => $this->atualizar($utilizador, $tipo, $post),
+            'remover' => $this->remover($utilizador, $tipo, $post),
+            default => '',
+        };
 
-        $aba = self::ABAS[$tipo] ?? 'musicos';
-        return ['aba' => $aba, 'msg' => $msg];
+        return ['aba' => self::ABAS[$tipo] ?? 'musicos', 'msg' => $mensagem];
     }
 
     /**
@@ -72,45 +68,45 @@ class ArtistasController
         }
 
         /* Botão Editar (GET): carrega o artista seleccionado */
-        $ed = null;
-        $edTipo = '';
-        $edInstrumentos = [];
+        $artistaEdicao = null;
+        $tipoArtistaEdicao = '';
+        $instrumentosSelecionados = [];
 
         if (($get['acao'] ?? '') === 'editar') {
-            $edTipo = $get['tipo'] ?? '';
+            $tipoArtistaEdicao = $get['tipo'] ?? '';
             // fica na aba onde o utilizador estava, mesmo que não tenha seleccionado ninguém
-            $tab = self::ABAS[$edTipo] ?? $tab;
-            $edId = (int)($get['sel_' . $edTipo] ?? 0);
+            $tab = self::ABAS[$tipoArtistaEdicao] ?? $tab;
+            $artistaEdicaoId = (int)($get['sel_' . $tipoArtistaEdicao] ?? 0);
 
-            if ($edId === 0) { // compatibilidade com o formato antigo "tipo:id"
+            if ($artistaEdicaoId === 0) { // compatibilidade com o formato antigo "tipo:id"
                 [$tipoAntigo, $idAntigo] = array_pad(explode(':', $get['sel'] ?? ''), 2, '');
-                if ($edTipo === '' && $tipoAntigo !== '') $edTipo = $tipoAntigo;
-                $edId = (int)$idAntigo;
+                if ($tipoArtistaEdicao === '' && $tipoAntigo !== '') $tipoArtistaEdicao = $tipoAntigo;
+                $artistaEdicaoId = (int)$idAntigo;
             }
 
-            if ($edId > 0 && $edTipo === 'musico') {
-                $ed = $this->musicoController->buscarPorCodigo($edId);
-                if ($ed->getCodigoMusico()) {
-                    foreach ($this->musicoController->buscarInstrumentosDoMusico($edId) as $i) {
-                        $edInstrumentos[] = $i->getCodigo();
+            if ($artistaEdicaoId > 0 && $tipoArtistaEdicao === 'musico') {
+                $artistaEdicao = $this->musicoController->buscarPorCodigo($artistaEdicaoId);
+                if ($artistaEdicao->getCodigoMusico()) {
+                    foreach ($this->musicoController->buscarInstrumentosDoMusico($artistaEdicaoId) as $i) {
+                        $instrumentosSelecionados[] = $i->getCodigo();
                     }
                     $tab = 'musicos';
                 } else {
-                    $ed = null;
+                    $artistaEdicao = null;
                 }
-            } elseif ($edId > 0 && $edTipo === 'compositor') {
-                $ed = $this->compositorController->buscarPorCodigo($edId);
-                if ($ed->getCodigoCompositor()) $tab = 'compositores';
-                else $ed = null;
-            } elseif ($edId > 0 && $edTipo === 'cantor') {
-                $ed = $this->cantorController->buscarPorCodigo($edId);
-                if ($ed->getCodigoCantor()) $tab = 'cantores';
-                else $ed = null;
+            } elseif ($artistaEdicaoId > 0 && $tipoArtistaEdicao === 'compositor') {
+                $artistaEdicao = $this->compositorController->buscarPorCodigo($artistaEdicaoId);
+                if ($artistaEdicao->getCodigoCompositor()) $tab = 'compositores';
+                else $artistaEdicao = null;
+            } elseif ($artistaEdicaoId > 0 && $tipoArtistaEdicao === 'cantor') {
+                $artistaEdicao = $this->cantorController->buscarPorCodigo($artistaEdicaoId);
+                if ($artistaEdicao->getCodigoCantor()) $tab = 'cantores';
+                else $artistaEdicao = null;
             } else {
-                $edTipo = '';
+                $tipoArtistaEdicao = '';
             }
 
-            if (!$ed && $msg === '') $msg = 'Seleccione um artista.';
+            if (!$artistaEdicao && $msg === '') $msg = 'Seleccione um artista.';
         }
 
         $musicos      = $this->musicoController->listarMusicos();
@@ -119,11 +115,11 @@ class ArtistasController
         $instrumentos = $this->instrumentoController->listarInstrumentos();
 
         /* Pesquisa simples (filtra em memória as 3 listas) */
-        $q = trim($get['q'] ?? '');
-        if ($q !== '') {
-            $qMin = mb_strtolower($q);
+        $termoPesquisa = trim($get['q'] ?? '');
+        if ($termoPesquisa !== '') {
+            $termoMinusculo = mb_strtolower($termoPesquisa);
 
-            $musicos = array_values(array_filter($musicos, function ($m) use ($qMin) {
+            $musicos = array_values(array_filter($musicos, function ($m) use ($termoMinusculo) {
                 $nomesInstr = array_map(
                     fn($i) => $i->getNome(),
                     $this->musicoController->buscarInstrumentosDoMusico($m->getCodigoMusico())
@@ -132,23 +128,23 @@ class ArtistasController
                     $m->getCodigoMusico() . ' ' . $m->getNomeMusico() . ' ' . $m->getApelidoMusico() . ' ' .
                     implode(' ', $nomesInstr) . ' ' . $m->getEmailMusico() . ' ' . $m->getContactoMusico()
                 );
-                return str_contains($alvo, $qMin);
+                return str_contains($alvo, $termoMinusculo);
             }));
 
-            $compositores = array_values(array_filter($compositores, function ($c) use ($qMin) {
+            $compositores = array_values(array_filter($compositores, function ($c) use ($termoMinusculo) {
                 $alvo = mb_strtolower(
                     $c->getCodigoCompositor() . ' ' . $c->getNomeCompositor() . ' ' . $c->getApelidoCompositor() . ' ' .
                     $c->getEmailCompositor() . ' ' . $c->getContactoCompositor()
                 );
-                return str_contains($alvo, $qMin);
+                return str_contains($alvo, $termoMinusculo);
             }));
 
-            $cantores = array_values(array_filter($cantores, function ($c) use ($qMin) {
+            $cantores = array_values(array_filter($cantores, function ($c) use ($termoMinusculo) {
                 $alvo = mb_strtolower(
                     $c->getCodigoCantor() . ' ' . $c->getNomeCantor() . ' ' . $c->getApelidoCantor() . ' ' .
                     $c->getEmailCantor() . ' ' . $c->getContactoCantor()
                 );
-                return str_contains($alvo, $qMin);
+                return str_contains($alvo, $termoMinusculo);
             }));
 
             // Se a aba actual ficou sem resultados, abre a primeira que tenha
@@ -163,41 +159,54 @@ class ArtistasController
         }
 
         /* Campos do modal de edição (normaliza os 3 tipos de artista) */
-        $edId = $edNome = $edApelido = $edContacto = $edEmail = '';
-        if ($ed) {
-            if ($edTipo === 'musico') {
-                $edId = $ed->getCodigoMusico();
-                $edNome = $ed->getNomeMusico();
-                $edApelido = $ed->getApelidoMusico();
-                $edContacto = $ed->getContactoMusico();
-                $edEmail = $ed->getEmailMusico();
-            } elseif ($edTipo === 'compositor') {
-                $edId = $ed->getCodigoCompositor();
-                $edNome = $ed->getNomeCompositor();
-                $edApelido = $ed->getApelidoCompositor();
-                $edContacto = $ed->getContactoCompositor();
-                $edEmail = $ed->getEmailCompositor();
+        $artistaEdicaoId = $artistaEdicaoNome = $artistaEdicaoApelido = $artistaEdicaoContacto = $artistaEdicaoEmail = '';
+        if ($artistaEdicao) {
+            if ($tipoArtistaEdicao === 'musico') {
+                $artistaEdicaoId = $artistaEdicao->getCodigoMusico();
+                $artistaEdicaoNome = $artistaEdicao->getNomeMusico();
+                $artistaEdicaoApelido = $artistaEdicao->getApelidoMusico();
+                $artistaEdicaoContacto = $artistaEdicao->getContactoMusico();
+                $artistaEdicaoEmail = $artistaEdicao->getEmailMusico();
+            } elseif ($tipoArtistaEdicao === 'compositor') {
+                $artistaEdicaoId = $artistaEdicao->getCodigoCompositor();
+                $artistaEdicaoNome = $artistaEdicao->getNomeCompositor();
+                $artistaEdicaoApelido = $artistaEdicao->getApelidoCompositor();
+                $artistaEdicaoContacto = $artistaEdicao->getContactoCompositor();
+                $artistaEdicaoEmail = $artistaEdicao->getEmailCompositor();
             } else {
-                $edId = $ed->getCodigoCantor();
-                $edNome = $ed->getNomeCantor();
-                $edApelido = $ed->getApelidoCantor();
-                $edContacto = $ed->getContactoCantor();
-                $edEmail = $ed->getEmailCantor();
+                $artistaEdicaoId = $artistaEdicao->getCodigoCantor();
+                $artistaEdicaoNome = $artistaEdicao->getNomeCantor();
+                $artistaEdicaoApelido = $artistaEdicao->getApelidoCantor();
+                $artistaEdicaoContacto = $artistaEdicao->getContactoCantor();
+                $artistaEdicaoEmail = $artistaEdicao->getEmailCantor();
             }
         }
-        $edTitulo = ['musico' => 'Músico', 'compositor' => 'Compositor', 'cantor' => 'Cantor'][$edTipo] ?? 'Artista';
+        $artistaEdicaoTitulo = ['musico' => 'Músico', 'compositor' => 'Compositor', 'cantor' => 'Cantor'][$tipoArtistaEdicao] ?? 'Artista';
 
-        return compact(
-            'msg', 'tab', 'ed', 'edTipo', 'edInstrumentos', 'edId', 'edNome', 'edApelido',
-            'edContacto', 'edEmail', 'edTitulo', 'musicos', 'cantores', 'compositores',
-            'instrumentos', 'q'
-        );
+        return [
+            'msg' => $msg,
+            'tab' => $tab,
+            'artistaEdicao' => $artistaEdicao,
+            'tipoArtistaEdicao' => $tipoArtistaEdicao,
+            'instrumentosSelecionados' => $instrumentosSelecionados,
+            'artistaEdicaoId' => $artistaEdicaoId,
+            'artistaEdicaoNome' => $artistaEdicaoNome,
+            'artistaEdicaoApelido' => $artistaEdicaoApelido,
+            'artistaEdicaoContacto' => $artistaEdicaoContacto,
+            'artistaEdicaoEmail' => $artistaEdicaoEmail,
+            'artistaEdicaoTitulo' => $artistaEdicaoTitulo,
+            'musicos' => $musicos,
+            'cantores' => $cantores,
+            'compositores' => $compositores,
+            'instrumentos' => $instrumentos,
+            'termoPesquisa' => $termoPesquisa,
+        ];
     }
 
     private function cadastrar($utilizador, $tipo, $post)
     {
-        if ($bloq = Permissao::bloquear($utilizador, 'adicionar')) {
-            return $bloq;
+        if ($bloqueio = Permissao::bloquear($utilizador, 'adicionar')) {
+            return $bloqueio;
         }
 
         $nome     = trim($post['nome'] ?? '');
@@ -236,8 +245,8 @@ class ArtistasController
 
     private function atualizar($utilizador, $tipo, $post)
     {
-        if ($bloq = Permissao::bloquear($utilizador, 'editar')) {
-            return $bloq;
+        if ($bloqueio = Permissao::bloquear($utilizador, 'editar')) {
+            return $bloqueio;
         }
 
         $id       = (int)($post['id'] ?? 0);
@@ -276,8 +285,8 @@ class ArtistasController
 
     private function remover($utilizador, $tipo, $post)
     {
-        if ($bloq = Permissao::bloquear($utilizador, 'remover')) {
-            return $bloq;
+        if ($bloqueio = Permissao::bloquear($utilizador, 'remover')) {
+            return $bloqueio;
         }
 
         // Cada aba selecciona pelo seu próprio name; mantém-se o formato antigo "tipo:id".

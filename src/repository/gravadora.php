@@ -1,7 +1,7 @@
 <?php
 
-include_once __DIR__ . '/../model/gravadora.php';
-include_once __DIR__ . '/connection.php';
+require_once __DIR__ . '/../model/gravadora.php';
+require_once __DIR__ . '/connection.php';
 
 class GravadoraDAO
 {

@@ -38,29 +38,18 @@ class ListagemDiscosController
 
     /**
      * Executa a acção submetida.
-     * Devolve ['msg' => ...] e, quando aplicável, ['det' => disco].
+     * Devolve ['mensagem' => ...] e, quando aplicável, ['discoDetalhe' => disco].
      */
     public function processarPost($utilizador, $post)
     {
-        $acao = $post['acao'] ?? '';
-
-        if ($acao === 'remover') {
-            return $this->removerDisco($utilizador, $post);
-        }
-        if ($acao === 'atualizar') {
-            return $this->atualizarDisco($utilizador, $post);
-        }
-        if ($acao === 'addfaixa') {
-            return $this->adicionarFaixa($utilizador, $post);
-        }
-        if ($acao === 'atualizarfaixa') {
-            return $this->atualizarFaixa($utilizador, $post);
-        }
-        if ($acao === 'removerfaixa') {
-            return $this->removerFaixa($utilizador, $post);
-        }
-
-        return ['msg' => ''];
+        return match ($post['acao'] ?? '') {
+            'remover' => $this->removerDisco($utilizador, $post),
+            'atualizar' => $this->atualizarDisco($utilizador, $post),
+            'addfaixa' => $this->adicionarFaixa($utilizador, $post),
+            'atualizarfaixa' => $this->atualizarFaixa($utilizador, $post),
+            'removerfaixa' => $this->removerFaixa($utilizador, $post),
+            default => ['mensagem' => ''],
+        };
     }
 
     /**
@@ -68,47 +57,63 @@ class ListagemDiscosController
      */
     public function prepararEcra($utilizador, $get, $post = [])
     {
-        $msg = '';
-        $det = null;    // disco aberto em "Ver Detalhes"
-        $edF = null;    // faixa a editar ("Editar Faixa" dentro de Ver Detalhes)
-        $edFDisco = 0;  // disco da faixa em edição
-        $edFComp = $edFMus = $edFCant = [];
+        $mensagem = '';
+        $discoDetalhe = null;   // disco aberto em "Ver Detalhes"
+        $faixaEdicao = null;    // faixa a editar dentro de "Ver Detalhes"
+        $faixaDiscoId = 0;      // disco da faixa em edição
+        $faixaCompositoresSelecionados = [];
+        $faixaMusicosSelecionados = [];
+        $faixaCantoresSelecionados = [];
 
-        // Texto da pesquisa (vem por GET na pesquisa e nos botões Editar/Detalhes; por POST nas restantes acções)
-        $q = trim($get['q'] ?? $post['q'] ?? '');
+        // A pesquisa chega por GET nos botões Editar/Detalhes e por POST nas restantes acções.
+        $termoPesquisa = trim($get['q'] ?? $post['q'] ?? '');
 
-        /* ---------- Botões Editar / Adicionar Faixas / Ver Detalhes / Editar Faixa (GET) ---------- */
-        $ed = null;   // disco a editar
-        $fx = null;   // disco a que se vai juntar uma faixa
+        $discoEdicao = null;      // disco a editar
+        $discoNovaFaixa = null;   // disco a que se vai juntar uma faixa
         $acaoGet = $get['acao'] ?? '';
 
         if ($acaoGet !== '') {
-            $d = $this->discoDAO->buscarPorCodigo((int)($get['sel'] ?? 0));
+            $disco = $this->discoDAO->buscarPorCodigo((int)($get['sel'] ?? 0));
 
             if ($acaoGet === 'editarfaixa') {
                 // Editar Faixa: a faixa vem de sel_faixa; o disco vem de id (ou deduz-se da faixa).
-                $edFDisco = (int)($get['id'] ?? 0);
-                $fId = (int)($get['sel_faixa'] ?? 0);
+                $faixaDiscoId = (int)($get['id'] ?? 0);
+                $faixaId = (int)($get['sel_faixa'] ?? 0);
 
                 if (!Permissao::pode($utilizador, 'editar')) {
-                    $msg = 'Sem permissão para editar.';
-                } elseif ($fId > 0) {
-                    $edF = $this->faixaDAO->listarFaixaPorCodigo($fId);
-                    foreach ($this->faixaDAO->listarCompositoresPorFaixa($fId) as $c) $edFComp[] = $c->getCodigoCompositor();
-                    foreach ($this->faixaDAO->listarMusicosPorFaixa($fId) as $m)      $edFMus[]  = $m->getCodigoMusico();
-                    foreach ($this->faixaDAO->listarCantoresPorFaixa($fId) as $c)     $edFCant[] = $c->getCodigoCantor();
+                    $mensagem = 'Sem permissão para editar.';
+                } elseif ($faixaId > 0) {
+                    $faixaEdicao = $this->faixaDAO->listarFaixaPorCodigo($faixaId);
+
+                    foreach ($this->faixaDAO->listarCompositoresPorFaixa($faixaId) as $compositor) {
+                        $faixaCompositoresSelecionados[] = $compositor->getCodigoCompositor();
+                    }
+
+                    foreach ($this->faixaDAO->listarMusicosPorFaixa($faixaId) as $musico) {
+                        $faixaMusicosSelecionados[] = $musico->getCodigoMusico();
+                    }
+
+                    foreach ($this->faixaDAO->listarCantoresPorFaixa($faixaId) as $cantor) {
+                        $faixaCantoresSelecionados[] = $cantor->getCodigoCantor();
+                    }
                 }
-                // Reabre os Detalhes no mesmo disco para dar contexto ao editar.
-                $det = $edFDisco > 0 ? $this->discoDAO->buscarPorCodigo($edFDisco) : null;
-                if (!$edF) $msg = 'Seleccione uma faixa.';
-            } elseif (!$d) {
-                $msg = 'Seleccione um disco.';
+
+                // Reabre os Detalhes no mesmo disco para dar contexto à edição.
+                $discoDetalhe = $faixaDiscoId > 0
+                    ? $this->discoDAO->buscarPorCodigo($faixaDiscoId)
+                    : null;
+
+                if (!$faixaEdicao) {
+                    $mensagem = 'Seleccione uma faixa.';
+                }
+            } elseif (!$disco) {
+                $mensagem = 'Seleccione um disco.';
             } elseif ($acaoGet === 'editar') {
-                $ed  = $d;
+                $discoEdicao = $disco;
             } elseif ($acaoGet === 'faixas') {
-                $fx  = $d;
+                $discoNovaFaixa = $disco;
             } elseif ($acaoGet === 'detalhes') {
-                $det = $d;
+                $discoDetalhe = $disco;
             }
         }
 
@@ -116,85 +121,129 @@ class ListagemDiscosController
         $todosGeneros = $this->generoDAO->listarTodos();
 
         /* ---------- Pesquisa: filtra por título, género, preço ou ano ---------- */
-        if ($q !== '') {
-            $discos = array_filter($discos, function ($d) use ($q) {
-                $alvo = $d->getTitulo() . ' ' . $d->getGeneroMusicalTxt() . ' '
-                      . number_format($d->getPreco(), 2, ',', '.') . ' ' . $d->getAnoEdicao();
-                return mb_stripos($alvo, $q) !== false;
-            });
+        if ($termoPesquisa !== '') {
+            $discos = array_values(array_filter($discos, function ($disco) use ($termoPesquisa) {
+                $alvo = $disco->getTitulo() . ' ' . $disco->getGeneroMusicalTxt() . ' '
+                    . number_format($disco->getPreco(), 2, ',', '.') . ' ' . $disco->getAnoEdicao();
+
+                return mb_stripos($alvo, $termoPesquisa) !== false;
+            }));
         }
 
         /* ---------- Dados derivados dos modais ---------- */
-        $dGeneros = '';
-        $dFaixas = [];
-        $dCompositores = $dMusicos = $dCantores = [];
-        if ($det) {
-            $dId = $det->getCodigoDisco();
-            $dGeneros = implode(', ', array_map(fn($g) => $g->getNomeGenero(), $this->generoDAO->listarPorDisco($dId)));
-            $dFaixas = $this->faixaDAO->listarPorCodigo($dId);
-            $dCompositores = $this->compositorDAO->listarPorCodigo($dId);
-            $dMusicos = $this->musicoDAO->listarPorCodigo($dId);
-            $dCantores = $this->cantorDAO->listarPorCodigo($dId);
+        $detalheDiscoId = 0;
+        $detalheGeneros = '';
+        $detalheFaixas = [];
+        $detalheCompositores = [];
+        $detalheMusicos = [];
+        $detalheCantores = [];
+
+        if ($discoDetalhe) {
+            $detalheDiscoId = $discoDetalhe->getCodigoDisco();
+            $detalheGeneros = implode(', ', array_map(
+                fn($genero) => $genero->getNomeGenero(),
+                $this->generoDAO->listarPorDisco($detalheDiscoId)
+            ));
+            $detalheFaixas = $this->faixaDAO->listarPorCodigo($detalheDiscoId);
+            $detalheCompositores = $this->compositorDAO->listarPorCodigo($detalheDiscoId);
+            $detalheMusicos = $this->musicoDAO->listarPorCodigo($detalheDiscoId);
+            $detalheCantores = $this->cantorDAO->listarPorCodigo($detalheDiscoId);
         }
 
         $generosDoDisco = [];
-        if ($ed) {
-            foreach ($this->generoDAO->listarPorDisco($ed->getCodigoDisco()) as $g) {
-                $generosDoDisco[] = $g->getCodigoGenero();
+        if ($discoEdicao) {
+            foreach ($this->generoDAO->listarPorDisco($discoEdicao->getCodigoDisco()) as $genero) {
+                $generosDoDisco[] = $genero->getCodigoGenero();
             }
         }
 
-        $edFMin = $edFSeg = 0;   // duração "mm:ss" partida em dois campos
-        if ($edF) {
-            [$edFMin, $edFSeg] = array_pad(array_map('intval', explode(':', (string)$edF->getDuracao())), 2, 0);
+        // Duração "mm:ss" partida em dois campos.
+        $faixaMinutos = 0;
+        $faixaSegundos = 0;
+        if ($faixaEdicao) {
+            [$faixaMinutos, $faixaSegundos] = array_pad(
+                array_map('intval', explode(':', (string)$faixaEdicao->getDuracao())),
+                2,
+                0
+            );
         }
 
-        $edFDiscoCompositores = $edFDiscoMusicos = $edFDiscoCantores = [];
-        if ($edFDisco) {
-            $edFDiscoCompositores = $this->compositorDAO->listarPorCodigo($edFDisco);
-            $edFDiscoMusicos = $this->musicoDAO->listarPorCodigo($edFDisco);
-            $edFDiscoCantores = $this->cantorDAO->listarPorCodigo($edFDisco);
+        $discoCompositoresDisponiveis = [];
+        $discoMusicosDisponiveis = [];
+        $discoCantoresDisponiveis = [];
+        if ($faixaDiscoId) {
+            $discoCompositoresDisponiveis = $this->compositorDAO->listarPorCodigo($faixaDiscoId);
+            $discoMusicosDisponiveis = $this->musicoDAO->listarPorCodigo($faixaDiscoId);
+            $discoCantoresDisponiveis = $this->cantorDAO->listarPorCodigo($faixaDiscoId);
         }
 
-        $fxCompositores = $fxMusicos = $fxCantores = [];
-        if ($fx) {
-            $fxCompositores = $this->compositorDAO->listarPorCodigo($fx->getCodigoDisco());
-            $fxMusicos = $this->musicoDAO->listarPorCodigo($fx->getCodigoDisco());
-            $fxCantores = $this->cantorDAO->listarPorCodigo($fx->getCodigoDisco());
+        $novaFaixaCompositores = [];
+        $novaFaixaMusicos = [];
+        $novaFaixaCantores = [];
+        if ($discoNovaFaixa) {
+            $novaFaixaCompositores = $this->compositorDAO->listarPorCodigo($discoNovaFaixa->getCodigoDisco());
+            $novaFaixaMusicos = $this->musicoDAO->listarPorCodigo($discoNovaFaixa->getCodigoDisco());
+            $novaFaixaCantores = $this->cantorDAO->listarPorCodigo($discoNovaFaixa->getCodigoDisco());
         }
 
-        return compact(
-            'msg', 'det', 'ed', 'fx', 'edF', 'edFDisco', 'edFComp', 'edFMus', 'edFCant',
-            'edFMin', 'edFSeg', 'edFDiscoCompositores', 'edFDiscoMusicos', 'edFDiscoCantores',
-            'fxCompositores', 'fxMusicos', 'fxCantores', 'dGeneros', 'dFaixas',
-            'dCompositores', 'dMusicos', 'dCantores', 'discos', 'todosGeneros', 'generosDoDisco', 'q'
-        );
+        return [
+            'mensagem' => $mensagem,
+            'discoDetalhe' => $discoDetalhe,
+            'discoEdicao' => $discoEdicao,
+            'discoNovaFaixa' => $discoNovaFaixa,
+            'faixaEdicao' => $faixaEdicao,
+            'faixaDiscoId' => $faixaDiscoId,
+            'faixaCompositoresSelecionados' => $faixaCompositoresSelecionados,
+            'faixaMusicosSelecionados' => $faixaMusicosSelecionados,
+            'faixaCantoresSelecionados' => $faixaCantoresSelecionados,
+            'faixaMinutos' => $faixaMinutos,
+            'faixaSegundos' => $faixaSegundos,
+            'discoCompositoresDisponiveis' => $discoCompositoresDisponiveis,
+            'discoMusicosDisponiveis' => $discoMusicosDisponiveis,
+            'discoCantoresDisponiveis' => $discoCantoresDisponiveis,
+            'novaFaixaCompositores' => $novaFaixaCompositores,
+            'novaFaixaMusicos' => $novaFaixaMusicos,
+            'novaFaixaCantores' => $novaFaixaCantores,
+            'detalheDiscoId' => $detalheDiscoId,
+            'detalheGeneros' => $detalheGeneros,
+            'detalheFaixas' => $detalheFaixas,
+            'detalheCompositores' => $detalheCompositores,
+            'detalheMusicos' => $detalheMusicos,
+            'detalheCantores' => $detalheCantores,
+            'discos' => $discos,
+            'todosGeneros' => $todosGeneros,
+            'generosDoDisco' => $generosDoDisco,
+            'termoPesquisa' => $termoPesquisa,
+        ];
     }
 
     private function removerDisco($utilizador, $post)
     {
-        if ($bloq = Permissao::bloquear($utilizador, 'remover')) {
-            return ['msg' => $bloq];
+        if ($bloqueio = Permissao::bloquear($utilizador, 'remover')) {
+            return ['mensagem' => $bloqueio];
         }
 
         $id = (int)($post['sel'] ?? 0);
         if ($id === 0) {
-            return ['msg' => 'Seleccione um disco.'];
+            return ['mensagem' => 'Seleccione um disco.'];
         }
 
-        $discoRemovido = $this->discoDAO->buscarPorCodigo($id);   // antes de remover, para guardar o título no log
+        // Lê o disco antes de remover para guardar o título no log.
+        $discoRemovido = $this->discoDAO->buscarPorCodigo($id);
         $removido = $this->discoDAO->remover($id);
+
         if ($removido) {
-            LogsController::registar('Eliminou o disco: ' . ($discoRemovido ? $discoRemovido->getTitulo() : 'ID ' . $id));
+            $descricao = $discoRemovido ? $discoRemovido->getTitulo() : 'ID ' . $id;
+            LogsController::registar('Eliminou o disco: ' . $descricao);
         }
 
-        return ['msg' => $removido ? 'Disco removido.' : 'Erro ao remover o disco.'];
+        return ['mensagem' => $removido ? 'Disco removido.' : 'Erro ao remover o disco.'];
     }
 
     private function atualizarDisco($utilizador, $post)
     {
-        if ($bloq = Permissao::bloquear($utilizador, 'editar')) {
-            return ['msg' => $bloq];
+        if ($bloqueio = Permissao::bloquear($utilizador, 'editar')) {
+            return ['mensagem' => $bloqueio];
         }
 
         $id = (int)$post['id'];
@@ -206,102 +255,154 @@ class ListagemDiscosController
             [], [], [], [], [], [], [], null, []
         ));
 
-        // géneros: apaga as ligações antigas e grava as marcadas
+        // Géneros: apaga as ligações antigas e grava as marcadas.
         $this->generoDAO->removerRelacoesPorDisco($id);
-        foreach (($post['generos'] ?? []) as $g) {
-            $this->generoDAO->inserirRelacaoGeneroDisco($id, (int)$g);
+        foreach (($post['generos'] ?? []) as $generoId) {
+            $this->generoDAO->inserirRelacaoGeneroDisco($id, (int)$generoId);
         }
 
-        return ['msg' => 'Disco atualizado.'];
+        return ['mensagem' => 'Disco atualizado.'];
     }
 
     private function adicionarFaixa($utilizador, $post)
     {
-        if ($bloq = Permissao::bloquear($utilizador, 'adicionar')) {
-            return ['msg' => $bloq];
+        if ($bloqueio = Permissao::bloquear($utilizador, 'adicionar')) {
+            return ['mensagem' => $bloqueio];
         }
 
-        $id  = (int)$post['id'];
-        $dur = sprintf('%02d:%02d', (int)$post['min'], (int)$post['seg']);
-        $num = count($this->faixaDAO->listarPorCodigo($id)) + 1;
+        $discoId = (int)$post['id'];
+        $duracao = sprintf('%02d:%02d', (int)$post['min'], (int)$post['seg']);
+        $numeroFaixa = count($this->faixaDAO->listarPorCodigo($discoId)) + 1;
 
-        $idFaixa = $this->faixaDAO->inserir(
-            new Faixa(trim($post['nome']), trim($post['artista']), $dur, $num),
-            $id
+        $faixaId = $this->faixaDAO->inserir(
+            new Faixa(trim($post['nome']), trim($post['artista']), $duracao, $numeroFaixa),
+            $discoId
         );
 
-        if ($idFaixa > 0) {
-            foreach (($post['compositores'] ?? []) as $c) $this->faixaDAO->InserRelacaoCompositor($idFaixa, (int)$c);
-            foreach (($post['musicos'] ?? []) as $m)      $this->faixaDAO->InserRelacaoMusico($idFaixa, (int)$m);
-            foreach (($post['cantores'] ?? []) as $c)     $this->faixaDAO->InserRelacaoCantor($idFaixa, (int)$c);
-            return ['msg' => 'Faixa adicionada.'];
+        if ($faixaId <= 0) {
+            return ['mensagem' => 'Erro ao adicionar a faixa.'];
         }
 
-        return ['msg' => 'Erro ao adicionar a faixa.'];
+        foreach (($post['compositores'] ?? []) as $compositorId) {
+            $this->faixaDAO->inserirRelacaoCompositor($faixaId, (int)$compositorId);
+        }
+
+        foreach (($post['musicos'] ?? []) as $musicoId) {
+            $this->faixaDAO->inserirRelacaoMusico($faixaId, (int)$musicoId);
+        }
+
+        foreach (($post['cantores'] ?? []) as $cantorId) {
+            $this->faixaDAO->inserirRelacaoCantor($faixaId, (int)$cantorId);
+        }
+
+        return ['mensagem' => 'Faixa adicionada.'];
     }
 
     private function atualizarFaixa($utilizador, $post)
     {
-        if ($bloq = Permissao::bloquear($utilizador, 'editar')) {
-            return ['msg' => $bloq];
+        if ($bloqueio = Permissao::bloquear($utilizador, 'editar')) {
+            return ['mensagem' => $bloqueio];
         }
 
         // Edita nome/artista/duração e sincroniza os participantes da faixa.
-        $id = (int)$post['id'];
-        $f  = (int)$post['id_faixa'];
-        $dur = sprintf('%02d:%02d', (int)$post['min'], (int)$post['seg']);
+        $discoId = (int)$post['id'];
+        $faixaId = (int)$post['id_faixa'];
+        $duracao = sprintf('%02d:%02d', (int)$post['min'], (int)$post['seg']);
+
         $this->faixaDAO->atualizar(
-            new Faixa(trim($post['nome']), trim($post['artista']), $dur, (int)$post['num']),
-            $f
+            new Faixa(trim($post['nome']), trim($post['artista']), $duracao, (int)$post['num']),
+            $faixaId
         );
 
-        $novosComp = array_map('intval', $post['compositores'] ?? []);
-        $novosMus  = array_map('intval', $post['musicos'] ?? []);
-        $novosCant = array_map('intval', $post['cantores'] ?? []);
-
-        $atualComp = $atualMus = $atualCant = [];
-        foreach ($this->faixaDAO->listarCompositoresPorFaixa($f) as $c) $atualComp[] = $c->getCodigoCompositor();
-        foreach ($this->faixaDAO->listarMusicosPorFaixa($f) as $m)      $atualMus[]  = $m->getCodigoMusico();
-        foreach ($this->faixaDAO->listarCantoresPorFaixa($f) as $c)     $atualCant[] = $c->getCodigoCantor();
-
-        foreach (array_diff($atualComp, $novosComp) as $c) $this->faixaDAO->removerCompositor($f, $c);
-        foreach (array_diff($atualMus, $novosMus) as $m)   $this->faixaDAO->removerMusico($f, $m);
-        foreach (array_diff($atualCant, $novosCant) as $c) $this->faixaDAO->removerCantor($f, $c);
-        foreach (array_diff($novosComp, $atualComp) as $c) $this->faixaDAO->InserRelacaoCompositor($f, $c);
-        foreach (array_diff($novosMus, $atualMus) as $m)   $this->faixaDAO->InserRelacaoMusico($f, $m);
-        foreach (array_diff($novosCant, $atualCant) as $c) $this->faixaDAO->InserRelacaoCantor($f, $c);
+        $this->sincronizarParticipantesDaFaixa($faixaId, $post);
 
         return [
-            'msg' => 'Faixa atualizada.',
-            'det' => $this->discoDAO->buscarPorCodigo($id),
+            'mensagem' => 'Faixa atualizada.',
+            'discoDetalhe' => $this->discoDAO->buscarPorCodigo($discoId),
         ];
     }
 
     private function removerFaixa($utilizador, $post)
     {
-        if ($bloq = Permissao::bloquear($utilizador, 'remover')) {
-            return ['msg' => $bloq];
+        if ($bloqueio = Permissao::bloquear($utilizador, 'remover')) {
+            return ['mensagem' => $bloqueio];
         }
 
-        $id = (int)$post['id'];
-        $f  = (int)($post['sel_faixa'] ?? 0);
+        $discoId = (int)$post['id'];
+        $faixaId = (int)($post['sel_faixa'] ?? 0);
 
-        if ($f === 0) {
+        if ($faixaId === 0) {
             return [
-                'msg' => 'Seleccione uma faixa.',
-                'det' => $this->discoDAO->buscarPorCodigo($id),
+                'mensagem' => 'Seleccione uma faixa.',
+                'discoDetalhe' => $this->discoDAO->buscarPorCodigo($discoId),
             ];
         }
 
-        // o DAO não deixa remover faixas com participantes: tira-os primeiro
-        foreach ($this->faixaDAO->listarCompositoresPorFaixa($f) as $c) $this->faixaDAO->removerCompositor($f, $c->getCodigoCompositor());
-        foreach ($this->faixaDAO->listarMusicosPorFaixa($f) as $m)      $this->faixaDAO->removerMusico($f, $m->getCodigoMusico());
-        foreach ($this->faixaDAO->listarCantoresPorFaixa($f) as $c)     $this->faixaDAO->removerCantor($f, $c->getCodigoCantor());
-        $removida = $this->faixaDAO->remover($f);
+        // O DAO não deixa remover faixas com participantes: tira-os primeiro.
+        $this->removerParticipantesDaFaixa($faixaId);
+        $removida = $this->faixaDAO->remover($faixaId);
 
         return [
-            'msg' => $removida ? 'Faixa removida.' : 'Não foi possível remover a faixa.',
-            'det' => $this->discoDAO->buscarPorCodigo($id),
+            'mensagem' => $removida ? 'Faixa removida.' : 'Não foi possível remover a faixa.',
+            'discoDetalhe' => $this->discoDAO->buscarPorCodigo($discoId),
         ];
+    }
+
+    /**
+     * Mantém apenas os participantes marcados no formulário de edição da faixa.
+     */
+    private function sincronizarParticipantesDaFaixa($faixaId, $post)
+    {
+        $novosCompositores = array_map('intval', $post['compositores'] ?? []);
+        $novosMusicos = array_map('intval', $post['musicos'] ?? []);
+        $novosCantores = array_map('intval', $post['cantores'] ?? []);
+
+        $compositoresAtuais = array_map(
+            fn($compositor) => $compositor->getCodigoCompositor(),
+            $this->faixaDAO->listarCompositoresPorFaixa($faixaId)
+        );
+        $musicosAtuais = array_map(
+            fn($musico) => $musico->getCodigoMusico(),
+            $this->faixaDAO->listarMusicosPorFaixa($faixaId)
+        );
+        $cantoresAtuais = array_map(
+            fn($cantor) => $cantor->getCodigoCantor(),
+            $this->faixaDAO->listarCantoresPorFaixa($faixaId)
+        );
+
+        foreach (array_diff($compositoresAtuais, $novosCompositores) as $compositorId) {
+            $this->faixaDAO->removerCompositor($faixaId, $compositorId);
+        }
+        foreach (array_diff($musicosAtuais, $novosMusicos) as $musicoId) {
+            $this->faixaDAO->removerMusico($faixaId, $musicoId);
+        }
+        foreach (array_diff($cantoresAtuais, $novosCantores) as $cantorId) {
+            $this->faixaDAO->removerCantor($faixaId, $cantorId);
+        }
+
+        foreach (array_diff($novosCompositores, $compositoresAtuais) as $compositorId) {
+            $this->faixaDAO->inserirRelacaoCompositor($faixaId, $compositorId);
+        }
+        foreach (array_diff($novosMusicos, $musicosAtuais) as $musicoId) {
+            $this->faixaDAO->inserirRelacaoMusico($faixaId, $musicoId);
+        }
+        foreach (array_diff($novosCantores, $cantoresAtuais) as $cantorId) {
+            $this->faixaDAO->inserirRelacaoCantor($faixaId, $cantorId);
+        }
+    }
+
+    private function removerParticipantesDaFaixa($faixaId)
+    {
+        foreach ($this->faixaDAO->listarCompositoresPorFaixa($faixaId) as $compositor) {
+            $this->faixaDAO->removerCompositor($faixaId, $compositor->getCodigoCompositor());
+        }
+
+        foreach ($this->faixaDAO->listarMusicosPorFaixa($faixaId) as $musico) {
+            $this->faixaDAO->removerMusico($faixaId, $musico->getCodigoMusico());
+        }
+
+        foreach ($this->faixaDAO->listarCantoresPorFaixa($faixaId) as $cantor) {
+            $this->faixaDAO->removerCantor($faixaId, $cantor->getCodigoCantor());
+        }
     }
 }

@@ -11,7 +11,7 @@ if (!Sessao::estaLogado()) {
 }
 
 $utilizador = Sessao::getUtilizadorLogado();
-$username = $utilizador->getUser_name();
+$username = $utilizador->getUserName();
 
 $erro = '';
 

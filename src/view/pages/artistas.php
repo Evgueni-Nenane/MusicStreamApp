@@ -10,25 +10,29 @@ if (!$utilizador) { header('Location: Login.php'); exit; }
 $podeAdicionar = Permissao::pode($utilizador, 'adicionar');
 $podeEditar    = Permissao::pode($utilizador, 'editar');
 $podeRemover   = Permissao::pode($utilizador, 'remover');
-$podeUsers     = Permissao::pode($utilizador, 'utilizadores');
+$podeUtilizadores     = Permissao::pode($utilizador, 'utilizadores');
 $podeLogs      = Permissao::pode($utilizador, 'logs');
 
 // Botões de acção de uma aba. Cada aba tem o seu formulário (form-musico,
 // form-compositor, form-cantor), por isso o Editar envia o rádio seleccionado
 // por GET e o Remover abre o modal de confirmação dessa aba.
-function acoes($tipo, $podeRemover, $podeEditar, $podeAdicionar)
+function renderizarAcoes($tipo, $podeRemover, $podeEditar, $podeAdicionar)
 {
-    echo '<div class="table-actions">';
+    $html = '<div class="table-actions">';
+
     if ($podeRemover) {
-        echo '<label for="m-rem-' . $tipo . '" class="btn btn-secondary btn-sm" style="cursor:pointer; margin:0;">Remover</label>';
+        $html .= '<label for="m-rem-' . $tipo . '" class="btn btn-secondary btn-sm" style="cursor:pointer; margin:0;">Remover</label>';
     }
+
     if ($podeEditar) {
-        echo '<button type="submit" name="acao" value="editar" formmethod="get" class="btn btn-secondary btn-sm">Editar</button>';
+        $html .= '<button type="submit" name="acao" value="editar" formmethod="get" class="btn btn-secondary btn-sm">Editar</button>';
     }
+
     if ($podeAdicionar) {
-        echo '<label for="modal-adicionar-artista-toggle" class="btn btn-primary btn-sm" style="cursor:pointer; margin:0;">Adicionar</label>';
+        $html .= '<label for="modal-adicionar-artista-toggle" class="btn btn-primary btn-sm" style="cursor:pointer; margin:0;">Adicionar</label>';
     }
-    echo '</div>';
+
+    return $html . '</div>';
 }
 
 $artistasController = new ArtistasController();
@@ -43,22 +47,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /* ---------- Estado da página ---------- */
 $estado = $artistasController->prepararEcra($_GET);
 
-$msg            = $estado['msg'];
-$tab            = $estado['tab'];
-$ed             = $estado['ed'];
-$edTipo         = $estado['edTipo'];
-$edInstrumentos = $estado['edInstrumentos'];
-$edId           = $estado['edId'];
-$edNome         = $estado['edNome'];
-$edApelido      = $estado['edApelido'];
-$edContacto     = $estado['edContacto'];
-$edEmail        = $estado['edEmail'];
-$edTitulo       = $estado['edTitulo'];
-$musicos        = $estado['musicos'];
-$cantores       = $estado['cantores'];
-$compositores   = $estado['compositores'];
-$instrumentos   = $estado['instrumentos'];
-$q              = $estado['q'];
+$msg = $estado['msg'];
+$tab = $estado['tab'];
+$artistaEdicao = $estado['artistaEdicao'];
+$tipoArtistaEdicao = $estado['tipoArtistaEdicao'];
+$instrumentosSelecionados = $estado['instrumentosSelecionados'];
+$artistaEdicaoId = $estado['artistaEdicaoId'];
+$artistaEdicaoNome = $estado['artistaEdicaoNome'];
+$artistaEdicaoApelido = $estado['artistaEdicaoApelido'];
+$artistaEdicaoContacto = $estado['artistaEdicaoContacto'];
+$artistaEdicaoEmail = $estado['artistaEdicaoEmail'];
+$artistaEdicaoTitulo = $estado['artistaEdicaoTitulo'];
+$musicos = $estado['musicos'];
+$cantores = $estado['cantores'];
+$compositores = $estado['compositores'];
+$instrumentos = $estado['instrumentos'];
+$termoPesquisa = $estado['termoPesquisa'];
+$paginaAtiva = 'artistas';
+$subtituloPagina = 'Gestão de artistas';
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -76,49 +82,17 @@ $q              = $estado['q'];
     <input type="radio" name="tabs" id="tab-cantores" class="tab-toggle" <?= $tab === 'cantores' ? 'checked' : '' ?>>
 
     <input type="checkbox" id="modal-adicionar-artista-toggle" class="modal-toggle">
-    <input type="checkbox" id="modal-editar-artista-toggle" class="modal-toggle" <?= $ed ? 'checked' : '' ?>>
+    <input type="checkbox" id="modal-editar-artista-toggle" class="modal-toggle" <?= $artistaEdicao ? 'checked' : '' ?>>
 
     <div class="app-container">
-        <aside>
-            <div class="title" id="artistas"><h1>DiscoGest</h1></div>
-            <nav>
-                <ul>
-                    <li class="secnav">Menu Principal</li>
-                    <li><a href="registro.php">Registar</a></li>
-                    <li><a href="listagemdiscos.php">Listar Discos</a></li>
-                    <li class="secnav">Intervenientes</li>
-                    <li><a href="artistas.php" class="active">Artistas</a></li>
-                    <li><a href="producao.php">Produção</a></li>
-                    <li class="secnav">Cadastros</li>
-                    <li><a href="instrumentos.php">Instrumentos</a></li>
-                    <li><a href="generos.php">Géneros</a></li>
-                    <li class="secnav">Acções</li>
-                    <!-- <li><a href="#">Exportar</a></li> -->
-                    <?php if ($podeUsers): ?><li><a href="administracao.php">Administração</a></li><?php endif; ?>
-                    <?php if ($podeLogs): ?><li><a href="logs.php">Logs</a></li><?php endif; ?>
-                    <li><a href="LogOut.php">Sair</a></li>
-                </ul>
-            </nav>
-        </aside>
+        <?php require __DIR__ . '/../partials/sidebar.php'; ?>
 
         <div class="containermain">
-            <header>
-                <div class="pagetitle">
-                    <h2>Sistema de Gestão de Discos</h2>
-                    <p>Gestão de artistas</p>
-                </div>
-                <div class="userdetails">
-                    <div class="userdetailstxt">
-                        <p><?= htmlspecialchars($utilizador->getNomeCompleto()) ?></p>
-                        <p><?= htmlspecialchars($utilizador->getPerfil()->getNome()) ?></p>
-                    </div>
-                    <img src="foto.php" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto de Perfil">
-                </div>
-            </header>
+            <?php require __DIR__ . '/../partials/header.php'; ?>
 
             <main>
                 <div class="card">
-                    
+
                     <form method="get" action="artistas.php" id="form-pesq">
                         <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
                     </form>
@@ -130,7 +104,7 @@ $q              = $estado['q'];
                             <label for="tab-cantores" class="tab-label">Listar Cantores</label>
                         </div>
                         <input type="search" class="search-input" name="q" form="form-pesq"
-                            value="<?= htmlspecialchars($q) ?>" placeholder="Pesquisar artista...">
+                            value="<?= htmlspecialchars($termoPesquisa) ?>" placeholder="Pesquisar artista...">
                     </div>
 
                     <?php if ($msg): ?>
@@ -158,12 +132,12 @@ $q              = $estado['q'];
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$musicos): ?>
-                                            <tr><td colspan="5"><?= $q !== '' ? 'Nenhum músico encontrado.' : 'Nenhum músico cadastrado.' ?></td></tr>
+                                            <tr><td colspan="5"><?= $termoPesquisa !== '' ? 'Nenhum músico encontrado.' : 'Nenhum músico cadastrado.' ?></td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
                             </div>
-                            <?php acoes('musico', $podeRemover, $podeEditar, $podeAdicionar); ?>
+                            <?= renderizarAcoes('musico', $podeRemover, $podeEditar, $podeAdicionar) ?>
                         </div>
                     </form>
 
@@ -186,12 +160,12 @@ $q              = $estado['q'];
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$compositores): ?>
-                                            <tr><td colspan="4"><?= $q !== '' ? 'Nenhum compositor encontrado.' : 'Nenhum compositor cadastrado.' ?></td></tr>
+                                            <tr><td colspan="4"><?= $termoPesquisa !== '' ? 'Nenhum compositor encontrado.' : 'Nenhum compositor cadastrado.' ?></td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
                             </div>
-                            <?php acoes('compositor', $podeRemover, $podeEditar, $podeAdicionar); ?>
+                            <?= renderizarAcoes('compositor', $podeRemover, $podeEditar, $podeAdicionar) ?>
                         </div>
                     </form>
 
@@ -214,12 +188,12 @@ $q              = $estado['q'];
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$cantores): ?>
-                                            <tr><td colspan="4"><?= $q !== '' ? 'Nenhum cantor encontrado.' : 'Nenhum cantor cadastrado.' ?></td></tr>
+                                            <tr><td colspan="4"><?= $termoPesquisa !== '' ? 'Nenhum cantor encontrado.' : 'Nenhum cantor cadastrado.' ?></td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
                             </div>
-                            <?php acoes('cantor', $podeRemover, $podeEditar, $podeAdicionar); ?>
+                            <?= renderizarAcoes('cantor', $podeRemover, $podeEditar, $podeAdicionar) ?>
                         </div>
                     </form>
                 </div>
@@ -295,33 +269,33 @@ $q              = $estado['q'];
     <div class="modal-overlay modal-editar-artista">
         <div class="modal modal-sm">
             <div class="modal-header">
-                <h2>Editar <?= $edTitulo ?></h2>
+                <h2>Editar <?= $artistaEdicaoTitulo ?></h2>
                 <label for="modal-editar-artista-toggle" class="modal-close">&times;</label>
             </div>
             <form method="post" action="artistas.php?tab=<?= $tab ?>">
                 <input type="hidden" name="acao" value="atualizar">
-                <input type="hidden" name="tipo" value="<?= $ed ? htmlspecialchars($edTipo) : 'musico' ?>">
-                <input type="hidden" name="id" value="<?= $ed ? $edId : '' ?>">
+                <input type="hidden" name="tipo" value="<?= $artistaEdicao ? htmlspecialchars($tipoArtistaEdicao) : 'musico' ?>">
+                <input type="hidden" name="id" value="<?= $artistaEdicao ? $artistaEdicaoId : '' ?>">
                 <div class="modal-body">
                     <div class="form-grid">
                         <div class="label-group">
                             <label for="ed-nome">Nome</label>
-                            <input type="text" id="ed-nome" name="nome" required value="<?= htmlspecialchars($edNome) ?>">
+                            <input type="text" id="ed-nome" name="nome" required value="<?= htmlspecialchars($artistaEdicaoNome) ?>">
                         </div>
                         <div class="label-group">
                             <label for="ed-apelido">Apelido</label>
-                            <input type="text" id="ed-apelido" name="apelido" required value="<?= htmlspecialchars($edApelido) ?>">
+                            <input type="text" id="ed-apelido" name="apelido" required value="<?= htmlspecialchars($artistaEdicaoApelido) ?>">
                         </div>
 
                         <!-- Só para Músico (os outros tipos não têm instrumentos) -->
-                        <?php if ($edTipo !== 'compositor' && $edTipo !== 'cantor'): ?>
+                        <?php if ($tipoArtistaEdicao !== 'compositor' && $tipoArtistaEdicao !== 'cantor'): ?>
                         <div class="instrumento-group sempre">
                             <label>Instrumentos Musicais</label>
                             <div class="list-box">
                                 <?php foreach ($instrumentos as $i): ?>
                                     <div class="list-item">
                                         <input type="checkbox" name="instrumentos[]" value="<?= $i->getCodigo() ?>" id="edinst<?= $i->getCodigo() ?>"
-                                            <?= in_array($i->getCodigo(), $edInstrumentos) ? 'checked' : '' ?>>
+                                            <?= in_array($i->getCodigo(), $instrumentosSelecionados) ? 'checked' : '' ?>>
                                         <label for="edinst<?= $i->getCodigo() ?>"><?= htmlspecialchars($i->getNome()) ?></label>
                                     </div>
                                 <?php endforeach; ?>
@@ -331,11 +305,11 @@ $q              = $estado['q'];
 
                         <div class="label-group form-grid-full">
                             <label for="ed-contacto">Contacto</label>
-                            <input type="text" id="ed-contacto" name="contacto" value="<?= htmlspecialchars($edContacto) ?>">
+                            <input type="text" id="ed-contacto" name="contacto" value="<?= htmlspecialchars($artistaEdicaoContacto) ?>">
                         </div>
                         <div class="label-group form-grid-full">
                             <label for="ed-email">E-mail</label>
-                            <input type="email" id="ed-email" name="email" value="<?= htmlspecialchars($edEmail) ?>">
+                            <input type="email" id="ed-email" name="email" value="<?= htmlspecialchars($artistaEdicaoEmail) ?>">
                         </div>
                     </div>
                 </div>

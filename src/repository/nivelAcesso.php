@@ -6,7 +6,7 @@ class NivelAcessoDAO
 {
     public function inserir($nome)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO NivelAcesso (NomeNivel) VALUES (?)";
         $ps = $conn->prepare($sql);
         $ps->bind_param("s", $nome);
@@ -22,7 +22,7 @@ class NivelAcessoDAO
     public function listarNiveis()
     {
         $niveis = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT * FROM NivelAcesso";
         $result = $conn->query($sql);
 
@@ -38,7 +38,7 @@ class NivelAcessoDAO
     // Todas as linhas da tabela (com as permissões), para mostrar na aba Perfis
     public function listarPerfis()
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $result = $conn->query("SELECT * FROM NivelAcesso ORDER BY CodigoNivel");
         $perfis = [];
         while ($row = $result->fetch_assoc()) {
@@ -50,7 +50,7 @@ class NivelAcessoDAO
     // Uma linha só (devolve null se não existir)
     public function buscarPorCodigo($codigo)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $ps = $conn->prepare("SELECT * FROM NivelAcesso WHERE CodigoNivel = ?");
         $ps->bind_param("i", $codigo);
         $ps->execute();
@@ -75,7 +75,7 @@ class NivelAcessoDAO
 
     public function criar($nome, $perm)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO NivelAcesso
                 (NomeNivel, PodeLer, PodeAdicionar, PodeEditar, PodeRemover, PodeUtilizadores, PodeLogs)
                 VALUES (?, 1, ?, ?, ?, ?, ?)";
@@ -100,7 +100,7 @@ class NivelAcessoDAO
     {
         if ($codigo <= 4) return false; // perfis base não se editam
 
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "UPDATE NivelAcesso SET NomeNivel=?, PodeAdicionar=?, PodeEditar=?,
                 PodeRemover=?, PodeUtilizadores=?, PodeLogs=? WHERE CodigoNivel=?";
         $ps = $conn->prepare($sql);
@@ -124,7 +124,7 @@ class NivelAcessoDAO
     {
         if ($codigo <= 4) return false; // perfis base não se apagam
 
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
 
         // Não apaga se houver utilizadores com este perfil.
         $ps = $conn->prepare("SELECT COUNT(*) AS total FROM Utilizador WHERE Perfil = ?");
@@ -137,7 +137,7 @@ class NivelAcessoDAO
         $ps->bind_param("i", $codigo);
         try {
             $ps->execute();
-            return true;    
+            return true;
         } catch (mysqli_sql_exception $e) {
             return false;
         }

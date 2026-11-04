@@ -11,7 +11,7 @@ class LoginDAO
 
     public function login($username, $senha, $logController)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT Codigo_User, Nome, Apelido, UserName, Genero, Email, Contacto, "
             . "Perfil, NomeNivel"
             . " FROM Utilizador u"
@@ -58,7 +58,7 @@ class LoginDAO
 
     public function isPrimeiroAcesso($username, $senha)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT Primeiro_Acesso FROM Utilizador WHERE UserName = ? AND Senha = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("ss", $username, $senha);
@@ -70,7 +70,7 @@ class LoginDAO
 
     public function atualizarSenha($username, $senhaAntiga, $novaSenha)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "UPDATE Utilizador SET Senha = ?, Primeiro_Acesso = 0 WHERE BINARY UserName = ? AND BINARY Senha = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("sss", $novaSenha, $username, $senhaAntiga);

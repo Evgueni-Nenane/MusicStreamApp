@@ -37,28 +37,27 @@ class ProducaoController
         $tipo = $post['tipo'] ?? '';
         $acao = $post['acao'] ?? '';
 
-        $permissaoPedido = $acao === 'adicionar' ? 'adicionar'
-            : ($acao === 'atualizar' ? 'editar'
-            : ($acao === 'remover' ? 'remover' : ''));
+        $permissaoPedido = match ($acao) {
+            'adicionar' => 'adicionar',
+            'atualizar' => 'editar',
+            'remover' => 'remover',
+            default => '',
+        };
 
         if ($permissaoPedido === '') {
             return 'Acção inválida.';
         }
-        if ($bloq = Permissao::bloquear($utilizador, $permissaoPedido)) {
-            return $bloq;
+
+        if ($bloqueio = Permissao::bloquear($utilizador, $permissaoPedido)) {
+            return $bloqueio;
         }
 
-        if ($tipo === 'produtor') {
-            return $this->processarProdutor($acao, $post);
-        }
-        if ($tipo === 'gravadora') {
-            return $this->processarGravadora($acao, $post);
-        }
-        if ($tipo === 'editora') {
-            return $this->processarEditora($acao, $post);
-        }
-
-        return 'Tipo inválido.';
+        return match ($tipo) {
+            'produtor' => $this->processarProdutor($acao, $post),
+            'gravadora' => $this->processarGravadora($acao, $post),
+            'editora' => $this->processarEditora($acao, $post),
+            default => 'Tipo inválido.',
+        };
     }
 
     /**
@@ -68,23 +67,23 @@ class ProducaoController
     {
         $msg = $get['msg'] ?? '';
         $tab = 'prod';
-        $edProd = $edGrav = $edEdit = null;
+        $produtorEdicao = $gravadoraEdicao = $editoraEdicao = null;
 
         if (($get['acao'] ?? '') === 'editar') {
             $sel  = (int)($get['sel'] ?? 0);
             $tipo = $get['tipo'] ?? '';
 
             if ($tipo === 'produtor') {
-                $edProd = $this->produtorController->buscarPorCodigo($sel);
+                $produtorEdicao = $this->produtorController->buscarPorCodigo($sel);
                 $tab = 'prod';
             } elseif ($tipo === 'gravadora') {
-                $edGrav = $this->gravadoraController->buscarPorCodigo($sel);
+                $gravadoraEdicao = $this->gravadoraController->buscarPorCodigo($sel);
                 $tab = 'grav';
             } elseif ($tipo === 'editora') {
-                $edEdit = $this->editoraController->buscarPorCodigo($sel);
+                $editoraEdicao = $this->editoraController->buscarPorCodigo($sel);
                 $tab = 'edit';
             }
-            if (!$edProd && !$edGrav && !$edEdit) {
+            if (!$produtorEdicao && !$gravadoraEdicao && !$editoraEdicao) {
                 $msg = 'Seleccione um registo para editar.';
             }
         }
@@ -94,34 +93,37 @@ class ProducaoController
         $editoras   = $this->editoraController->listarEditoras();
 
         // Pesquisa simples (filtra em memória as 3 listas pelo texto introduzido)
-        $q = trim($get['q'] ?? '');
-        if ($q !== '') {
-            $qMin = mb_strtolower($q);
+        $termoPesquisa = trim($get['q'] ?? '');
+        if ($termoPesquisa !== '') {
+            $termoMinusculo = mb_strtolower($termoPesquisa);
 
-            $produtores = array_values(array_filter($produtores, function ($p) use ($qMin) {
-                $alvo = mb_strtolower(
-                    $p->getCodigoProdutor() . ' ' . $p->getNomeCompleto() . ' ' .
-                    $p->getContactoProdutor() . ' ' . $p->getEmailProdutor()
+            $produtores = array_values(array_filter($produtores, function ($produtor) use ($termoMinusculo) {
+                $textoPesquisa = mb_strtolower(
+                    $produtor->getCodigoProdutor() . ' ' . $produtor->getNomeCompleto() . ' ' .
+                    $produtor->getContactoProdutor() . ' ' . $produtor->getEmailProdutor()
                 );
-                return str_contains($alvo, $qMin);
+
+                return str_contains($textoPesquisa, $termoMinusculo);
             }));
 
-            $gravadoras = array_values(array_filter($gravadoras, function ($g) use ($qMin) {
-                $alvo = mb_strtolower(
-                    $g->getCodigoGravadora() . ' ' . $g->getNomeGravadora() . ' ' .
-                    $g->getContactoGravadora() . ' ' . $g->getEmailGravadora() . ' ' .
-                    $g->getEnderecoGravadora()
+            $gravadoras = array_values(array_filter($gravadoras, function ($gravadora) use ($termoMinusculo) {
+                $textoPesquisa = mb_strtolower(
+                    $gravadora->getCodigoGravadora() . ' ' . $gravadora->getNomeGravadora() . ' ' .
+                    $gravadora->getContactoGravadora() . ' ' . $gravadora->getEmailGravadora() . ' ' .
+                    $gravadora->getEnderecoGravadora()
                 );
-                return str_contains($alvo, $qMin);
+
+                return str_contains($textoPesquisa, $termoMinusculo);
             }));
 
-            $editoras = array_values(array_filter($editoras, function ($e) use ($qMin) {
-                $alvo = mb_strtolower(
-                    $e->getCodigoEditora() . ' ' . $e->getNomeEditora() . ' ' .
-                    $e->getContactoEditora() . ' ' . $e->getEmailEditora() . ' ' .
-                    $e->getEndereco()
+            $editoras = array_values(array_filter($editoras, function ($editora) use ($termoMinusculo) {
+                $textoPesquisa = mb_strtolower(
+                    $editora->getCodigoEditora() . ' ' . $editora->getNomeEditora() . ' ' .
+                    $editora->getContactoEditora() . ' ' . $editora->getEmailEditora() . ' ' .
+                    $editora->getEndereco()
                 );
-                return str_contains($alvo, $qMin);
+
+                return str_contains($textoPesquisa, $termoMinusculo);
             }));
 
             // Abre automaticamente a primeira aba que tenha resultados
@@ -132,7 +134,17 @@ class ProducaoController
             }
         }
 
-        return compact('msg', 'tab', 'edProd', 'edGrav', 'edEdit', 'q', 'produtores', 'gravadoras', 'editoras');
+        return [
+            'msg' => $msg,
+            'tab' => $tab,
+            'produtorEdicao' => $produtorEdicao,
+            'gravadoraEdicao' => $gravadoraEdicao,
+            'editoraEdicao' => $editoraEdicao,
+            'termoPesquisa' => $termoPesquisa,
+            'produtores' => $produtores,
+            'gravadoras' => $gravadoras,
+            'editoras' => $editoras,
+        ];
     }
 
     private function processarProdutor($acao, $post)

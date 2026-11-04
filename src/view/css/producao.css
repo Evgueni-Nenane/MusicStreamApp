@@ -20,8 +20,7 @@ body {
 /* 2. CHECKBOX / RADIO HACK (Base)                              */
 /* ============================================================ */
 /* Estes inputs são escondidos mas controlam modais e abas */
-.tab-toggle,
-.modal-toggle {
+.tab-toggle, .modal-toggle {
     display: none;
 }
 
@@ -207,17 +206,13 @@ header {
 }
 
 /* Os rádios são irmãos de .card-header e dos .panel, por isso o "~" funciona */
-#tab-prod:checked ~ .card-header [for="tab-prod"],
-#tab-grav:checked ~ .card-header [for="tab-grav"],
-#tab-edit:checked ~ .card-header [for="tab-edit"] {
+#tab-prod:checked ~ .card-header [for="tab-prod"], #tab-grav:checked ~ .card-header [for="tab-grav"], #tab-edit:checked ~ .card-header [for="tab-edit"] {
     background: #fff;
     color: #1e1e1e;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
-#tab-prod:checked ~ .panel-prod,
-#tab-grav:checked ~ .panel-grav,
-#tab-edit:checked ~ .panel-edit {
+#tab-prod:checked ~ .panel-prod, #tab-grav:checked ~ .panel-grav, #tab-edit:checked ~ .panel-edit {
     display: block;
 }
 
@@ -234,8 +229,7 @@ header {
     width: 250px;
 }
 
-.search-input:focus,
-.label-group input:focus {
+.search-input:focus, .label-group input:focus {
     border-color: #1e1e1e;
     box-shadow: 0 0 0 3px rgba(30, 30, 30, 0.06);
 }
@@ -423,6 +417,7 @@ input[type=radio] {
         opacity: 0;
         transform: translateY(12px) scale(0.98);
     }
+
     to {
         opacity: 1;
         transform: none;

@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once __DIR__ . '/../repository/faixa.php';
 require_once __DIR__ . '/../model/faixa.php';
 
@@ -57,22 +57,22 @@ class FaixaController
 
     public function associarCompositor($idFaixa, $idCompositor)
     {
-        return $this->faixaDAO->InserRelacaoCompositor($idFaixa, $idCompositor);
+        return $this->faixaDAO->inserirRelacaoCompositor($idFaixa, $idCompositor);
     }
 
     public function associarCantor($idFaixa, $idCantor)
     {
-        return $this->faixaDAO->InserRelacaoCantor($idFaixa, $idCantor);
+        return $this->faixaDAO->inserirRelacaoCantor($idFaixa, $idCantor);
     }
 
     public function associarMusico($idFaixa, $idMusico)
     {
-        return $this->faixaDAO->InserRelacaoMusico($idFaixa, $idMusico);
+        return $this->faixaDAO->inserirRelacaoMusico($idFaixa, $idMusico);
     }
 
     public function associarProdutor($idFaixa, $idProdutor)
     {
-        return $this->faixaDAO->InserRelacaoProdutor($idFaixa, $idProdutor);
+        return $this->faixaDAO->inserirRelacaoProdutor($idFaixa, $idProdutor);
     }
 
     public function removerCompositorDaFaixa($idFaixa, $idCompositor)

@@ -51,63 +51,66 @@ class RegistoDiscoController
      */
     public function processarPost($utilizador, $post)
     {
-        if ($bloq = Permissao::bloquear($utilizador, 'adicionar')) {
-            return ['erro' => $bloq];
+        if ($bloqueio = Permissao::bloquear($utilizador, 'adicionar')) {
+            return ['erro' => $bloqueio];
         }
 
-        $titulo     = trim($post['titulo'] ?? '');
-        $preco      = ($post['preco'] ?? '') !== '' ? (float)$post['preco'] : 0;
+        $titulo = trim($post['titulo'] ?? '');
+        $preco = ($post['preco'] ?? '') !== '' ? (float)$post['preco'] : 0;
         $dataEdicao = $post['ano_edicao'] ?? '';
-        $ano        = $dataEdicao !== '' ? (int)substr($dataEdicao, 0, 4) : null;   // o disco guarda só o ano
-        $codEditora = (int)($post['editora'] ?? 0);
+        $ano = $dataEdicao !== '' ? (int)substr($dataEdicao, 0, 4) : null;   // o disco guarda só o ano
+        $editoraId = (int)($post['editora'] ?? 0);
 
         if ($titulo === '') {
             return ['erro' => 'O título é obrigatório.'];
         }
+
         if (empty($post['generos'])) {
             return ['erro' => 'Escolha pelo menos um género.'];
         }
-        if ($codEditora > 0 && $dataEdicao === '') {
+
+        if ($editoraId > 0 && $dataEdicao === '') {
             return ['erro' => 'Escolha a data de edição para associar a editora.'];
         }
 
-        $disco  = new DiscoCompacto(0, $titulo, $preco, $ano, [], [], [], [], [], [], [], null, []);
-        $codigo = $this->discoDAO->inserir($disco);
+        $disco = new DiscoCompacto(0, $titulo, $preco, $ano, [], [], [], [], [], [], [], null, []);
+        $codigoDisco = $this->discoDAO->inserir($disco);
 
-        if ($codigo <= 0) {
+        if ($codigoDisco <= 0) {
             return ['erro' => 'Erro ao registar o disco.'];
         }
 
-        // género(s)
-        foreach ($post['generos'] as $g) {
-            $this->generoDAO->inserirRelacaoGeneroDisco($codigo, (int)$g);
+        foreach ($post['generos'] as $generoId) {
+            $this->generoDAO->inserirRelacaoGeneroDisco($codigoDisco, (int)$generoId);
         }
 
-        // participantes
-        foreach (($post['compositores'] ?? []) as $c) {
-            $this->compositorDAO->inserirRelacaoDiscoCompositor($codigo, (int)$c);
-        }
-        foreach (($post['musicos'] ?? []) as $m) {
-            $this->musicoDAO->inserirRelacaoDiscoMusico($codigo, (int)$m);
-        }
-        foreach (($post['cantores'] ?? []) as $c) {
-            $this->cantorDAO->inserirRelacaoDiscoCantor($codigo, (int)$c);
+        foreach (($post['compositores'] ?? []) as $compositorId) {
+            $this->compositorDAO->inserirRelacaoDiscoCompositor($codigoDisco, (int)$compositorId);
         }
 
-        // produção
-        foreach (($post['produtores'] ?? []) as $p) {
-            $this->produtorDAO->inserirRelacaoDiscoProdutor($codigo, (int)$p);
+        foreach (($post['musicos'] ?? []) as $musicoId) {
+            $this->musicoDAO->inserirRelacaoDiscoMusico($codigoDisco, (int)$musicoId);
         }
-        foreach (($post['gravadoras'] ?? []) as $g) {
-            $this->gravadoraDAO->inserirRelacaoDiscoGravadora($codigo, (int)$g);
+
+        foreach (($post['cantores'] ?? []) as $cantorId) {
+            $this->cantorDAO->inserirRelacaoDiscoCantor($codigoDisco, (int)$cantorId);
         }
-        if ($codEditora > 0) {
-            $this->edicaoDAO->inserir(new Edicao($codigo, $codEditora, $dataEdicao));
+
+        foreach (($post['produtores'] ?? []) as $produtorId) {
+            $this->produtorDAO->inserirRelacaoDiscoProdutor($codigoDisco, (int)$produtorId);
+        }
+
+        foreach (($post['gravadoras'] ?? []) as $gravadoraId) {
+            $this->gravadoraDAO->inserirRelacaoDiscoGravadora($codigoDisco, (int)$gravadoraId);
+        }
+
+        if ($editoraId > 0) {
+            $this->edicaoDAO->inserir(new Edicao($codigoDisco, $editoraId, $dataEdicao));
         }
 
         LogsController::registar('Registou o disco: ' . $titulo);
 
-        return ['redirect' => 'registro.php?ok=' . $codigo];
+        return ['redirect' => 'registro.php?ok=' . $codigoDisco];
     }
 
     /**
@@ -115,48 +118,73 @@ class RegistoDiscoController
      */
     public function prepararEcra($get)
     {
-        $msg = isset($get['ok']) ? 'Disco registado com sucesso' : '';
-        $erro = '';
+        $mensagem = isset($get['ok']) ? 'Disco registado com sucesso' : '';
 
-        /* Listas para os modais (código => texto) */
-        $generos = [];
-        foreach ($this->generoDAO->listarTodos() as $g) {
-            $generos[$g->getCodigoGenero()] = $g->getNomeGenero();
-        }
-
-        $compositores = [];
-        foreach ($this->compositorDAO->listarTodos() as $c) {
-            $compositores[$c->getCodigoCompositor()] = $c->getNomeCompositor() . ' ' . $c->getApelidoCompositor();
-        }
-
-        $musicos = [];
-        foreach ($this->musicoDAO->listarTodos() as $m) {
-            $musicos[$m->getCodigoMusico()] = $m->getNomeMusico() . ' ' . $m->getApelidoMusico();
-        }
-
-        $cantores = [];
-        foreach ($this->cantorDAO->listarTodos() as $c) {
-            $cantores[$c->getCodigoCantor()] = $c->getNomeCantor() . ' ' . $c->getApelidoCantor();
-        }
-
-        $produtores = [];
-        foreach ($this->produtorDAO->listarTodos() as $p) {
-            $produtores[$p->getCodigoProdutor()] = $p->getNomeProdutor() . ' ' . $p->getApelidoProdutor();
-        }
-
-        $gravadoras = [];
-        foreach ($this->gravadoraDAO->listarTodos() as $g) {
-            $gravadoras[$g->getCodigoGravadora()] = $g->getNomeGravadora();
-        }
-
-        $editoras = [];
-        foreach ($this->editoraDAO->listarTodos() as $e) {
-            $editoras[$e->getCodigoEditora()] = $e->getNomeEditora();
-        }
-
-        return compact(
-            'msg', 'erro', 'generos', 'compositores', 'musicos', 'cantores',
-            'produtores', 'gravadoras', 'editoras'
+        $generos = $this->mapearOpcoes(
+            $this->generoDAO->listarTodos(),
+            fn($genero) => $genero->getCodigoGenero(),
+            fn($genero) => $genero->getNomeGenero()
         );
+
+        $compositores = $this->mapearOpcoes(
+            $this->compositorDAO->listarTodos(),
+            fn($compositor) => $compositor->getCodigoCompositor(),
+            fn($compositor) => $compositor->getNomeCompositor() . ' ' . $compositor->getApelidoCompositor()
+        );
+
+        $musicos = $this->mapearOpcoes(
+            $this->musicoDAO->listarTodos(),
+            fn($musico) => $musico->getCodigoMusico(),
+            fn($musico) => $musico->getNomeMusico() . ' ' . $musico->getApelidoMusico()
+        );
+
+        $cantores = $this->mapearOpcoes(
+            $this->cantorDAO->listarTodos(),
+            fn($cantor) => $cantor->getCodigoCantor(),
+            fn($cantor) => $cantor->getNomeCantor() . ' ' . $cantor->getApelidoCantor()
+        );
+
+        $produtores = $this->mapearOpcoes(
+            $this->produtorDAO->listarTodos(),
+            fn($produtor) => $produtor->getCodigoProdutor(),
+            fn($produtor) => $produtor->getNomeProdutor() . ' ' . $produtor->getApelidoProdutor()
+        );
+
+        $gravadoras = $this->mapearOpcoes(
+            $this->gravadoraDAO->listarTodos(),
+            fn($gravadora) => $gravadora->getCodigoGravadora(),
+            fn($gravadora) => $gravadora->getNomeGravadora()
+        );
+
+        $editoras = $this->mapearOpcoes(
+            $this->editoraDAO->listarTodos(),
+            fn($editora) => $editora->getCodigoEditora(),
+            fn($editora) => $editora->getNomeEditora()
+        );
+
+        return [
+            'mensagem' => $mensagem,
+            'generos' => $generos,
+            'compositores' => $compositores,
+            'musicos' => $musicos,
+            'cantores' => $cantores,
+            'produtores' => $produtores,
+            'gravadoras' => $gravadoras,
+            'editoras' => $editoras,
+        ];
+    }
+
+    /**
+     * Converte uma lista de objectos numa lista associativa código => texto.
+     */
+    private function mapearOpcoes(array $registos, callable $obterCodigo, callable $obterTexto)
+    {
+        $opcoes = [];
+
+        foreach ($registos as $registo) {
+            $opcoes[$obterCodigo($registo)] = $obterTexto($registo);
+        }
+
+        return $opcoes;
     }
 }

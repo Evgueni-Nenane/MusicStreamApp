@@ -1,27 +1,28 @@
-<?php 
- class Genero {
+<?php
 
+class Genero
+{
     private $codigoGenero;
     private $nomeGenero;
 
-   
-    
-    public function __construct($codigoGenero = null, $nomeGenero = null) {
+    public function __construct($codigoGenero = null, $nomeGenero = null)
+    {
         $this->codigoGenero = $codigoGenero;
         $this->nomeGenero = $nomeGenero;
     }
-    
-    
-    public function getCodigoGenero() {
+
+    public function getCodigoGenero()
+    {
         return $this->codigoGenero;
     }
 
-    public function getNomeGenero() {
+    public function getNomeGenero()
+    {
         return $this->nomeGenero;
     }
 
- 
-    public function toString() {
+    public function toString()
+    {
         return $this->nomeGenero;
     }
 }
