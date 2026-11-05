@@ -32,8 +32,14 @@ if (!$proprio && !Permissao::pode($utilizador, 'utilizadores')) {
 $utilizadorDAO = new UtilizadorDAO();
 $foto = $utilizadorDAO->buscarFoto($id);
 
+// Sem foto guardada: devolve o avatar padrão em vez de uma imagem quebrada.
 if ($foto === null) {
-    http_response_code(404);
+    $avatarPadrao = __DIR__ . '/../resources/user.png';
+
+    header('Content-Type: image/png');
+    header('Content-Length: ' . filesize($avatarPadrao));
+    header('Cache-Control: private, max-age=300');
+    readfile($avatarPadrao);
     exit;
 }
 
