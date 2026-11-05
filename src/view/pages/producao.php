@@ -113,7 +113,9 @@ $subtituloPagina = 'Gestão de produção';
                             </div>
                             <div class="table-actions">
                                 <?php if ($podeRemover): ?><label for="m-rem-prod" class="btn btn-secondary btn-sm">Remover</label><?php endif; ?>
-                                <?php if ($podeEditar): ?><button type="submit" name="acao" value="editar" formmethod="get" class="btn btn-secondary btn-sm">Editar</button><?php endif; ?>
+                                <?php if ($podeEditar): ?>
+                                    <button type="submit" name="acao" value="editar" formmethod="get" class="btn btn-secondary btn-sm">Editar</button>
+                                <?php endif; ?>
                                 <?php if ($podeAdicionar): ?><label for="m-add-prod" class="btn btn-primary btn-sm">Adicionar</label><?php endif; ?>
                             </div>
                         </form>
@@ -156,7 +158,9 @@ $subtituloPagina = 'Gestão de produção';
                             </div>
                             <div class="table-actions">
                                 <?php if ($podeRemover): ?><label for="m-rem-grav" class="btn btn-secondary btn-sm">Remover</label><?php endif; ?>
-                                <?php if ($podeEditar): ?><button type="submit" name="acao" value="editar" formmethod="get" class="btn btn-secondary btn-sm">Editar</button><?php endif; ?>
+                                <?php if ($podeEditar): ?>
+                                    <button type="submit" name="acao" value="editar" formmethod="get" class="btn btn-secondary btn-sm">Editar</button>
+                                <?php endif; ?>
                                 <?php if ($podeAdicionar): ?><label for="m-add-grav" class="btn btn-primary btn-sm">Adicionar</label><?php endif; ?>
                             </div>
                         </form>
@@ -199,7 +203,9 @@ $subtituloPagina = 'Gestão de produção';
                             </div>
                             <div class="table-actions">
                                 <?php if ($podeRemover): ?><label for="m-rem-edit" class="btn btn-secondary btn-sm">Remover</label><?php endif; ?>
-                                <?php if ($podeEditar): ?><button type="submit" name="acao" value="editar" formmethod="get" class="btn btn-secondary btn-sm">Editar</button><?php endif; ?>
+                                <?php if ($podeEditar): ?>
+                                    <button type="submit" name="acao" value="editar" formmethod="get" class="btn btn-secondary btn-sm">Editar</button>
+                                <?php endif; ?>
                                 <?php if ($podeAdicionar): ?><label for="m-add-edit" class="btn btn-primary btn-sm">Adicionar</label><?php endif; ?>
                             </div>
                         </form>
@@ -222,10 +228,22 @@ $subtituloPagina = 'Gestão de produção';
                 <input type="hidden" name="acao" value="adicionar">
                 <div class="modal-body">
                     <div class="form-grid">
-                        <div class="label-group"><label for="ap-nome">Nome *</label><input id="ap-nome" name="nome" type="text" required></div>
-                        <div class="label-group"><label for="ap-apelido">Apelido *</label><input id="ap-apelido" name="apelido" type="text" required></div>
-                        <div class="label-group full"><label for="ap-contacto">Contacto</label><input id="ap-contacto" name="contacto" type="tel"></div>
-                        <div class="label-group full"><label for="ap-email">E-mail</label><input id="ap-email" name="email" type="email"></div>
+                        <div class="label-group">
+                            <label for="ap-nome">Nome *</label>
+                            <input id="ap-nome" name="nome" type="text" required>
+                        </div>
+                        <div class="label-group">
+                            <label for="ap-apelido">Apelido *</label>
+                            <input id="ap-apelido" name="apelido" type="text" required>
+                        </div>
+                        <div class="label-group full">
+                            <label for="ap-contacto">Contacto</label>
+                            <input id="ap-contacto" name="contacto" type="tel">
+                        </div>
+                        <div class="label-group full">
+                            <label for="ap-email">E-mail</label>
+                            <input id="ap-email" name="email" type="email">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -249,10 +267,22 @@ $subtituloPagina = 'Gestão de produção';
                 <input type="hidden" name="id" value="<?= $produtorEdicao ? $produtorEdicao->getCodigoProdutor() : '' ?>">
                 <div class="modal-body">
                     <div class="form-grid">
-                        <div class="label-group"><label for="ep-nome">Nome</label><input id="ep-nome" name="nome" type="text" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getNomeProdutor() : '') ?>" required></div>
-                        <div class="label-group"><label for="ep-apelido">Apelido</label><input id="ep-apelido" name="apelido" type="text" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getApelidoProdutor() : '') ?>" required></div>
-                        <div class="label-group full"><label for="ep-contacto">Contacto</label><input id="ep-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getContactoProdutor() : '') ?>"></div>
-                        <div class="label-group full"><label for="ep-email">E-mail</label><input id="ep-email" name="email" type="email" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getEmailProdutor() : '') ?>"></div>
+                        <div class="label-group">
+                            <label for="ep-nome">Nome</label>
+                            <input id="ep-nome" name="nome" type="text" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getNomeProdutor() : '') ?>" required>
+                        </div>
+                        <div class="label-group">
+                            <label for="ep-apelido">Apelido</label>
+                            <input id="ep-apelido" name="apelido" type="text" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getApelidoProdutor() : '') ?>" required>
+                        </div>
+                        <div class="label-group full">
+                            <label for="ep-contacto">Contacto</label>
+                            <input id="ep-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getContactoProdutor() : '') ?>">
+                        </div>
+                        <div class="label-group full">
+                            <label for="ep-email">E-mail</label>
+                            <input id="ep-email" name="email" type="email" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getEmailProdutor() : '') ?>">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -291,10 +321,22 @@ $subtituloPagina = 'Gestão de produção';
                 <input type="hidden" name="acao" value="adicionar">
                 <div class="modal-body">
                     <div class="form-grid">
-                        <div class="label-group full"><label for="ag-nome">Nome *</label><input id="ag-nome" name="nome" type="text" required></div>
-                        <div class="label-group full"><label for="ag-contacto">Contacto</label><input id="ag-contacto" name="contacto" type="tel"></div>
-                        <div class="label-group full"><label for="ag-email">E-mail</label><input id="ag-email" name="email" type="email"></div>
-                        <div class="label-group full"><label for="ag-endereco">Endereço</label><input id="ag-endereco" name="endereco" type="text"></div>
+                        <div class="label-group full">
+                            <label for="ag-nome">Nome *</label>
+                            <input id="ag-nome" name="nome" type="text" required>
+                        </div>
+                        <div class="label-group full">
+                            <label for="ag-contacto">Contacto</label>
+                            <input id="ag-contacto" name="contacto" type="tel">
+                        </div>
+                        <div class="label-group full">
+                            <label for="ag-email">E-mail</label>
+                            <input id="ag-email" name="email" type="email">
+                        </div>
+                        <div class="label-group full">
+                            <label for="ag-endereco">Endereço</label>
+                            <input id="ag-endereco" name="endereco" type="text">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -318,10 +360,22 @@ $subtituloPagina = 'Gestão de produção';
                 <input type="hidden" name="id" value="<?= $gravadoraEdicao ? $gravadoraEdicao->getCodigoGravadora() : '' ?>">
                 <div class="modal-body">
                     <div class="form-grid">
-                        <div class="label-group full"><label for="eg-nome">Nome</label><input id="eg-nome" name="nome" type="text" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getNomeGravadora() : '') ?>" required></div>
-                        <div class="label-group full"><label for="eg-contacto">Contacto</label><input id="eg-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getContactoGravadora() : '') ?>"></div>
-                        <div class="label-group full"><label for="eg-email">E-mail</label><input id="eg-email" name="email" type="email" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getEmailGravadora() : '') ?>"></div>
-                        <div class="label-group full"><label for="eg-endereco">Endereço</label><input id="eg-endereco" name="endereco" type="text" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getEnderecoGravadora() : '') ?>"></div>
+                        <div class="label-group full">
+                            <label for="eg-nome">Nome</label>
+                            <input id="eg-nome" name="nome" type="text" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getNomeGravadora() : '') ?>" required>
+                        </div>
+                        <div class="label-group full">
+                            <label for="eg-contacto">Contacto</label>
+                            <input id="eg-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getContactoGravadora() : '') ?>">
+                        </div>
+                        <div class="label-group full">
+                            <label for="eg-email">E-mail</label>
+                            <input id="eg-email" name="email" type="email" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getEmailGravadora() : '') ?>">
+                        </div>
+                        <div class="label-group full">
+                            <label for="eg-endereco">Endereço</label>
+                            <input id="eg-endereco" name="endereco" type="text" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getEnderecoGravadora() : '') ?>">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -360,10 +414,22 @@ $subtituloPagina = 'Gestão de produção';
                 <input type="hidden" name="acao" value="adicionar">
                 <div class="modal-body">
                     <div class="form-grid">
-                        <div class="label-group full"><label for="ae-nome">Nome *</label><input id="ae-nome" name="nome" type="text" required></div>
-                        <div class="label-group full"><label for="ae-contacto">Contacto</label><input id="ae-contacto" name="contacto" type="tel"></div>
-                        <div class="label-group full"><label for="ae-email">E-mail</label><input id="ae-email" name="email" type="email"></div>
-                        <div class="label-group full"><label for="ae-endereco">Endereço</label><input id="ae-endereco" name="endereco" type="text"></div>
+                        <div class="label-group full">
+                            <label for="ae-nome">Nome *</label>
+                            <input id="ae-nome" name="nome" type="text" required>
+                        </div>
+                        <div class="label-group full">
+                            <label for="ae-contacto">Contacto</label>
+                            <input id="ae-contacto" name="contacto" type="tel">
+                        </div>
+                        <div class="label-group full">
+                            <label for="ae-email">E-mail</label>
+                            <input id="ae-email" name="email" type="email">
+                        </div>
+                        <div class="label-group full">
+                            <label for="ae-endereco">Endereço</label>
+                            <input id="ae-endereco" name="endereco" type="text">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -387,10 +453,22 @@ $subtituloPagina = 'Gestão de produção';
                 <input type="hidden" name="id" value="<?= $editoraEdicao ? $editoraEdicao->getCodigoEditora() : '' ?>">
                 <div class="modal-body">
                     <div class="form-grid">
-                        <div class="label-group full"><label for="ee-nome">Nome</label><input id="ee-nome" name="nome" type="text" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getNomeEditora() : '') ?>" required></div>
-                        <div class="label-group full"><label for="ee-contacto">Contacto</label><input id="ee-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getContactoEditora() : '') ?>"></div>
-                        <div class="label-group full"><label for="ee-email">E-mail</label><input id="ee-email" name="email" type="email" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getEmailEditora() : '') ?>"></div>
-                        <div class="label-group full"><label for="ee-endereco">Endereço</label><input id="ee-endereco" name="endereco" type="text" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getEndereco() : '') ?>"></div>
+                        <div class="label-group full">
+                            <label for="ee-nome">Nome</label>
+                            <input id="ee-nome" name="nome" type="text" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getNomeEditora() : '') ?>" required>
+                        </div>
+                        <div class="label-group full">
+                            <label for="ee-contacto">Contacto</label>
+                            <input id="ee-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getContactoEditora() : '') ?>">
+                        </div>
+                        <div class="label-group full">
+                            <label for="ee-email">E-mail</label>
+                            <input id="ee-email" name="email" type="email" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getEmailEditora() : '') ?>">
+                        </div>
+                        <div class="label-group full">
+                            <label for="ee-endereco">Endereço</label>
+                            <input id="ee-endereco" name="endereco" type="text" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getEndereco() : '') ?>">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

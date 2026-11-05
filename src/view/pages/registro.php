@@ -43,7 +43,7 @@ $editoras = $estado['editoras'];
 
 // Desenha as linhas de uma lista. Os inputs usam form="form-registo" porque
 // os modais ficam fora do <form>, mas os valores têm de ir com ele.
-function renderizarItens($campo, $lista, $contador, $selecaoUnica = false)
+function renderizarItens($campo, $lista, $selecaoUnica = false)
 {
     if ($lista === []) {
         return '<div class="list-item text-muted">Sem registos.</div>';
@@ -59,8 +59,7 @@ function renderizarItens($campo, $lista, $contador, $selecaoUnica = false)
 
         $html .= '<div class="list-item">'
             . '<input type="' . $tipo . '" name="' . $nome . '" id="' . $id . '" value="' . $codigo . '"'
-            . ' form="form-registo" data-nome="' . $textoEscapado . '"'
-            . ' onchange="contar(this, \'' . $contador . '\')">'
+            . ' form="form-registo">'
             . '<label for="' . $id . '">' . $textoEscapado . '</label>'
             . '</div>';
     }
@@ -128,16 +127,16 @@ $subtituloPagina = 'Registar disco';
                         <div class="credit-panel">
                             <h4>Géneros *</h4>
                             <label for="modal-generos-toggle" class="btn-select">Selecionar géneros</label>
-                            <p class="selection-info"><strong id="n-generos">0</strong> selecionado(s)</p>
+                            <p class="selection-info">Pode escolher vários géneros.</p>
                         </div>
 
                         <div class="credit-panel">
                             <h4>Participantes</h4>
                             <label for="modal-participantes-toggle" class="btn-select">Selecionar participantes</label>
                             <ul>
-                                <li>Compositores: <span id="n-compositores">0</span></li>
-                                <li>Músicos: <span id="n-musicos">0</span></li>
-                                <li>Cantores: <span id="n-cantores">0</span></li>
+                                <li>Compositores</li>
+                                <li>Músicos</li>
+                                <li>Cantores</li>
                             </ul>
                         </div>
 
@@ -145,9 +144,9 @@ $subtituloPagina = 'Registar disco';
                             <h4>Produção</h4>
                             <label for="modal-producao-toggle" class="btn-select">Selecionar produção</label>
                             <ul>
-                                <li>Produtores: <span id="n-produtores">0</span></li>
-                                <li>Gravadoras: <span id="n-gravadoras">0</span></li>
-                                <li>Editora: <span id="n-editora">nenhuma</span></li>
+                                <li>Produtores</li>
+                                <li>Gravadoras</li>
+                                <li>Editora (apenas uma)</li>
                             </ul>
                         </div>
                     </div>
@@ -173,7 +172,7 @@ $subtituloPagina = 'Registar disco';
                 <label for="modal-generos-toggle" class="modal-close">&times;</label>
             </div>
             <div class="modal-body">
-                <div class="list-box"><?= renderizarItens('generos', $generos, 'n-generos') ?></div>
+                <div class="list-box"><?= renderizarItens('generos', $generos) ?></div>
             </div>
             <div class="modal-footer">
                 <label for="modal-generos-toggle" class="btn btn-primary">Concluir</label>
@@ -192,15 +191,15 @@ $subtituloPagina = 'Registar disco';
                 <div class="participant-grid">
                     <div class="participant-col">
                         <h4>Compositores</h4>
-                        <div class="list-box"><?= renderizarItens('compositores', $compositores, 'n-compositores') ?></div>
+                        <div class="list-box"><?= renderizarItens('compositores', $compositores) ?></div>
                     </div>
                     <div class="participant-col">
                         <h4>Músicos</h4>
-                        <div class="list-box"><?= renderizarItens('musicos', $musicos, 'n-musicos') ?></div>
+                        <div class="list-box"><?= renderizarItens('musicos', $musicos) ?></div>
                     </div>
                     <div class="participant-col">
                         <h4>Cantores</h4>
-                        <div class="list-box"><?= renderizarItens('cantores', $cantores, 'n-cantores') ?></div>
+                        <div class="list-box"><?= renderizarItens('cantores', $cantores) ?></div>
                     </div>
                 </div>
             </div>
@@ -221,15 +220,15 @@ $subtituloPagina = 'Registar disco';
                 <div class="participant-grid">
                     <div class="participant-col">
                         <h4>Produtores</h4>
-                        <div class="list-box"><?= renderizarItens('produtores', $produtores, 'n-produtores') ?></div>
+                        <div class="list-box"><?= renderizarItens('produtores', $produtores) ?></div>
                     </div>
                     <div class="participant-col">
                         <h4>Gravadoras</h4>
-                        <div class="list-box"><?= renderizarItens('gravadoras', $gravadoras, 'n-gravadoras') ?></div>
+                        <div class="list-box"><?= renderizarItens('gravadoras', $gravadoras) ?></div>
                     </div>
                     <div class="participant-col">
                         <h4>Editora (uma só)</h4>
-                        <div class="list-box"><?= renderizarItens('editora', $editoras, 'n-editora', true) ?></div>
+                        <div class="list-box"><?= renderizarItens('editora', $editoras, true) ?></div>
                     </div>
                 </div>
             </div>
@@ -239,17 +238,6 @@ $subtituloPagina = 'Registar disco';
         </div>
     </div>
 
-    <script>
-        // Actualiza o número (ou o nome da editora) que aparece no painel
-        function contar(el, destino) {
-            var alvo = document.getElementById(destino);
-            if (el.type === 'radio') {
-                alvo.textContent = el.dataset.nome;
-                return;
-            }
-            alvo.textContent = document.querySelectorAll('input[name="' + el.name + '"]:checked').length;
-        }
-    </script>
 </body>
 
 </html>

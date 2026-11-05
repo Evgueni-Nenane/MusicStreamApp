@@ -83,17 +83,19 @@ $subtituloPagina = 'Gestão de géneros musicais';
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($generos as $g): ?>
+                                        <?php foreach ($generos as $genero): ?>
                                             <tr>
-                                                <td><input type="radio" name="sel" value="<?= $g->getCodigoGenero() ?>"></td>
-                                                <td><?= $g->getCodigoGenero() ?></td>
-                                                <td><?= htmlspecialchars($g->getNomeGenero()) ?></td>
+                                                <td><input type="radio" name="sel" value="<?= $genero->getCodigoGenero() ?>"></td>
+                                                <td><?= $genero->getCodigoGenero() ?></td>
+                                                <td><?= htmlspecialchars($genero->getNomeGenero()) ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$generos): ?>
                                             <tr>
                                                 <td colspan="3">
-                                                    <?= $termoPesquisa !== '' ? 'Nenhum género encontrado para "' . htmlspecialchars($termoPesquisa) . '".' : 'Nenhum género cadastrado.' ?>
+                                                    <?= $termoPesquisa !== ''
+                                                        ? 'Nenhum género encontrado para "' . htmlspecialchars($termoPesquisa) . '".'
+                                                        : 'Nenhum género cadastrado.' ?>
                                                 </td>
                                             </tr>
                                         <?php endif; ?>
@@ -135,7 +137,8 @@ $subtituloPagina = 'Gestão de géneros musicais';
     <div class="modal-overlay">
         <div class="modal confirm">
             <div class="modal-header">
-                <h2>Confirmar remoção</h2><label for="m-rem-gen" class="modal-close">&times;</label>
+                <h2>Confirmar remoção</h2>
+                <label for="m-rem-gen" class="modal-close">&times;</label>
             </div>
             <div class="modal-body">Tem certeza que deseja remover este género? Géneros associados a discos não podem ser removidos.</div>
             <div class="modal-footer">

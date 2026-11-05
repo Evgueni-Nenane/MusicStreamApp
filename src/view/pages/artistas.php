@@ -6,12 +6,15 @@ require_once __DIR__ . '/../../model/nivelacesso.php';
 require_once __DIR__ . '/../../controller/artistasController.php';
 
 $utilizador = Sessao::getUtilizadorLogado();
-if (!$utilizador) { header('Location: Login.php'); exit; }
+if (!$utilizador) {
+    header('Location: Login.php');
+    exit;
+}
 $podeAdicionar = Permissao::pode($utilizador, 'adicionar');
-$podeEditar    = Permissao::pode($utilizador, 'editar');
-$podeRemover   = Permissao::pode($utilizador, 'remover');
-$podeUtilizadores     = Permissao::pode($utilizador, 'utilizadores');
-$podeLogs      = Permissao::pode($utilizador, 'logs');
+$podeEditar = Permissao::pode($utilizador, 'editar');
+$podeRemover = Permissao::pode($utilizador, 'remover');
+$podeUtilizadores = Permissao::pode($utilizador, 'utilizadores');
+$podeLogs = Permissao::pode($utilizador, 'logs');
 
 // Botões de acção de uma aba. Cada aba tem o seu formulário (form-musico,
 // form-compositor, form-cantor), por isso o Editar envia o rádio seleccionado
@@ -21,7 +24,7 @@ function renderizarAcoes($tipo, $podeRemover, $podeEditar, $podeAdicionar)
     $html = '<div class="table-actions">';
 
     if ($podeRemover) {
-        $html .= '<label for="m-rem-' . $tipo . '" class="btn btn-secondary btn-sm" style="cursor:pointer; margin:0;">Remover</label>';
+        $html .= '<label for="m-rem-' . $tipo . '" class="btn btn-secondary btn-sm">Remover</label>';
     }
 
     if ($podeEditar) {
@@ -29,7 +32,7 @@ function renderizarAcoes($tipo, $podeRemover, $podeEditar, $podeAdicionar)
     }
 
     if ($podeAdicionar) {
-        $html .= '<label for="modal-adicionar-artista-toggle" class="btn btn-primary btn-sm" style="cursor:pointer; margin:0;">Adicionar</label>';
+        $html .= '<label for="modal-adicionar-artista-toggle" class="btn btn-primary btn-sm">Adicionar</label>';
     }
 
     return $html . '</div>';
@@ -121,14 +124,14 @@ $subtituloPagina = 'Gestão de artistas';
                                         <tr><th class="col-sel"></th><th>Nome Completo</th><th>Instrumento</th><th>E-mail</th><th>Telefone</th></tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($musicos as $m): ?>
-                                            <?php $nomes = array_map(fn($i) => $i->getNome(), $m->getInstrumento() ?? []); ?>
+                                        <?php foreach ($musicos as $musico): ?>
+                                            <?php $nomes = array_map(fn($i) => $i->getNome(), $musico->getInstrumento() ?? []); ?>
                                             <tr>
-                                                <td><input type="radio" name="sel_musico" value="<?= $m->getCodigoMusico() ?>"></td>
-                                                <td><?= htmlspecialchars($m->getNomeMusico() . ' ' . $m->getApelidoMusico()) ?></td>
+                                                <td><input type="radio" name="sel_musico" value="<?= $musico->getCodigoMusico() ?>"></td>
+                                                <td><?= htmlspecialchars($musico->getNomeMusico() . ' ' . $musico->getApelidoMusico()) ?></td>
                                                 <td><?= htmlspecialchars(implode(', ', $nomes)) ?></td>
-                                                <td><?= htmlspecialchars($m->getEmailMusico()) ?></td>
-                                                <td><?= htmlspecialchars($m->getContactoMusico()) ?></td>
+                                                <td><?= htmlspecialchars($musico->getEmailMusico()) ?></td>
+                                                <td><?= htmlspecialchars($musico->getContactoMusico()) ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$musicos): ?>
@@ -151,12 +154,12 @@ $subtituloPagina = 'Gestão de artistas';
                                         <tr><th class="col-sel"></th><th>Nome Completo</th><th>E-mail</th><th>Telefone</th></tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($compositores as $c): ?>
+                                        <?php foreach ($compositores as $compositor): ?>
                                             <tr>
-                                                <td><input type="radio" name="sel_compositor" value="<?= $c->getCodigoCompositor() ?>"></td>
-                                                <td><?= htmlspecialchars($c->getNomeCompositor() . ' ' . $c->getApelidoCompositor()) ?></td>
-                                                <td><?= htmlspecialchars($c->getEmailCompositor()) ?></td>
-                                                <td><?= htmlspecialchars($c->getContactoCompositor()) ?></td>
+                                                <td><input type="radio" name="sel_compositor" value="<?= $compositor->getCodigoCompositor() ?>"></td>
+                                                <td><?= htmlspecialchars($compositor->getNomeCompositor() . ' ' . $compositor->getApelidoCompositor()) ?></td>
+                                                <td><?= htmlspecialchars($compositor->getEmailCompositor()) ?></td>
+                                                <td><?= htmlspecialchars($compositor->getContactoCompositor()) ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$compositores): ?>
@@ -179,12 +182,12 @@ $subtituloPagina = 'Gestão de artistas';
                                         <tr><th class="col-sel"></th><th>Nome Completo</th><th>E-mail</th><th>Telefone</th></tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($cantores as $c): ?>
+                                        <?php foreach ($cantores as $cantor): ?>
                                             <tr>
-                                                <td><input type="radio" name="sel_cantor" value="<?= $c->getCodigoCantor() ?>"></td>
-                                                <td><?= htmlspecialchars($c->getNomeCantor() . ' ' . $c->getApelidoCantor()) ?></td>
-                                                <td><?= htmlspecialchars($c->getEmailCantor()) ?></td>
-                                                <td><?= htmlspecialchars($c->getContactoCantor()) ?></td>
+                                                <td><input type="radio" name="sel_cantor" value="<?= $cantor->getCodigoCantor() ?>"></td>
+                                                <td><?= htmlspecialchars($cantor->getNomeCantor() . ' ' . $cantor->getApelidoCantor()) ?></td>
+                                                <td><?= htmlspecialchars($cantor->getEmailCantor()) ?></td>
+                                                <td><?= htmlspecialchars($cantor->getContactoCantor()) ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$cantores): ?>
@@ -238,10 +241,10 @@ $subtituloPagina = 'Gestão de artistas';
                         <div class="instrumento-group">
                             <label>Instrumentos Musicais</label>
                             <div class="list-box">
-                                <?php foreach ($instrumentos as $i): ?>
+                                <?php foreach ($instrumentos as $instrumento): ?>
                                     <div class="list-item">
-                                        <input type="checkbox" name="instrumentos[]" value="<?= $i->getCodigo() ?>" id="inst<?= $i->getCodigo() ?>">
-                                        <label for="inst<?= $i->getCodigo() ?>"><?= htmlspecialchars($i->getNome()) ?></label>
+                                        <input type="checkbox" name="instrumentos[]" value="<?= $instrumento->getCodigo() ?>" id="inst<?= $instrumento->getCodigo() ?>">
+                                        <label for="inst<?= $instrumento->getCodigo() ?>"><?= htmlspecialchars($instrumento->getNome()) ?></label>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -292,11 +295,11 @@ $subtituloPagina = 'Gestão de artistas';
                         <div class="instrumento-group sempre">
                             <label>Instrumentos Musicais</label>
                             <div class="list-box">
-                                <?php foreach ($instrumentos as $i): ?>
+                                <?php foreach ($instrumentos as $instrumento): ?>
                                     <div class="list-item">
-                                        <input type="checkbox" name="instrumentos[]" value="<?= $i->getCodigo() ?>" id="edinst<?= $i->getCodigo() ?>"
-                                            <?= in_array($i->getCodigo(), $instrumentosSelecionados) ? 'checked' : '' ?>>
-                                        <label for="edinst<?= $i->getCodigo() ?>"><?= htmlspecialchars($i->getNome()) ?></label>
+                                        <input type="checkbox" name="instrumentos[]" value="<?= $instrumento->getCodigo() ?>" id="edinst<?= $instrumento->getCodigo() ?>"
+                                            <?= in_array($instrumento->getCodigo(), $instrumentosSelecionados) ? 'checked' : '' ?>>
+                                        <label for="edinst<?= $instrumento->getCodigo() ?>"><?= htmlspecialchars($instrumento->getNome()) ?></label>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -321,16 +324,21 @@ $subtituloPagina = 'Gestão de artistas';
         </div>
     </div>
 
-    <?php foreach (['musico' => 'músico', 'compositor' => 'compositor', 'cantor' => 'cantor'] as $t => $nomeTipo): ?>
-    <input type="checkbox" id="m-rem-<?= $t ?>" class="modal-toggle">
-    <div class="modal-overlay"><div class="modal confirm">
-        <div class="modal-header"><h2>Confirmar remoção</h2><label for="m-rem-<?= $t ?>" class="modal-close">&times;</label></div>
-        <div class="modal-body">Tem certeza que deseja remover este <?= $nomeTipo ?>?</div>
-        <div class="modal-footer">
-            <label for="m-rem-<?= $t ?>" class="btn btn-secondary">Não</label>
-            <button class="btn btn-primary" type="submit" form="form-<?= $t ?>" name="acao" value="remover">Sim</button>
+    <?php foreach (['musico' => 'músico', 'compositor' => 'compositor', 'cantor' => 'cantor'] as $tipo => $nomeTipo): ?>
+    <input type="checkbox" id="m-rem-<?= $tipo ?>" class="modal-toggle">
+    <div class="modal-overlay">
+        <div class="modal confirm">
+            <div class="modal-header">
+                <h2>Confirmar remoção</h2>
+                <label for="m-rem-<?= $tipo ?>" class="modal-close">&times;</label>
+            </div>
+            <div class="modal-body">Tem certeza que deseja remover este <?= $nomeTipo ?>?</div>
+            <div class="modal-footer">
+                <label for="m-rem-<?= $tipo ?>" class="btn btn-secondary">Não</label>
+                <button class="btn btn-primary" type="submit" form="form-<?= $tipo ?>" name="acao" value="remover">Sim</button>
+            </div>
         </div>
-    </div></div>
+    </div>
     <?php endforeach; ?>
 
 </body>

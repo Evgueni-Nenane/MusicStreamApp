@@ -23,7 +23,6 @@ $subtituloPagina = $subtituloPagina ?? '';
         </div>
         <img
             src="foto.php"
-            onerror="this.onerror=null;this.src='../resources/user.png'"
             alt="Foto de perfil"
         >
     </div>

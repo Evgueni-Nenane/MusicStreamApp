@@ -93,7 +93,9 @@ $subtituloPagina = 'Gestão de instrumentos musicais';
                                         <?php if (!$instrumentos): ?>
                                             <tr>
                                                 <td colspan="3">
-                                                    <?= $termoPesquisa !== '' ? 'Nenhum instrumento encontrado para "' . htmlspecialchars($termoPesquisa) . '".' : 'Nenhum instrumento cadastrado.' ?>
+                                                    <?= $termoPesquisa !== ''
+                                                        ? 'Nenhum instrumento encontrado para "' . htmlspecialchars($termoPesquisa) . '".'
+                                                        : 'Nenhum instrumento cadastrado.' ?>
                                                 </td>
                                             </tr>
                                         <?php endif; ?>
@@ -131,7 +133,8 @@ $subtituloPagina = 'Gestão de instrumentos musicais';
     <div class="modal-overlay">
         <div class="modal confirm">
             <div class="modal-header">
-                <h2>Confirmar remoção</h2><label for="m-rem-instr" class="modal-close">&times;</label>
+                <h2>Confirmar remoção</h2>
+                <label for="m-rem-instr" class="modal-close">&times;</label>
             </div>
             <div class="modal-body">Tem certeza que deseja remover este instrumento? Esta ação não pode ser revertida.</div>
             <div class="modal-footer">

@@ -11,11 +11,11 @@ if (!$utilizador) {
     exit;
 }
 $podeAdicionar = Permissao::pode($utilizador, 'adicionar');
-$podeEditar    = Permissao::pode($utilizador, 'editar');
-$podeRemover   = Permissao::pode($utilizador, 'remover');
-$podeUtilizadores     = Permissao::pode($utilizador, 'utilizadores');
-$podeLogs      = Permissao::pode($utilizador, 'logs');
-$podeSelFaixa  = $podeEditar || $podeRemover;
+$podeEditar = Permissao::pode($utilizador, 'editar');
+$podeRemover = Permissao::pode($utilizador, 'remover');
+$podeUtilizadores = Permissao::pode($utilizador, 'utilizadores');
+$podeLogs = Permissao::pode($utilizador, 'logs');
+$podeSelFaixa = $podeEditar || $podeRemover;
 
 $listagemController = new ListagemDiscosController();
 
@@ -65,7 +65,7 @@ $termoPesquisa = $estado['termoPesquisa'];
 /* ---------- Helpers de apresentação ---------- */
 function escaparHtml($valor)
 {
-    return htmlspecialchars((string)$valor);
+    return htmlspecialchars((string) $valor);
 }
 
 function juntarNomes($pessoas, $metodoNome, $metodoApelido)
@@ -81,7 +81,7 @@ function juntarNomes($pessoas, $metodoNome, $metodoApelido)
 function formatarDuracao($duracao)
 {
     // O MySQL devolve TIME como HH:MM:SS; a interface mostra HH:MM.
-    $duracao = (string)$duracao;
+    $duracao = (string) $duracao;
 
     return $duracao === '' ? '' : substr($duracao, 0, 5);
 }
@@ -97,32 +97,6 @@ $subtituloPagina = 'Listagem de discos cadastrados';
     <title>Listagem de Discos | Sistema de Gestão</title>
     <link rel="stylesheet" href="../css/listagemdiscos.css">
     <link rel="stylesheet" href="../css/registro.css">
-    <style>
-        /* Barra de pesquisa ao lado do título do cartão */
-        .card-header.com-pesquisa {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .card-header.com-pesquisa .search-input {
-            width: 100%;
-            max-width: 320px;
-            padding: 0.6rem 0.9rem;
-            border: 1px solid #e4e4e7;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-family: inherit;
-            background: #fff;
-        }
-
-        .card-header.com-pesquisa .search-input:focus {
-            outline: none;
-            border-color: #18181b;
-        }
-    </style>
 </head>
 
 <body>
@@ -131,6 +105,8 @@ $subtituloPagina = 'Listagem de discos cadastrados';
     <input type="checkbox" id="modal-editar-disco-toggle" class="modal-toggle" <?= $discoEdicao ? 'checked' : '' ?>>
     <input type="checkbox" id="modal-editar-faixa-toggle" class="modal-toggle" <?= $faixaEdicao ? 'checked' : '' ?>>
     <input type="checkbox" id="modal-adicionar-faixa-toggle" class="modal-toggle" <?= $discoNovaFaixa ? 'checked' : '' ?>>
+    <input type="checkbox" id="modal-remover-disco-toggle" class="modal-toggle">
+    <input type="checkbox" id="modal-remover-faixa-toggle" class="modal-toggle">
 
     <div class="app-container">
         <?php require __DIR__ . '/../partials/sidebar.php'; ?>
@@ -154,7 +130,7 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                         <div class="alert alert-ok"><?= escaparHtml($mensagem) ?></div>
                     <?php endif; ?>
 
-                    <form method="post" action="listagemdiscos.php">
+                    <form method="post" action="listagemdiscos.php" id="form-discos">
                         <!-- Mantém a pesquisa activa depois de Editar / Remover / Ver Detalhes -->
                         <input type="hidden" name="q" value="<?= escaparHtml($termoPesquisa) ?>">
                         <div class="table-wrapper">
@@ -178,10 +154,12 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                                             <td><?= escaparHtml($disco->getAnoEdicao()) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
-                                    <?php if (count($discos) === 0): ?>
+                                    <?php if (!$discos): ?>
                                         <tr>
                                             <td colspan="5">
-                                                <?= $termoPesquisa !== '' ? 'Nenhum disco encontrado para "' . escaparHtml($termoPesquisa) . '".' : 'Ainda não há discos cadastrados.' ?>
+                                                <?= $termoPesquisa !== ''
+                                                    ? 'Nenhum disco encontrado para "' . escaparHtml($termoPesquisa) . '".'
+                                                    : 'Ainda não há discos cadastrados.' ?>
                                             </td>
                                         </tr>
                                     <?php endif; ?>
@@ -191,8 +169,7 @@ $subtituloPagina = 'Listagem de discos cadastrados';
 
                         <div class="table-actions">
                             <?php if ($podeRemover): ?>
-                            <button class="btn btn-secondary btn-sm" type="submit" name="acao" value="remover"
-                                onclick="return confirm('Remover o disco seleccionado e as suas faixas?')">Remover</button>
+                            <label for="modal-remover-disco-toggle" class="btn btn-secondary btn-sm">Remover</label>
                             <?php endif; ?>
                             <?php if ($podeAdicionar): ?>
                             <button class="btn btn-secondary btn-sm" type="submit" name="acao" value="faixas" formmethod="get">Adicionar Faixas</button>
@@ -223,20 +200,44 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                     <div class="detail-section">
                         <h4>Informações do Disco</h4>
                         <div class="detail-grid">
-                            <div class="detail-item"><span class="label">Título do Disco</span><span class="value"><?= $discoDetalhe ? escaparHtml($discoDetalhe->getTitulo()) : '' ?></span></div>
-                            <div class="detail-item"><span class="label">Género Musical</span><span class="value"><?= $discoDetalhe ? escaparHtml($detalheGeneros) : '' ?></span></div>
-                            <div class="detail-item"><span class="label">Preço</span><span class="value"><?= $discoDetalhe ? number_format($discoDetalhe->getPreco(), 2, ',', '.') : '' ?></span></div>
-                            <div class="detail-item"><span class="label">Tempo de Existência</span><span class="value"><?= $discoDetalhe ? (date('Y') - (int)$discoDetalhe->getAnoEdicao()) . ' ano(s)' : '' ?></span></div>
-                            <div class="detail-item"><span class="label">Ano de Edição</span><span class="value"><?= $discoDetalhe ? escaparHtml($discoDetalhe->getAnoEdicao()) : '' ?></span></div>
+                            <div class="detail-item">
+                                <span class="label">Título do Disco</span>
+                                <span class="value"><?= $discoDetalhe ? escaparHtml($discoDetalhe->getTitulo()) : '' ?></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Género Musical</span>
+                                <span class="value"><?= $discoDetalhe ? escaparHtml($detalheGeneros) : '' ?></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Preço</span>
+                                <span class="value"><?= $discoDetalhe ? number_format($discoDetalhe->getPreco(), 2, ',', '.') : '' ?></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Tempo de Existência</span>
+                                <span class="value"><?= $discoDetalhe ? (date('Y') - (int) $discoDetalhe->getAnoEdicao()) . ' ano(s)' : '' ?></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Ano de Edição</span>
+                                <span class="value"><?= $discoDetalhe ? escaparHtml($discoDetalhe->getAnoEdicao()) : '' ?></span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="detail-section">
                         <h4>Participantes do Disco</h4>
                         <div class="detail-grid">
-                            <div class="detail-item"><span class="label">Compositores</span><span class="value"><?= $discoDetalhe ? escaparHtml(juntarNomes($detalheCompositores, 'getNomeCompositor', 'getApelidoCompositor')) : '' ?></span></div>
-                            <div class="detail-item"><span class="label">Músicos</span><span class="value"><?= $discoDetalhe ? escaparHtml(juntarNomes($detalheMusicos, 'getNomeMusico', 'getApelidoMusico')) : '' ?></span></div>
-                            <div class="detail-item"><span class="label">Cantores</span><span class="value"><?= $discoDetalhe ? escaparHtml(juntarNomes($detalheCantores, 'getNomeCantor', 'getApelidoCantor')) : '' ?></span></div>
+                            <div class="detail-item">
+                                <span class="label">Compositores</span>
+                                <span class="value"><?= $discoDetalhe ? escaparHtml(juntarNomes($detalheCompositores, 'getNomeCompositor', 'getApelidoCompositor')) : '' ?></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Músicos</span>
+                                <span class="value"><?= $discoDetalhe ? escaparHtml(juntarNomes($detalheMusicos, 'getNomeMusico', 'getApelidoMusico')) : '' ?></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Cantores</span>
+                                <span class="value"><?= $discoDetalhe ? escaparHtml(juntarNomes($detalheCantores, 'getNomeCantor', 'getApelidoCantor')) : '' ?></span>
+                            </div>
                         </div>
                     </div>
 
@@ -272,12 +273,10 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                 <div class="modal-footer">
                     <label for="modal-detalhes-toggle" class="btn btn-secondary">Fechar</label>
                     <?php if ($podeEditar): ?>
-                    <button class="btn btn-secondary" type="submit" name="acao" value="editarfaixa" formmethod="get"
-                        onclick="return !!document.querySelector('#form-detalhes input[name=sel_faixa]:checked') || (alert('Seleccione uma faixa.'), false)">Editar Faixa</button>
+                    <button class="btn btn-secondary" type="submit" name="acao" value="editarfaixa" formmethod="get">Editar Faixa</button>
                     <?php endif; ?>
                     <?php if ($podeRemover): ?>
-                    <button class="btn btn-primary" type="submit"
-                        onclick="return !!document.querySelector('#form-detalhes input[name=sel_faixa]:checked') || (alert('Seleccione uma faixa.'), false) ? confirm('Remover a faixa seleccionada?') : false">Remover Faixa</button>
+                    <label for="modal-remover-faixa-toggle" class="btn btn-primary">Remover Faixa</label>
                     <?php endif; ?>
                 </div>
             </form>
@@ -311,7 +310,7 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                         </div>
                         <div class="label-group form-grid-full">
                             <label>Géneros</label>
-                            <div class="list-box" style="max-height:140px;">
+                            <div class="list-box list-box-tall">
                                 <?php foreach ($todosGeneros as $genero): ?>
                                     <div class="list-item">
                                         <input type="checkbox" name="generos[]" id="eg<?= $genero->getCodigoGenero() ?>" value="<?= $genero->getCodigoGenero() ?>"
@@ -358,10 +357,10 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                             </div>
                             <div class="label-group">
                                 <label>Duração (mm:ss)</label>
-                                <div style="display:flex; gap:0.5rem; align-items:center;">
-                                    <input type="number" name="min" min="0" max="99" value="<?= $faixaMinutos ?>" style="width:70px; text-align:center;">
+                                <div class="duration-fields">
+                                    <input type="number" name="min" min="0" max="99" value="<?= $faixaMinutos ?>" class="duration-input">
                                     <span>:</span>
-                                    <input type="number" name="seg" min="0" max="59" value="<?= $faixaSegundos ?>" style="width:70px; text-align:center;">
+                                    <input type="number" name="seg" min="0" max="59" value="<?= $faixaSegundos ?>" class="duration-input">
                                 </div>
                             </div>
                         </div>
@@ -371,27 +370,36 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                         <div class="participant-grid">
                             <div class="participant-col">
                                 <h4>Compositores</h4>
-                                <div class="list-box" style="max-height:120px;">
+                                <div class="list-box list-box-short">
                                     <?php if ($faixaDiscoId): foreach ($discoCompositoresDisponiveis as $compositor): ?>
-                                        <div class="list-item"><input type="checkbox" name="compositores[]" id="efc<?= $compositor->getCodigoCompositor() ?>" value="<?= $compositor->getCodigoCompositor() ?>" <?= in_array($compositor->getCodigoCompositor(), $faixaCompositoresSelecionados) ? 'checked' : '' ?>><label for="efc<?= $compositor->getCodigoCompositor() ?>"><?= escaparHtml($compositor->getNomeCompositor() . ' ' . $compositor->getApelidoCompositor()) ?></label></div>
+                                        <div class="list-item">
+                                            <input type="checkbox" name="compositores[]" id="efc<?= $compositor->getCodigoCompositor() ?>" value="<?= $compositor->getCodigoCompositor() ?>" <?= in_array($compositor->getCodigoCompositor(), $faixaCompositoresSelecionados) ? 'checked' : '' ?>>
+                                            <label for="efc<?= $compositor->getCodigoCompositor() ?>"><?= escaparHtml($compositor->getNomeCompositor() . ' ' . $compositor->getApelidoCompositor()) ?></label>
+                                        </div>
                                     <?php endforeach;
                                     endif; ?>
                                 </div>
                             </div>
                             <div class="participant-col">
                                 <h4>Músicos</h4>
-                                <div class="list-box" style="max-height:120px;">
+                                <div class="list-box list-box-short">
                                     <?php if ($faixaDiscoId): foreach ($discoMusicosDisponiveis as $musico): ?>
-                                        <div class="list-item"><input type="checkbox" name="musicos[]" id="efm<?= $musico->getCodigoMusico() ?>" value="<?= $musico->getCodigoMusico() ?>" <?= in_array($musico->getCodigoMusico(), $faixaMusicosSelecionados) ? 'checked' : '' ?>><label for="efm<?= $musico->getCodigoMusico() ?>"><?= escaparHtml($musico->getNomeMusico() . ' ' . $musico->getApelidoMusico()) ?></label></div>
+                                        <div class="list-item">
+                                            <input type="checkbox" name="musicos[]" id="efm<?= $musico->getCodigoMusico() ?>" value="<?= $musico->getCodigoMusico() ?>" <?= in_array($musico->getCodigoMusico(), $faixaMusicosSelecionados) ? 'checked' : '' ?>>
+                                            <label for="efm<?= $musico->getCodigoMusico() ?>"><?= escaparHtml($musico->getNomeMusico() . ' ' . $musico->getApelidoMusico()) ?></label>
+                                        </div>
                                     <?php endforeach;
                                     endif; ?>
                                 </div>
                             </div>
                             <div class="participant-col">
                                 <h4>Cantores</h4>
-                                <div class="list-box" style="max-height:120px;">
+                                <div class="list-box list-box-short">
                                     <?php if ($faixaDiscoId): foreach ($discoCantoresDisponiveis as $cantor): ?>
-                                        <div class="list-item"><input type="checkbox" name="cantores[]" id="efv<?= $cantor->getCodigoCantor() ?>" value="<?= $cantor->getCodigoCantor() ?>" <?= in_array($cantor->getCodigoCantor(), $faixaCantoresSelecionados) ? 'checked' : '' ?>><label for="efv<?= $cantor->getCodigoCantor() ?>"><?= escaparHtml($cantor->getNomeCantor() . ' ' . $cantor->getApelidoCantor()) ?></label></div>
+                                        <div class="list-item">
+                                            <input type="checkbox" name="cantores[]" id="efv<?= $cantor->getCodigoCantor() ?>" value="<?= $cantor->getCodigoCantor() ?>" <?= in_array($cantor->getCodigoCantor(), $faixaCantoresSelecionados) ? 'checked' : '' ?>>
+                                            <label for="efv<?= $cantor->getCodigoCantor() ?>"><?= escaparHtml($cantor->getNomeCantor() . ' ' . $cantor->getApelidoCantor()) ?></label>
+                                        </div>
                                     <?php endforeach;
                                     endif; ?>
                                 </div>
@@ -432,10 +440,10 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                             </div>
                             <div class="label-group">
                                 <label>Duração (mm:ss)</label>
-                                <div style="display:flex; gap:0.5rem; align-items:center;">
-                                    <input type="number" name="min" min="0" max="99" value="0" style="width:70px; text-align:center;">
+                                <div class="duration-fields">
+                                    <input type="number" name="min" min="0" max="99" value="0" class="duration-input">
                                     <span>:</span>
-                                    <input type="number" name="seg" min="0" max="59" value="0" style="width:70px; text-align:center;">
+                                    <input type="number" name="seg" min="0" max="59" value="0" class="duration-input">
                                 </div>
                             </div>
                         </div>
@@ -445,27 +453,36 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                         <div class="participant-grid">
                             <div class="participant-col">
                                 <h4>Compositores</h4>
-                                <div class="list-box" style="max-height:120px;">
+                                <div class="list-box list-box-short">
                                     <?php if ($discoNovaFaixa): foreach ($novaFaixaCompositores as $compositor): ?>
-                                            <div class="list-item"><input type="checkbox" name="compositores[]" id="fc<?= $compositor->getCodigoCompositor() ?>" value="<?= $compositor->getCodigoCompositor() ?>"><label for="fc<?= $compositor->getCodigoCompositor() ?>"><?= escaparHtml($compositor->getNomeCompositor() . ' ' . $compositor->getApelidoCompositor()) ?></label></div>
+                                            <div class="list-item">
+                                                <input type="checkbox" name="compositores[]" id="fc<?= $compositor->getCodigoCompositor() ?>" value="<?= $compositor->getCodigoCompositor() ?>">
+                                                <label for="fc<?= $compositor->getCodigoCompositor() ?>"><?= escaparHtml($compositor->getNomeCompositor() . ' ' . $compositor->getApelidoCompositor()) ?></label>
+                                            </div>
                                     <?php endforeach;
                                     endif; ?>
                                 </div>
                             </div>
                             <div class="participant-col">
                                 <h4>Músicos</h4>
-                                <div class="list-box" style="max-height:120px;">
+                                <div class="list-box list-box-short">
                                     <?php if ($discoNovaFaixa): foreach ($novaFaixaMusicos as $musico): ?>
-                                            <div class="list-item"><input type="checkbox" name="musicos[]" id="fm<?= $musico->getCodigoMusico() ?>" value="<?= $musico->getCodigoMusico() ?>"><label for="fm<?= $musico->getCodigoMusico() ?>"><?= escaparHtml($musico->getNomeMusico() . ' ' . $musico->getApelidoMusico()) ?></label></div>
+                                            <div class="list-item">
+                                                <input type="checkbox" name="musicos[]" id="fm<?= $musico->getCodigoMusico() ?>" value="<?= $musico->getCodigoMusico() ?>">
+                                                <label for="fm<?= $musico->getCodigoMusico() ?>"><?= escaparHtml($musico->getNomeMusico() . ' ' . $musico->getApelidoMusico()) ?></label>
+                                            </div>
                                     <?php endforeach;
                                     endif; ?>
                                 </div>
                             </div>
                             <div class="participant-col">
                                 <h4>Cantores</h4>
-                                <div class="list-box" style="max-height:120px;">
+                                <div class="list-box list-box-short">
                                     <?php if ($discoNovaFaixa): foreach ($novaFaixaCantores as $cantor): ?>
-                                            <div class="list-item"><input type="checkbox" name="cantores[]" id="fv<?= $cantor->getCodigoCantor() ?>" value="<?= $cantor->getCodigoCantor() ?>"><label for="fv<?= $cantor->getCodigoCantor() ?>"><?= escaparHtml($cantor->getNomeCantor() . ' ' . $cantor->getApelidoCantor()) ?></label></div>
+                                            <div class="list-item">
+                                                <input type="checkbox" name="cantores[]" id="fv<?= $cantor->getCodigoCantor() ?>" value="<?= $cantor->getCodigoCantor() ?>">
+                                                <label for="fv<?= $cantor->getCodigoCantor() ?>"><?= escaparHtml($cantor->getNomeCantor() . ' ' . $cantor->getApelidoCantor()) ?></label>
+                                            </div>
                                     <?php endforeach;
                                     endif; ?>
                                 </div>
@@ -478,6 +495,36 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                     <button class="btn btn-primary" type="submit">Guardar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ============ MODAL: REMOVER DISCO ============ -->
+    <div class="modal-overlay modal-remover-disco">
+        <div class="modal confirm">
+            <div class="modal-header">
+                <h2>Confirmar remoção</h2>
+                <label for="modal-remover-disco-toggle" class="modal-close">&times;</label>
+            </div>
+            <div class="modal-body">Tem certeza que deseja remover o disco seleccionado e as suas faixas?</div>
+            <div class="modal-footer">
+                <label for="modal-remover-disco-toggle" class="btn btn-secondary">Não</label>
+                <button class="btn btn-primary" type="submit" form="form-discos" name="acao" value="remover">Sim</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ MODAL: REMOVER FAIXA ============ -->
+    <div class="modal-overlay modal-remover-faixa">
+        <div class="modal confirm">
+            <div class="modal-header">
+                <h2>Confirmar remoção</h2>
+                <label for="modal-remover-faixa-toggle" class="modal-close">&times;</label>
+            </div>
+            <div class="modal-body">Tem certeza que deseja remover a faixa seleccionada?</div>
+            <div class="modal-footer">
+                <label for="modal-remover-faixa-toggle" class="btn btn-secondary">Não</label>
+                <button class="btn btn-primary" type="submit" form="form-detalhes" name="acao" value="removerfaixa">Sim</button>
+            </div>
         </div>
     </div>
 

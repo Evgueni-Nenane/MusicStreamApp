@@ -108,17 +108,22 @@ $subtituloPagina = 'Administração de utilizadores';
                             <input type="hidden" name="acao" value="salvar">
                             <div class="cadastro-layout">
                                 <div class="foto-user">
-                                    <div class="foto-preview"><img id="cad-preview" src="../resources/user.png" alt="Foto do Utilizador"></div>
+                                    <div class="foto-preview"><img src="../resources/user.png" alt="Foto do Utilizador"></div>
                                     <div class="foto-actions">
-                                        <input type="file" id="cad-foto" name="foto" accept="image/*" class="file-hidden"
-                                            onchange="document.getElementById('cad-preview').src = window.URL.createObjectURL(this.files[0])">
+                                        <input type="file" id="cad-foto" name="foto" accept="image/*" class="file-hidden">
                                         <label for="cad-foto" class="btn btn-primary btn-sm">Escolher Foto</label>
                                     </div>
                                 </div>
 
                                 <div class="form-grid">
-                                    <div class="label-group"><label for="cad-nome">Primeiro Nome *</label><input type="text" id="cad-nome" name="nome" required></div>
-                                    <div class="label-group"><label for="cad-apelido">Último Nome *</label><input type="text" id="cad-apelido" name="apelido" required></div>
+                                    <div class="label-group">
+                                        <label for="cad-nome">Primeiro Nome *</label>
+                                        <input type="text" id="cad-nome" name="nome" required>
+                                    </div>
+                                    <div class="label-group">
+                                        <label for="cad-apelido">Último Nome *</label>
+                                        <input type="text" id="cad-apelido" name="apelido" required>
+                                    </div>
                                     <div class="label-group">
                                         <label for="cad-genero">Género</label>
                                         <select id="cad-genero" name="genero">
@@ -129,14 +134,23 @@ $subtituloPagina = 'Administração de utilizadores';
                                     <div class="label-group">
                                         <label for="cad-perfil">Perfil do Utilizador</label>
                                         <select id="cad-perfil" name="perfil">
-                                            <?php foreach ($niveis as $n): ?>
-                                                <option value="<?= $n->getCodigoNivel() ?>"><?= htmlspecialchars($n->getNome()) ?></option>
+                                            <?php foreach ($niveis as $nivel): ?>
+                                                <option value="<?= $nivel->getCodigoNivel() ?>"><?= htmlspecialchars($nivel->getNome()) ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
-                                    <div class="label-group full"><label for="cad-username">Nome de Utilizador *</label><input type="text" id="cad-username" name="username" required></div>
-                                    <div class="label-group full"><label for="cad-email">E-mail Corporativo</label><input type="email" id="cad-email" name="email"></div>
-                                    <div class="label-group full"><label for="cad-tel">Número de Telemóvel</label><input type="tel" id="cad-tel" name="telefone"></div>
+                                    <div class="label-group full">
+                                        <label for="cad-username">Nome de Utilizador *</label>
+                                        <input type="text" id="cad-username" name="username" required>
+                                    </div>
+                                    <div class="label-group full">
+                                        <label for="cad-email">E-mail Corporativo</label>
+                                        <input type="email" id="cad-email" name="email">
+                                    </div>
+                                    <div class="label-group full">
+                                        <label for="cad-tel">Número de Telemóvel</label>
+                                        <input type="tel" id="cad-tel" name="telefone">
+                                    </div>
                                 </div>
                             </div>
                             <div class="table-actions">
@@ -162,15 +176,15 @@ $subtituloPagina = 'Administração de utilizadores';
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($lista as $u): ?>
+                                        <?php foreach ($lista as $utilizadorLista): ?>
                                             <tr>
-                                                <td><input type="radio" name="sel" value="<?= $u->getCodigo() ?>"></td>
-                                                <td><?= $u->getCodigo() ?></td>
-                                                <td><?= htmlspecialchars($u->getNomeCompleto()) ?></td>
-                                                <td><?= htmlspecialchars($u->getEmail()) ?></td>
-                                                <td><?= htmlspecialchars($u->getGenero()) ?></td>
-                                                <td><?= htmlspecialchars($u->getPerfil()->getNome()) ?></td>
-                                                <td><?= htmlspecialchars($u->getContacto()) ?></td>
+                                                <td><input type="radio" name="sel" value="<?= $utilizadorLista->getCodigo() ?>"></td>
+                                                <td><?= $utilizadorLista->getCodigo() ?></td>
+                                                <td><?= htmlspecialchars($utilizadorLista->getNomeCompleto()) ?></td>
+                                                <td><?= htmlspecialchars($utilizadorLista->getEmail()) ?></td>
+                                                <td><?= htmlspecialchars($utilizadorLista->getGenero()) ?></td>
+                                                <td><?= htmlspecialchars($utilizadorLista->getPerfil()->getNome()) ?></td>
+                                                <td><?= htmlspecialchars($utilizadorLista->getContacto()) ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$lista): ?>
@@ -202,12 +216,30 @@ $subtituloPagina = 'Administração de utilizadores';
                                 <div class="label-group full">
                                     <label>Permissões</label>
                                     <div class="perm-grid">
-                                        <label class="perm-check"><input type="checkbox" checked disabled> Listar</label>
-                                        <label class="perm-check"><input type="checkbox" name="perm[adicionar]" value="1"> Criar</label>
-                                        <label class="perm-check"><input type="checkbox" name="perm[editar]" value="1"> Editar</label>
-                                        <label class="perm-check"><input type="checkbox" name="perm[remover]" value="1"> Remover</label>
-                                        <label class="perm-check"><input type="checkbox" name="perm[utilizadores]" value="1"> Gerir utilizadores</label>
-                                        <label class="perm-check"><input type="checkbox" name="perm[logs]" value="1"> Ver logs</label>
+                                        <label class="perm-check">
+                                            <input type="checkbox" checked disabled>
+                                            Listar
+                                        </label>
+                                        <label class="perm-check">
+                                            <input type="checkbox" name="perm[adicionar]" value="1">
+                                            Criar
+                                        </label>
+                                        <label class="perm-check">
+                                            <input type="checkbox" name="perm[editar]" value="1">
+                                            Editar
+                                        </label>
+                                        <label class="perm-check">
+                                            <input type="checkbox" name="perm[remover]" value="1">
+                                            Remover
+                                        </label>
+                                        <label class="perm-check">
+                                            <input type="checkbox" name="perm[utilizadores]" value="1">
+                                            Gerir utilizadores
+                                        </label>
+                                        <label class="perm-check">
+                                            <input type="checkbox" name="perm[logs]" value="1">
+                                            Ver logs
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -234,17 +266,17 @@ $subtituloPagina = 'Administração de utilizadores';
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($perfis as $p): ?>
+                                        <?php foreach ($perfis as $perfilLista): ?>
                                             <tr>
-                                                <td><input type="radio" name="sel_perfil" value="<?= $p['CodigoNivel'] ?>"></td>
-                                                <td><?= $p['CodigoNivel'] ?></td>
-                                                <td><?= htmlspecialchars($p['NomeNivel']) ?></td>
-                                                <td><?= formatarSimNao($p['PodeLer']) ?></td>
-                                                <td><?= formatarSimNao($p['PodeAdicionar']) ?></td>
-                                                <td><?= formatarSimNao($p['PodeEditar']) ?></td>
-                                                <td><?= formatarSimNao($p['PodeRemover']) ?></td>
-                                                <td><?= formatarSimNao($p['PodeUtilizadores']) ?></td>
-                                                <td><?= formatarSimNao($p['PodeLogs']) ?></td>
+                                                <td><input type="radio" name="sel_perfil" value="<?= $perfilLista['CodigoNivel'] ?>"></td>
+                                                <td><?= $perfilLista['CodigoNivel'] ?></td>
+                                                <td><?= htmlspecialchars($perfilLista['NomeNivel']) ?></td>
+                                                <td><?= formatarSimNao($perfilLista['PodeLer']) ?></td>
+                                                <td><?= formatarSimNao($perfilLista['PodeAdicionar']) ?></td>
+                                                <td><?= formatarSimNao($perfilLista['PodeEditar']) ?></td>
+                                                <td><?= formatarSimNao($perfilLista['PodeRemover']) ?></td>
+                                                <td><?= formatarSimNao($perfilLista['PodeUtilizadores']) ?></td>
+                                                <td><?= formatarSimNao($perfilLista['PodeLogs']) ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$perfis): ?>
@@ -271,7 +303,8 @@ $subtituloPagina = 'Administração de utilizadores';
     <div class="modal-overlay">
         <div class="modal">
             <div class="modal-header">
-                <h2>Editar Utilizador</h2><label for="m-edit-user" class="modal-close">&times;</label>
+                <h2>Editar Utilizador</h2>
+                <label for="m-edit-user" class="modal-close">&times;</label>
             </div>
             <form method="post" action="administracao.php" enctype="multipart/form-data">
                 <input type="hidden" name="acao" value="atualizar">
@@ -280,27 +313,38 @@ $subtituloPagina = 'Administração de utilizadores';
                     <div class="cadastro-layout sm">
                         <div class="foto-user">
                             <div class="foto-preview">
-                                <img id="eu-preview" src="<?= $utilizadorEdicao ? 'foto.php?u=' . (int) $utilizadorEdicao->getCodigo() : '../resources/user.png' ?>" onerror="this.onerror=null;this.src='../resources/user.png'" alt="Foto do Utilizador">
+                                <img src="<?= $utilizadorEdicao ? 'foto.php?u=' . (int) $utilizadorEdicao->getCodigo() : '../resources/user.png' ?>" alt="Foto do Utilizador">
                             </div>
                             <div class="foto-actions">
-                                <input type="file" id="edit-foto" name="foto" accept="image/*" class="file-hidden"
-                                    onchange="document.getElementById('eu-preview').src = window.URL.createObjectURL(this.files[0])">
+                                <input type="file" id="edit-foto" name="foto" accept="image/*" class="file-hidden">
                                 <label for="edit-foto" class="btn btn-primary btn-sm">Escolher Foto</label>
                             </div>
                         </div>
                         <div class="form-grid">
-                            <div class="label-group"><label>Primeiro Nome</label><input type="text" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getNome() : '') ?>" readonly></div>
-                            <div class="label-group"><label>Último Nome</label><input type="text" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getApelido() : '') ?>" readonly></div>
+                            <div class="label-group">
+                                <label>Primeiro Nome</label>
+                                <input type="text" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getNome() : '') ?>" readonly>
+                            </div>
+                            <div class="label-group">
+                                <label>Último Nome</label>
+                                <input type="text" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getApelido() : '') ?>" readonly>
+                            </div>
                             <div class="label-group full">
                                 <label for="eu-perfil">Perfil</label>
                                 <select id="eu-perfil" name="perfil">
-                                    <?php foreach ($niveis as $n): ?>
-                                        <option value="<?= $n->getCodigoNivel() ?>" <?= ($utilizadorEdicao && $utilizadorEdicao->getPerfil()->getCodigoNivel() == $n->getCodigoNivel()) ? 'selected' : '' ?>><?= htmlspecialchars($n->getNome()) ?></option>
+                                    <?php foreach ($niveis as $nivel): ?>
+                                        <option value="<?= $nivel->getCodigoNivel() ?>" <?= ($utilizadorEdicao && $utilizadorEdicao->getPerfil()->getCodigoNivel() == $nivel->getCodigoNivel()) ? 'selected' : '' ?>><?= htmlspecialchars($nivel->getNome()) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="label-group full"><label for="eu-email">E-mail Corporativo</label><input type="email" id="eu-email" name="email" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getEmail() : '') ?>"></div>
-                            <div class="label-group full"><label for="eu-tel">Número de Telemóvel</label><input type="tel" id="eu-tel" name="telefone" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getContacto() : '') ?>"></div>
+                            <div class="label-group full">
+                                <label for="eu-email">E-mail Corporativo</label>
+                                <input type="email" id="eu-email" name="email" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getEmail() : '') ?>">
+                            </div>
+                            <div class="label-group full">
+                                <label for="eu-tel">Número de Telemóvel</label>
+                                <input type="tel" id="eu-tel" name="telefone" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getContacto() : '') ?>">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -317,7 +361,8 @@ $subtituloPagina = 'Administração de utilizadores';
     <div class="modal-overlay">
         <div class="modal">
             <div class="modal-header">
-                <h2>Editar Perfil</h2><label for="m-edit-perfil" class="modal-close">&times;</label>
+                <h2>Editar Perfil</h2>
+                <label for="m-edit-perfil" class="modal-close">&times;</label>
             </div>
             <form method="post" action="administracao.php">
                 <input type="hidden" name="acao" value="atualizar_perfil">
@@ -331,12 +376,30 @@ $subtituloPagina = 'Administração de utilizadores';
                         <div class="label-group full">
                             <label>Permissões</label>
                             <div class="perm-grid">
-                                <label class="perm-check"><input type="checkbox" checked disabled> Listar</label>
-                                <label class="perm-check"><input type="checkbox" name="perm[adicionar]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeAdicionar']) ? 'checked' : '' ?>> Criar</label>
-                                <label class="perm-check"><input type="checkbox" name="perm[editar]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeEditar']) ? 'checked' : '' ?>> Editar</label>
-                                <label class="perm-check"><input type="checkbox" name="perm[remover]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeRemover']) ? 'checked' : '' ?>> Remover</label>
-                                <label class="perm-check"><input type="checkbox" name="perm[utilizadores]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeUtilizadores']) ? 'checked' : '' ?>> Gerir utilizadores</label>
-                                <label class="perm-check"><input type="checkbox" name="perm[logs]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeLogs']) ? 'checked' : '' ?>> Ver logs</label>
+                                <label class="perm-check">
+                                    <input type="checkbox" checked disabled>
+                                    Listar
+                                </label>
+                                <label class="perm-check">
+                                    <input type="checkbox" name="perm[adicionar]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeAdicionar']) ? 'checked' : '' ?>>
+                                    Criar
+                                </label>
+                                <label class="perm-check">
+                                    <input type="checkbox" name="perm[editar]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeEditar']) ? 'checked' : '' ?>>
+                                    Editar
+                                </label>
+                                <label class="perm-check">
+                                    <input type="checkbox" name="perm[remover]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeRemover']) ? 'checked' : '' ?>>
+                                    Remover
+                                </label>
+                                <label class="perm-check">
+                                    <input type="checkbox" name="perm[utilizadores]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeUtilizadores']) ? 'checked' : '' ?>>
+                                    Gerir utilizadores
+                                </label>
+                                <label class="perm-check">
+                                    <input type="checkbox" name="perm[logs]" value="1" <?= ($perfilEdicao && $perfilEdicao['PodeLogs']) ? 'checked' : '' ?>>
+                                    Ver logs
+                                </label>
                             </div>
                         </div>
                     </div>
