@@ -2,10 +2,9 @@
 require_once __DIR__ . '/../../model/sessao.php';
 require_once __DIR__ . '/../../controller/loginController.php';
 
-
 Sessao::iniciar();
 
-// Se já estiver logado, não faz sentido ver o login outra vez — manda para o dashboard
+// Se já estiver logado, não faz sentido ver o login outra vez — manda para a administração
 if (Sessao::estaLogado()) {
     header('Location: administracao.php');
     exit;

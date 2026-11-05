@@ -2,8 +2,8 @@
 /*
  * Serve a foto de perfil guardada na base de dados (Utilizador.foto / foto_tipo).
  *
- *   foto.php          -> foto do utilizador com sessao
- *   foto.php?u=<id>   -> foto de outro utilizador (so o proprio ou quem tem a permissao "utilizadores")
+ *   foto.php          -> foto do utilizador com sessão
+ *   foto.php?u=<id>   -> foto de outro utilizador (só o próprio ou quem tem a permissão "utilizadores")
  */
 require_once __DIR__ . '/../../model/sessao.php';
 require_once __DIR__ . '/../../model/permissao.php';
