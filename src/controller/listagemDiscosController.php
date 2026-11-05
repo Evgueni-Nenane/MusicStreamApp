@@ -73,12 +73,12 @@ class ListagemDiscosController
         $acaoGet = $get['acao'] ?? '';
 
         if ($acaoGet !== '') {
-            $disco = $this->discoDAO->buscarPorCodigo((int)($get['sel'] ?? 0));
+            $disco = $this->discoDAO->buscarPorCodigo((int) ($get['sel'] ?? 0));
 
             if ($acaoGet === 'editarfaixa') {
                 // Editar Faixa: a faixa vem de sel_faixa; o disco vem de id (ou deduz-se da faixa).
-                $faixaDiscoId = (int)($get['id'] ?? 0);
-                $faixaId = (int)($get['sel_faixa'] ?? 0);
+                $faixaDiscoId = (int) ($get['id'] ?? 0);
+                $faixaId = (int) ($get['sel_faixa'] ?? 0);
 
                 if (!Permissao::pode($utilizador, 'editar')) {
                     $mensagem = 'Sem permissão para editar.';
@@ -162,7 +162,7 @@ class ListagemDiscosController
         $faixaSegundos = 0;
         if ($faixaEdicao) {
             [$faixaMinutos, $faixaSegundos] = array_pad(
-                array_map('intval', explode(':', (string)$faixaEdicao->getDuracao())),
+                array_map('intval', explode(':', (string) $faixaEdicao->getDuracao())),
                 2,
                 0
             );
@@ -223,7 +223,7 @@ class ListagemDiscosController
             return ['mensagem' => $bloqueio];
         }
 
-        $id = (int)($post['sel'] ?? 0);
+        $id = (int) ($post['sel'] ?? 0);
         if ($id === 0) {
             return ['mensagem' => 'Seleccione um disco.'];
         }
@@ -246,19 +246,19 @@ class ListagemDiscosController
             return ['mensagem' => $bloqueio];
         }
 
-        $id = (int)$post['id'];
+        $id = (int) $post['id'];
         $this->discoDAO->atualizar(new DiscoCompacto(
             $id,
             trim($post['titulo']),
-            (float)$post['preco'],
-            (int)substr($post['ano_edicao'], 0, 4),   // o calendário envia AAAA-MM-DD
+            (float) $post['preco'],
+            (int) substr($post['ano_edicao'], 0, 4),   // o calendário envia AAAA-MM-DD
             [], [], [], [], [], [], [], null, []
         ));
 
         // Géneros: apaga as ligações antigas e grava as marcadas.
         $this->generoDAO->removerRelacoesPorDisco($id);
         foreach (($post['generos'] ?? []) as $generoId) {
-            $this->generoDAO->inserirRelacaoGeneroDisco($id, (int)$generoId);
+            $this->generoDAO->inserirRelacaoGeneroDisco($id, (int) $generoId);
         }
 
         return ['mensagem' => 'Disco atualizado.'];
@@ -270,8 +270,8 @@ class ListagemDiscosController
             return ['mensagem' => $bloqueio];
         }
 
-        $discoId = (int)$post['id'];
-        $duracao = sprintf('%02d:%02d', (int)$post['min'], (int)$post['seg']);
+        $discoId = (int) $post['id'];
+        $duracao = sprintf('%02d:%02d', (int) $post['min'], (int) $post['seg']);
         $numeroFaixa = count($this->faixaDAO->listarPorCodigo($discoId)) + 1;
 
         $faixaId = $this->faixaDAO->inserir(
@@ -284,15 +284,15 @@ class ListagemDiscosController
         }
 
         foreach (($post['compositores'] ?? []) as $compositorId) {
-            $this->faixaDAO->inserirRelacaoCompositor($faixaId, (int)$compositorId);
+            $this->faixaDAO->inserirRelacaoCompositor($faixaId, (int) $compositorId);
         }
 
         foreach (($post['musicos'] ?? []) as $musicoId) {
-            $this->faixaDAO->inserirRelacaoMusico($faixaId, (int)$musicoId);
+            $this->faixaDAO->inserirRelacaoMusico($faixaId, (int) $musicoId);
         }
 
         foreach (($post['cantores'] ?? []) as $cantorId) {
-            $this->faixaDAO->inserirRelacaoCantor($faixaId, (int)$cantorId);
+            $this->faixaDAO->inserirRelacaoCantor($faixaId, (int) $cantorId);
         }
 
         return ['mensagem' => 'Faixa adicionada.'];
@@ -305,12 +305,12 @@ class ListagemDiscosController
         }
 
         // Edita nome/artista/duração e sincroniza os participantes da faixa.
-        $discoId = (int)$post['id'];
-        $faixaId = (int)$post['id_faixa'];
-        $duracao = sprintf('%02d:%02d', (int)$post['min'], (int)$post['seg']);
+        $discoId = (int) $post['id'];
+        $faixaId = (int) $post['id_faixa'];
+        $duracao = sprintf('%02d:%02d', (int) $post['min'], (int) $post['seg']);
 
         $this->faixaDAO->atualizar(
-            new Faixa(trim($post['nome']), trim($post['artista']), $duracao, (int)$post['num']),
+            new Faixa(trim($post['nome']), trim($post['artista']), $duracao, (int) $post['num']),
             $faixaId
         );
 
@@ -328,8 +328,8 @@ class ListagemDiscosController
             return ['mensagem' => $bloqueio];
         }
 
-        $discoId = (int)$post['id'];
-        $faixaId = (int)($post['sel_faixa'] ?? 0);
+        $discoId = (int) $post['id'];
+        $faixaId = (int) ($post['sel_faixa'] ?? 0);
 
         if ($faixaId === 0) {
             return [

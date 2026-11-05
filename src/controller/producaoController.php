@@ -70,7 +70,7 @@ class ProducaoController
         $produtorEdicao = $gravadoraEdicao = $editoraEdicao = null;
 
         if (($get['acao'] ?? '') === 'editar') {
-            $sel  = (int)($get['sel'] ?? 0);
+            $sel = (int) ($get['sel'] ?? 0);
             $tipo = $get['tipo'] ?? '';
 
             if ($tipo === 'produtor') {
@@ -90,7 +90,7 @@ class ProducaoController
 
         $produtores = $this->produtorController->listarProdutor();
         $gravadoras = $this->gravadoraController->listarGravadoras();
-        $editoras   = $this->editoraController->listarEditoras();
+        $editoras = $this->editoraController->listarEditoras();
 
         // Pesquisa simples (filtra em memória as 3 listas pelo texto introduzido)
         $termoPesquisa = trim($get['q'] ?? '');
@@ -128,9 +128,13 @@ class ProducaoController
 
             // Abre automaticamente a primeira aba que tenha resultados
             if (($get['acao'] ?? '') !== 'editar') {
-                if ($produtores)      $tab = 'prod';
-                elseif ($gravadoras)  $tab = 'grav';
-                elseif ($editoras)    $tab = 'edit';
+                if ($produtores) {
+                    $tab = 'prod';
+                } elseif ($gravadoras) {
+                    $tab = 'grav';
+                } elseif ($editoras) {
+                    $tab = 'edit';
+                }
             }
         }
 
@@ -150,7 +154,7 @@ class ProducaoController
     private function processarProdutor($acao, $post)
     {
         if ($acao === 'adicionar') {
-            $nome    = trim($post['nome'] ?? '');
+            $nome = trim($post['nome'] ?? '');
             $apelido = trim($post['apelido'] ?? '');
             $novo = $this->produtorController->cadastrarProdutor(new Produtor(
                 null, $nome, $apelido,
@@ -164,14 +168,14 @@ class ProducaoController
 
         if ($acao === 'atualizar') {
             $p = new Produtor(
-                (int)$post['id'], trim($post['nome'] ?? ''), trim($post['apelido'] ?? ''),
+                (int) $post['id'], trim($post['nome'] ?? ''), trim($post['apelido'] ?? ''),
                 trim($post['contacto'] ?? ''), trim($post['email'] ?? '')
             );
             return $this->produtorController->atualizarProdutor($p) ? 'Produtor atualizado.' : 'Sem alterações.';
         }
 
         if ($acao === 'remover') {
-            $id = (int)($post['sel'] ?? 0);
+            $id = (int) ($post['sel'] ?? 0);
             $removido = $id > 0 && $this->produtorController->removerProdutor($id);
             if ($removido) {
                 LogsController::registar('Removeu o produtor ID ' . $id);
@@ -200,14 +204,14 @@ class ProducaoController
 
         if ($acao === 'atualizar') {
             $g = new Gravadora(
-                (int)$post['id'], trim($post['nome'] ?? ''), trim($post['contacto'] ?? ''),
+                (int) $post['id'], trim($post['nome'] ?? ''), trim($post['contacto'] ?? ''),
                 trim($post['endereco'] ?? ''), trim($post['email'] ?? '')
             );
             return $this->gravadoraController->atualizarGravadora($g) ? 'Gravadora atualizada.' : 'Sem alterações.';
         }
 
         if ($acao === 'remover') {
-            $id = (int)($post['sel'] ?? 0);
+            $id = (int) ($post['sel'] ?? 0);
             $removido = $id > 0 && $this->gravadoraController->removerGravadora($id);
             if ($removido) {
                 LogsController::registar('Removeu a gravadora ID ' . $id);
@@ -236,14 +240,14 @@ class ProducaoController
 
         if ($acao === 'atualizar') {
             $e = new Editora(
-                (int)$post['id'], trim($post['nome'] ?? ''), trim($post['contacto'] ?? ''),
+                (int) $post['id'], trim($post['nome'] ?? ''), trim($post['contacto'] ?? ''),
                 trim($post['email'] ?? ''), trim($post['endereco'] ?? '')
             );
             return $this->editoraController->atualizarEditora($e) ? 'Editora atualizada.' : 'Sem alterações.';
         }
 
         if ($acao === 'remover') {
-            $id = (int)($post['sel'] ?? 0);
+            $id = (int) ($post['sel'] ?? 0);
             $removido = $id > 0 && $this->editoraController->removerEditora($id);
             if ($removido) {
                 LogsController::registar('Removeu a editora ID ' . $id);

@@ -56,10 +56,10 @@ class RegistoDiscoController
         }
 
         $titulo = trim($post['titulo'] ?? '');
-        $preco = ($post['preco'] ?? '') !== '' ? (float)$post['preco'] : 0;
+        $preco = ($post['preco'] ?? '') !== '' ? (float) $post['preco'] : 0;
         $dataEdicao = $post['ano_edicao'] ?? '';
-        $ano = $dataEdicao !== '' ? (int)substr($dataEdicao, 0, 4) : null;   // o disco guarda só o ano
-        $editoraId = (int)($post['editora'] ?? 0);
+        $ano = $dataEdicao !== '' ? (int) substr($dataEdicao, 0, 4) : null;   // o disco guarda só o ano
+        $editoraId = (int) ($post['editora'] ?? 0);
 
         if ($titulo === '') {
             return ['erro' => 'O título é obrigatório.'];
@@ -81,27 +81,27 @@ class RegistoDiscoController
         }
 
         foreach ($post['generos'] as $generoId) {
-            $this->generoDAO->inserirRelacaoGeneroDisco($codigoDisco, (int)$generoId);
+            $this->generoDAO->inserirRelacaoGeneroDisco($codigoDisco, (int) $generoId);
         }
 
         foreach (($post['compositores'] ?? []) as $compositorId) {
-            $this->compositorDAO->inserirRelacaoDiscoCompositor($codigoDisco, (int)$compositorId);
+            $this->compositorDAO->inserirRelacaoDiscoCompositor($codigoDisco, (int) $compositorId);
         }
 
         foreach (($post['musicos'] ?? []) as $musicoId) {
-            $this->musicoDAO->inserirRelacaoDiscoMusico($codigoDisco, (int)$musicoId);
+            $this->musicoDAO->inserirRelacaoDiscoMusico($codigoDisco, (int) $musicoId);
         }
 
         foreach (($post['cantores'] ?? []) as $cantorId) {
-            $this->cantorDAO->inserirRelacaoDiscoCantor($codigoDisco, (int)$cantorId);
+            $this->cantorDAO->inserirRelacaoDiscoCantor($codigoDisco, (int) $cantorId);
         }
 
         foreach (($post['produtores'] ?? []) as $produtorId) {
-            $this->produtorDAO->inserirRelacaoDiscoProdutor($codigoDisco, (int)$produtorId);
+            $this->produtorDAO->inserirRelacaoDiscoProdutor($codigoDisco, (int) $produtorId);
         }
 
         foreach (($post['gravadoras'] ?? []) as $gravadoraId) {
-            $this->gravadoraDAO->inserirRelacaoDiscoGravadora($codigoDisco, (int)$gravadoraId);
+            $this->gravadoraDAO->inserirRelacaoDiscoGravadora($codigoDisco, (int) $gravadoraId);
         }
 
         if ($editoraId > 0) {

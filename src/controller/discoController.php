@@ -44,7 +44,7 @@ class DiscoController
     {
         $codigoDisco = $this->discoDAO->inserir($disco);
 
-        if ($codigoDisco == -1) {
+        if ($codigoDisco === -1) {
             return -1;
         }
 
@@ -138,7 +138,7 @@ class DiscoController
     public function adicionarFaixaAoDisco($codigoDisco, $faixa)
     {
         $idFaixa = $this->faixaDAO->inserir($faixa, $codigoDisco);
-        if ($idFaixa == -1) {
+        if ($idFaixa === -1) {
             return false;
         }
 
@@ -188,7 +188,7 @@ class DiscoController
             }
         }
 
-        if (count($idsFaixas) > 0) {
+        if ($idsFaixas) {
             LogsController::registar('Removeu as faixas ID ' . implode(', ', $idsFaixas));
         }
 

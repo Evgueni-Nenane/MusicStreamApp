@@ -19,7 +19,7 @@ class MusicoController
     {
         $codigoMusico = $this->musicoDAO->inserir($musico);
 
-        if ($codigoMusico == -1) {
+        if ($codigoMusico === -1) {
             return -1;
         }
 

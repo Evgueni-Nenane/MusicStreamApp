@@ -17,7 +17,7 @@ class CompositorController
         return $this->compositorDAO->inserir($compositor);
     }
 
-    public function listarCompositor()
+    public function listarCompositores()
     {
         return $this->compositorDAO->listarTodos();
     }

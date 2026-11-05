@@ -83,7 +83,7 @@ class InstrumentoController
             return ['erro' => $bloqueio];
         }
 
-        $id = (int)($post['sel'] ?? 0);
+        $id = (int) ($post['sel'] ?? 0);
         if ($id === 0) {
             return ['erro' => 'Seleccione um instrumento.'];
         }

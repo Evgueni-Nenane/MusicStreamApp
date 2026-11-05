@@ -81,9 +81,9 @@ class NivelAcessoDAO
                 VALUES (?, 1, ?, ?, ?, ?, ?)";
         $ps = $conn->prepare($sql);
 
-        $add  = !empty($perm['adicionar']) ? 1 : 0;
+        $add = !empty($perm['adicionar']) ? 1 : 0;
         $edit = !empty($perm['editar']) ? 1 : 0;
-        $rem  = !empty($perm['remover']) ? 1 : 0;
+        $rem = !empty($perm['remover']) ? 1 : 0;
         $user = !empty($perm['utilizadores']) ? 1 : 0;
         $logs = !empty($perm['logs']) ? 1 : 0;
         $ps->bind_param("siiiii", $nome, $add, $edit, $rem, $user, $logs);
@@ -98,16 +98,19 @@ class NivelAcessoDAO
 
     public function atualizar($codigo, $nome, $perm)
     {
-        if ($codigo <= 4) return false; // perfis base não se editam
+        // Perfis base não se editam.
+        if ($codigo <= 4) {
+            return false;
+        }
 
         $conn = Connection::connectionDB();
         $sql = "UPDATE NivelAcesso SET NomeNivel=?, PodeAdicionar=?, PodeEditar=?,
                 PodeRemover=?, PodeUtilizadores=?, PodeLogs=? WHERE CodigoNivel=?";
         $ps = $conn->prepare($sql);
 
-        $add  = !empty($perm['adicionar']) ? 1 : 0;
+        $add = !empty($perm['adicionar']) ? 1 : 0;
         $edit = !empty($perm['editar']) ? 1 : 0;
-        $rem  = !empty($perm['remover']) ? 1 : 0;
+        $rem = !empty($perm['remover']) ? 1 : 0;
         $user = !empty($perm['utilizadores']) ? 1 : 0;
         $logs = !empty($perm['logs']) ? 1 : 0;
         $ps->bind_param("siiiiii", $nome, $add, $edit, $rem, $user, $logs, $codigo);
@@ -122,7 +125,10 @@ class NivelAcessoDAO
 
     public function remover($codigo)
     {
-        if ($codigo <= 4) return false; // perfis base não se apagam
+        // Perfis base não se apagam.
+        if ($codigo <= 4) {
+            return false;
+        }
 
         $conn = Connection::connectionDB();
 
@@ -131,7 +137,9 @@ class NivelAcessoDAO
         $ps->bind_param("i", $codigo);
         $ps->execute();
         $row = $ps->get_result()->fetch_assoc();
-        if ($row['total'] > 0) return false;
+        if ($row['total'] > 0) {
+            return false;
+        }
 
         $ps = $conn->prepare("DELETE FROM NivelAcesso WHERE CodigoNivel = ?");
         $ps->bind_param("i", $codigo);

@@ -76,19 +76,21 @@ class ArtistasController
             $tipoArtistaEdicao = $get['tipo'] ?? '';
             // fica na aba onde o utilizador estava, mesmo que não tenha seleccionado ninguém
             $tab = self::ABAS[$tipoArtistaEdicao] ?? $tab;
-            $artistaEdicaoId = (int)($get['sel_' . $tipoArtistaEdicao] ?? 0);
+            $artistaEdicaoId = (int) ($get['sel_' . $tipoArtistaEdicao] ?? 0);
 
             if ($artistaEdicaoId === 0) { // compatibilidade com o formato antigo "tipo:id"
                 [$tipoAntigo, $idAntigo] = array_pad(explode(':', $get['sel'] ?? ''), 2, '');
-                if ($tipoArtistaEdicao === '' && $tipoAntigo !== '') $tipoArtistaEdicao = $tipoAntigo;
-                $artistaEdicaoId = (int)$idAntigo;
+                if ($tipoArtistaEdicao === '' && $tipoAntigo !== '') {
+                    $tipoArtistaEdicao = $tipoAntigo;
+                }
+                $artistaEdicaoId = (int) $idAntigo;
             }
 
             if ($artistaEdicaoId > 0 && $tipoArtistaEdicao === 'musico') {
                 $artistaEdicao = $this->musicoController->buscarPorCodigo($artistaEdicaoId);
                 if ($artistaEdicao->getCodigoMusico()) {
-                    foreach ($this->musicoController->buscarInstrumentosDoMusico($artistaEdicaoId) as $i) {
-                        $instrumentosSelecionados[] = $i->getCodigo();
+                    foreach ($this->musicoController->buscarInstrumentosDoMusico($artistaEdicaoId) as $instrumento) {
+                        $instrumentosSelecionados[] = $instrumento->getCodigo();
                     }
                     $tab = 'musicos';
                 } else {
@@ -96,22 +98,30 @@ class ArtistasController
                 }
             } elseif ($artistaEdicaoId > 0 && $tipoArtistaEdicao === 'compositor') {
                 $artistaEdicao = $this->compositorController->buscarPorCodigo($artistaEdicaoId);
-                if ($artistaEdicao->getCodigoCompositor()) $tab = 'compositores';
-                else $artistaEdicao = null;
+                if ($artistaEdicao->getCodigoCompositor()) {
+                    $tab = 'compositores';
+                } else {
+                    $artistaEdicao = null;
+                }
             } elseif ($artistaEdicaoId > 0 && $tipoArtistaEdicao === 'cantor') {
                 $artistaEdicao = $this->cantorController->buscarPorCodigo($artistaEdicaoId);
-                if ($artistaEdicao->getCodigoCantor()) $tab = 'cantores';
-                else $artistaEdicao = null;
+                if ($artistaEdicao->getCodigoCantor()) {
+                    $tab = 'cantores';
+                } else {
+                    $artistaEdicao = null;
+                }
             } else {
                 $tipoArtistaEdicao = '';
             }
 
-            if (!$artistaEdicao && $msg === '') $msg = 'Seleccione um artista.';
+            if (!$artistaEdicao && $msg === '') {
+                $msg = 'Seleccione um artista.';
+            }
         }
 
-        $musicos      = $this->musicoController->listarMusicos();
-        $cantores     = $this->cantorController->listarCantor();
-        $compositores = $this->compositorController->listarCompositor();
+        $musicos = $this->musicoController->listarMusicos();
+        $cantores = $this->cantorController->listarCantor();
+        $compositores = $this->compositorController->listarCompositores();
         $instrumentos = $this->instrumentoController->listarInstrumentos();
 
         /* Pesquisa simples (filtra em memória as 3 listas) */
@@ -149,10 +159,18 @@ class ArtistasController
 
             // Se a aba actual ficou sem resultados, abre a primeira que tenha
             if (($get['acao'] ?? '') !== 'editar') {
-                $listasPorAba = ['musicos' => $musicos, 'compositores' => $compositores, 'cantores' => $cantores];
+                $listasPorAba = [
+                    'musicos' => $musicos,
+                    'compositores' => $compositores,
+                    'cantores' => $cantores,
+                ];
+
                 if (empty($listasPorAba[$tab])) {
                     foreach ($listasPorAba as $nomeAba => $lista) {
-                        if ($lista) { $tab = $nomeAba; break; }
+                        if ($lista) {
+                            $tab = $nomeAba;
+                            break;
+                        }
                     }
                 }
             }
@@ -209,10 +227,10 @@ class ArtistasController
             return $bloqueio;
         }
 
-        $nome     = trim($post['nome'] ?? '');
-        $apelido  = trim($post['apelido'] ?? '');
+        $nome = trim($post['nome'] ?? '');
+        $apelido = trim($post['apelido'] ?? '');
         $contacto = trim($post['contacto'] ?? '');
-        $email    = trim($post['email'] ?? '');
+        $email = trim($post['email'] ?? '');
 
         if ($nome === '' || $apelido === '') {
             return 'Preencha pelo menos o nome e o apelido.';
@@ -225,7 +243,7 @@ class ArtistasController
             );
             if ($id > 0) {
                 foreach (($post['instrumentos'] ?? []) as $cod) {
-                    $this->instrumentoController->inserirRelacaoMusicoInstrumento($id, (int)$cod);
+                    $this->instrumentoController->inserirRelacaoMusicoInstrumento($id, (int) $cod);
                 }
             }
         } elseif ($tipo === 'cantor') {
@@ -249,11 +267,11 @@ class ArtistasController
             return $bloqueio;
         }
 
-        $id       = (int)($post['id'] ?? 0);
-        $nome     = trim($post['nome'] ?? '');
-        $apelido  = trim($post['apelido'] ?? '');
+        $id = (int) ($post['id'] ?? 0);
+        $nome = trim($post['nome'] ?? '');
+        $apelido = trim($post['apelido'] ?? '');
         $contacto = trim($post['contacto'] ?? '');
-        $email    = trim($post['email'] ?? '');
+        $email = trim($post['email'] ?? '');
 
         if ($id === 0 || $nome === '' || $apelido === '') {
             return 'Dados inválidos para atualizar.';
@@ -265,7 +283,7 @@ class ArtistasController
             );
             $this->instrumentoController->removerRelacoesPorMusico($id);
             foreach (($post['instrumentos'] ?? []) as $cod) {
-                $this->instrumentoController->inserirRelacaoMusicoInstrumento($id, (int)$cod);
+                $this->instrumentoController->inserirRelacaoMusicoInstrumento($id, (int) $cod);
             }
             return $ok ? 'Músico atualizado.' : 'Sem alterações.';
         }
@@ -290,17 +308,24 @@ class ArtistasController
         }
 
         // Cada aba selecciona pelo seu próprio name; mantém-se o formato antigo "tipo:id".
-        $id = (int)($post['sel_' . $tipo] ?? 0);
+        $id = (int) ($post['sel_' . $tipo] ?? 0);
         if ($id === 0) {
             [$tipoAntigo, $idAntigo] = array_pad(explode(':', $post['sel'] ?? ''), 2, '');
-            if ($tipo === '' && $tipoAntigo !== '') $tipo = $tipoAntigo;
-            $id = (int)$idAntigo;
+            if ($tipo === '' && $tipoAntigo !== '') {
+                $tipo = $tipoAntigo;
+            }
+            $id = (int) $idAntigo;
         }
 
-        if ($tipo === 'musico')          $ok = $id > 0 && $this->musicoController->removerMusico($id);
-        elseif ($tipo === 'cantor')      $ok = $id > 0 && $this->cantorController->removerCantor($id);
-        elseif ($tipo === 'compositor')  $ok = $id > 0 && $this->compositorController->removerCompositor($id);
-        else                             $ok = false;
+        if ($tipo === 'musico') {
+            $ok = $id > 0 && $this->musicoController->removerMusico($id);
+        } elseif ($tipo === 'cantor') {
+            $ok = $id > 0 && $this->cantorController->removerCantor($id);
+        } elseif ($tipo === 'compositor') {
+            $ok = $id > 0 && $this->compositorController->removerCompositor($id);
+        } else {
+            $ok = false;
+        }
 
         if ($ok) {
             LogsController::registar('Removeu o artista (' . $tipo . ') ID ' . $id);

@@ -64,7 +64,7 @@ class AdministracaoController
         $utilizadorEdicao = null;
         if (($get['acao'] ?? '') === 'editar') {
             $tab = 'lista';
-            $utilizadorEdicao = $this->utilizadorController->listarPorId((int)($get['sel'] ?? 0));
+            $utilizadorEdicao = $this->utilizadorController->listarPorId((int) ($get['sel'] ?? 0));
 
             if (!$utilizadorEdicao) {
                 $msg = 'Seleccione um utilizador.';
@@ -75,7 +75,7 @@ class AdministracaoController
         $perfilEdicao = null;
         if (($get['acao'] ?? '') === 'editar_perfil') {
             $tab = 'perfis';
-            $perfilEdicao = $this->nivelController->buscarPorCodigo((int)($get['sel_perfil'] ?? 0));
+            $perfilEdicao = $this->nivelController->buscarPorCodigo((int) ($get['sel_perfil'] ?? 0));
 
             if (!$perfilEdicao) {
                 $msg = 'Seleccione um perfil.';
@@ -172,7 +172,7 @@ class AdministracaoController
             trim($post['apelido'] ?? ''),
             trim($post['username'] ?? ''),
             $post['genero'] ?? null,
-            new NivelAcesso((int)($post['perfil'] ?? 0), ''),
+            new NivelAcesso((int) ($post['perfil'] ?? 0), ''),
             trim($post['email'] ?? ''),
             trim($post['telefone'] ?? ''),
             self::SENHA_PROVISORIA,
@@ -198,7 +198,7 @@ class AdministracaoController
 
     private function atualizarUtilizador($post)
     {
-        $id = (int)($post['id'] ?? 0);
+        $id = (int) ($post['id'] ?? 0);
         $utilizadorAtual = $this->utilizadorController->listarPorId($id);
         $foto = $this->lerFoto('foto');
 
@@ -208,7 +208,7 @@ class AdministracaoController
             null,
             null,
             null,
-            new NivelAcesso((int)($post['perfil'] ?? 0), ''),
+            new NivelAcesso((int) ($post['perfil'] ?? 0), ''),
             trim($post['email'] ?? ''),
             trim($post['telefone'] ?? ''),
             null,
@@ -228,7 +228,7 @@ class AdministracaoController
 
     private function removerUtilizador($utilizadorSessao, $post)
     {
-        $id = (int)($post['sel'] ?? 0);
+        $id = (int) ($post['sel'] ?? 0);
 
         if ($id === 0) {
             return ['msg' => 'Seleccione um utilizador.', 'tab' => 'lista'];
@@ -250,7 +250,7 @@ class AdministracaoController
 
     private function reporSenha($post)
     {
-        $id = (int)($post['sel'] ?? 0);
+        $id = (int) ($post['sel'] ?? 0);
 
         if ($id === 0) {
             return ['msg' => 'Seleccione um utilizador.', 'tab' => 'lista'];
@@ -284,7 +284,7 @@ class AdministracaoController
 
     private function atualizarPerfil($post)
     {
-        $id = (int)($post['id_perfil'] ?? 0);
+        $id = (int) ($post['id_perfil'] ?? 0);
         $nome = trim($post['nome_perfil'] ?? '');
 
         if ($nome === '') {
@@ -302,7 +302,7 @@ class AdministracaoController
 
     private function removerPerfil($post)
     {
-        $id = (int)($post['sel_perfil'] ?? 0);
+        $id = (int) ($post['sel_perfil'] ?? 0);
 
         if ($id === 0) {
             return ['msg' => 'Seleccione um perfil.', 'tab' => 'perfis'];
@@ -327,7 +327,7 @@ class AdministracaoController
         }
 
         $tmp = $_FILES[$campo]['tmp_name'];
-        $tamanho = (int)$_FILES[$campo]['size'];
+        $tamanho = (int) $_FILES[$campo]['size'];
         $maximo = 2 * 1024 * 1024; // igual ao upload_max_filesize
 
         if ($tamanho <= 0 || $tamanho > $maximo) {

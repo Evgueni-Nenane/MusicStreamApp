@@ -18,7 +18,7 @@ class Permissao
     // Devolve as permissões de um nível, lidas da tabela NivelAcesso
     public static function regras($nivel)
     {
-        $nivel = (int)$nivel;
+        $nivel = (int) $nivel;
         if (!isset(self::$cache[$nivel])) {
             require_once __DIR__ . '/../repository/nivelAcesso.php';
             $dao = new NivelAcessoDAO();
@@ -29,12 +29,14 @@ class Permissao
 
     public static function nivelDo($utilizador)
     {
-        if (!$utilizador) return 0;
+        if (!$utilizador) {
+            return 0;
+        }
         $perfil = $utilizador->getPerfil();
         if (is_object($perfil) && method_exists($perfil, 'getCodigoNivel')) {
-            return (int)$perfil->getCodigoNivel();
+            return (int) $perfil->getCodigoNivel();
         }
-        return (int)$perfil;
+        return (int) $perfil;
     }
 
     public static function pode($utilizador, $accao)
@@ -46,7 +48,9 @@ class Permissao
     // Devolve a mensagem de erro se não puder, ou null se puder
     public static function bloquear($utilizador, $accao)
     {
-        if (self::pode($utilizador, $accao)) return null;
+        if (self::pode($utilizador, $accao)) {
+            return null;
+        }
         return 'O seu perfil não tem permissão para esta acção.';
     }
 }
