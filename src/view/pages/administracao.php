@@ -23,30 +23,25 @@ $podeLogs = Permissao::pode($utilizador, 'logs');
 // Mostra "Sim" ou "Não" na tabela de perfis
 function formatarSimNao($valor)
 {
-  return $valor ? 'Sim' : 'Não';
+    return $valor ? 'Sim' : 'Não';
 }
 
 $administracaoController = new AdministracaoController();
 
-$msg = '';
-$tab = 'cad';
-
-// Aba pedida na URL (a pesquisa envia a aba actual)
-if (in_array($_GET['tab'] ?? '', ['cad', 'lista', 'perfis'], true)) {
-  $tab = $_GET['tab'];
-}
+$tab = in_array($_GET['tab'] ?? '', ['cad', 'lista', 'perfis'], true) ? $_GET['tab'] : 'cad';
+$resultadoPost = [];
 
 /* ---------- Cadastrar / Atualizar / Remover ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $resultado = $administracaoController->processarPost($utilizador, $_POST, $tab);
-    $tab = $resultado['tab'];
-    $msg = $resultado['msg'];
+    $resultadoPost = $administracaoController->processarPost($utilizador, $_POST, $tab);
+    $tab = $resultadoPost['tab'];
 }
 
 /* ---------- Estado da página ---------- */
-$estado = $administracaoController->prepararEcra($utilizador, $_GET, $tab, $msg);
+$estado = $administracaoController->prepararEcra($utilizador, $_GET, $tab, $resultadoPost);
 
 $msg = $estado['msg'];
+$erro = $estado['erro'];
 $tab = $estado['tab'];
 $utilizadorEdicao = $estado['utilizadorEdicao'];
 $perfilEdicao = $estado['perfilEdicao'];
@@ -100,6 +95,9 @@ $subtituloPagina = 'Administração de utilizadores';
 
                     <?php if ($msg): ?>
                         <div class="alert alert-ok"><?= htmlspecialchars($msg) ?></div>
+                    <?php endif; ?>
+                    <?php if ($erro): ?>
+                        <div class="alert alert-erro"><?= htmlspecialchars($erro) ?></div>
                     <?php endif; ?>
 
                     <!-- ===== CADASTRAR ===== -->

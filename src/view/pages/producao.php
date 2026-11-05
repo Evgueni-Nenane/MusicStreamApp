@@ -21,14 +21,23 @@ $producaoController = new ProducaoController();
 
 /* ---------- Acções (POST) ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $msg = $producaoController->processarPost($utilizador, $_POST);
-    header('Location: producao.php?msg=' . urlencode($msg));
+    $resultado = $producaoController->processarPost($utilizador, $_POST);
+    $destino = 'producao.php';
+
+    if (!empty($resultado['msg'])) {
+        $destino .= '?msg=' . urlencode($resultado['msg']);
+    } elseif (!empty($resultado['erro'])) {
+        $destino .= '?erro=' . urlencode($resultado['erro']);
+    }
+
+    header('Location: ' . $destino);
     exit;
 }
 
 /* ---------- Estado da página ---------- */
 $estado = $producaoController->prepararEcra($_GET);
 $msg = $estado['msg'];
+$erro = $estado['erro'];
 $tab = $estado['tab'];
 $produtorEdicao = $estado['produtorEdicao'];
 $gravadoraEdicao = $estado['gravadoraEdicao'];
@@ -76,7 +85,12 @@ $subtituloPagina = 'Gestão de produção';
                             value="<?= htmlspecialchars($termoPesquisa) ?>" placeholder="Pesquisar...">
                     </div>
 
-                    <?php if ($msg): ?><div class="alert alert-ok"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
+                    <?php if ($msg): ?>
+                        <div class="alert alert-ok"><?= htmlspecialchars($msg) ?></div>
+                    <?php endif; ?>
+                    <?php if ($erro): ?>
+                        <div class="alert alert-erro"><?= htmlspecialchars($erro) ?></div>
+                    <?php endif; ?>
 
                     <!-- ===== PRODUTORES ===== -->
                     <section class="panel panel-prod">

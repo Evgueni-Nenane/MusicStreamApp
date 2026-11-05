@@ -38,7 +38,8 @@ class ListagemDiscosController
 
     /**
      * Executa a acção submetida.
-     * Devolve ['mensagem' => ...] e, quando aplicável, ['discoDetalhe' => disco].
+     * Devolve ['msg' => ...] ou ['erro' => ...] e, quando aplicável,
+     * ['discoDetalhe' => disco].
      */
     public function processarPost($utilizador, $post)
     {
@@ -48,7 +49,7 @@ class ListagemDiscosController
             'addfaixa' => $this->adicionarFaixa($utilizador, $post),
             'atualizarfaixa' => $this->atualizarFaixa($utilizador, $post),
             'removerfaixa' => $this->removerFaixa($utilizador, $post),
-            default => ['mensagem' => ''],
+            default => [],
         };
     }
 
@@ -57,7 +58,7 @@ class ListagemDiscosController
      */
     public function prepararEcra($utilizador, $get, $post = [])
     {
-        $mensagem = '';
+        $erro = '';
         $discoDetalhe = null;   // disco aberto em "Ver Detalhes"
         $faixaEdicao = null;    // faixa a editar dentro de "Ver Detalhes"
         $faixaDiscoId = 0;      // disco da faixa em edição
@@ -81,7 +82,7 @@ class ListagemDiscosController
                 $faixaId = (int) ($get['sel_faixa'] ?? 0);
 
                 if (!Permissao::pode($utilizador, 'editar')) {
-                    $mensagem = 'Sem permissão para editar.';
+                    $erro = 'Sem permissão para editar.';
                 } elseif ($faixaId > 0) {
                     $faixaEdicao = $this->faixaDAO->listarFaixaPorCodigo($faixaId);
 
@@ -103,11 +104,11 @@ class ListagemDiscosController
                     ? $this->discoDAO->buscarPorCodigo($faixaDiscoId)
                     : null;
 
-                if (!$faixaEdicao) {
-                    $mensagem = 'Seleccione uma faixa.';
+                if (!$faixaEdicao && $erro === '') {
+                    $erro = 'Seleccione uma faixa.';
                 }
             } elseif (!$disco) {
-                $mensagem = 'Seleccione um disco.';
+                $erro = 'Seleccione um disco.';
             } elseif ($acaoGet === 'editar') {
                 $discoEdicao = $disco;
             } elseif ($acaoGet === 'faixas') {
@@ -187,7 +188,8 @@ class ListagemDiscosController
         }
 
         return [
-            'mensagem' => $mensagem,
+            'msg' => '',
+            'erro' => $erro,
             'discoDetalhe' => $discoDetalhe,
             'discoEdicao' => $discoEdicao,
             'discoNovaFaixa' => $discoNovaFaixa,
@@ -220,12 +222,12 @@ class ListagemDiscosController
     private function removerDisco($utilizador, $post)
     {
         if ($bloqueio = Permissao::bloquear($utilizador, 'remover')) {
-            return ['mensagem' => $bloqueio];
+            return ['erro' => $bloqueio];
         }
 
         $id = (int) ($post['sel'] ?? 0);
         if ($id === 0) {
-            return ['mensagem' => 'Seleccione um disco.'];
+            return ['erro' => 'Seleccione um disco.'];
         }
 
         // Lê o disco antes de remover para guardar o título no log.
@@ -235,15 +237,16 @@ class ListagemDiscosController
         if ($removido) {
             $descricao = $discoRemovido ? $discoRemovido->getTitulo() : 'ID ' . $id;
             LogsController::registar('Eliminou o disco: ' . $descricao);
+            return ['msg' => 'Disco removido.'];
         }
 
-        return ['mensagem' => $removido ? 'Disco removido.' : 'Erro ao remover o disco.'];
+        return ['erro' => 'Erro ao remover o disco.'];
     }
 
     private function atualizarDisco($utilizador, $post)
     {
         if ($bloqueio = Permissao::bloquear($utilizador, 'editar')) {
-            return ['mensagem' => $bloqueio];
+            return ['erro' => $bloqueio];
         }
 
         $id = (int) $post['id'];
@@ -261,13 +264,13 @@ class ListagemDiscosController
             $this->generoDAO->inserirRelacaoGeneroDisco($id, (int) $generoId);
         }
 
-        return ['mensagem' => 'Disco atualizado.'];
+        return ['msg' => 'Disco atualizado.'];
     }
 
     private function adicionarFaixa($utilizador, $post)
     {
         if ($bloqueio = Permissao::bloquear($utilizador, 'adicionar')) {
-            return ['mensagem' => $bloqueio];
+            return ['erro' => $bloqueio];
         }
 
         $discoId = (int) $post['id'];
@@ -280,7 +283,7 @@ class ListagemDiscosController
         );
 
         if ($faixaId <= 0) {
-            return ['mensagem' => 'Erro ao adicionar a faixa.'];
+            return ['erro' => 'Erro ao adicionar a faixa.'];
         }
 
         foreach (($post['compositores'] ?? []) as $compositorId) {
@@ -295,13 +298,13 @@ class ListagemDiscosController
             $this->faixaDAO->inserirRelacaoCantor($faixaId, (int) $cantorId);
         }
 
-        return ['mensagem' => 'Faixa adicionada.'];
+        return ['msg' => 'Faixa adicionada.'];
     }
 
     private function atualizarFaixa($utilizador, $post)
     {
         if ($bloqueio = Permissao::bloquear($utilizador, 'editar')) {
-            return ['mensagem' => $bloqueio];
+            return ['erro' => $bloqueio];
         }
 
         // Edita nome/artista/duração e sincroniza os participantes da faixa.
@@ -317,7 +320,7 @@ class ListagemDiscosController
         $this->sincronizarParticipantesDaFaixa($faixaId, $post);
 
         return [
-            'mensagem' => 'Faixa atualizada.',
+            'msg' => 'Faixa atualizada.',
             'discoDetalhe' => $this->discoDAO->buscarPorCodigo($discoId),
         ];
     }
@@ -325,7 +328,7 @@ class ListagemDiscosController
     private function removerFaixa($utilizador, $post)
     {
         if ($bloqueio = Permissao::bloquear($utilizador, 'remover')) {
-            return ['mensagem' => $bloqueio];
+            return ['erro' => $bloqueio];
         }
 
         $discoId = (int) $post['id'];
@@ -333,7 +336,7 @@ class ListagemDiscosController
 
         if ($faixaId === 0) {
             return [
-                'mensagem' => 'Seleccione uma faixa.',
+                'erro' => 'Seleccione uma faixa.',
                 'discoDetalhe' => $this->discoDAO->buscarPorCodigo($discoId),
             ];
         }
@@ -342,8 +345,15 @@ class ListagemDiscosController
         $this->removerParticipantesDaFaixa($faixaId);
         $removida = $this->faixaDAO->remover($faixaId);
 
+        if (!$removida) {
+            return [
+                'erro' => 'Não foi possível remover a faixa.',
+                'discoDetalhe' => $this->discoDAO->buscarPorCodigo($discoId),
+            ];
+        }
+
         return [
-            'mensagem' => $removida ? 'Faixa removida.' : 'Não foi possível remover a faixa.',
+            'msg' => 'Faixa removida.',
             'discoDetalhe' => $this->discoDAO->buscarPorCodigo($discoId),
         ];
     }

@@ -38,20 +38,21 @@ class ArtistasController
     }
 
     /**
-     * Executa a acção submetida e devolve ['aba' => ..., 'msg' => ...].
+     * Executa a acção submetida e devolve ['aba' => ..., 'msg' => ...]
+     * ou ['aba' => ..., 'erro' => ...].
      */
     public function processarPost($utilizador, $post)
     {
         $tipo = $post['tipo'] ?? '';
 
-        $mensagem = match ($post['acao'] ?? '') {
+        $resultado = match ($post['acao'] ?? '') {
             'cadastrar' => $this->cadastrar($utilizador, $tipo, $post),
             'atualizar' => $this->atualizar($utilizador, $tipo, $post),
             'remover' => $this->remover($utilizador, $tipo, $post),
-            default => '',
+            default => [],
         };
 
-        return ['aba' => self::ABAS[$tipo] ?? 'musicos', 'msg' => $mensagem];
+        return ['aba' => self::ABAS[$tipo] ?? 'musicos'] + $resultado;
     }
 
     /**
@@ -60,6 +61,7 @@ class ArtistasController
     public function prepararEcra($get)
     {
         $msg = $get['msg'] ?? '';
+        $erro = $get['erro'] ?? '';
 
         /* Aba visível */
         $tab = $get['tab'] ?? 'musicos';
@@ -114,8 +116,8 @@ class ArtistasController
                 $tipoArtistaEdicao = '';
             }
 
-            if (!$artistaEdicao && $msg === '') {
-                $msg = 'Seleccione um artista.';
+            if (!$artistaEdicao && $erro === '') {
+                $erro = 'Seleccione um artista.';
             }
         }
 
@@ -203,6 +205,7 @@ class ArtistasController
 
         return [
             'msg' => $msg,
+            'erro' => $erro,
             'tab' => $tab,
             'artistaEdicao' => $artistaEdicao,
             'tipoArtistaEdicao' => $tipoArtistaEdicao,
@@ -224,7 +227,7 @@ class ArtistasController
     private function cadastrar($utilizador, $tipo, $post)
     {
         if ($bloqueio = Permissao::bloquear($utilizador, 'adicionar')) {
-            return $bloqueio;
+            return ['erro' => $bloqueio];
         }
 
         $nome = trim($post['nome'] ?? '');
@@ -233,7 +236,7 @@ class ArtistasController
         $email = trim($post['email'] ?? '');
 
         if ($nome === '' || $apelido === '') {
-            return 'Preencha pelo menos o nome e o apelido.';
+            return ['erro' => 'Preencha pelo menos o nome e o apelido.'];
         }
 
         $id = -1;
@@ -251,20 +254,20 @@ class ArtistasController
         } elseif ($tipo === 'compositor') {
             $id = $this->compositorController->cadastrarCompositor(new Compositor(0, $nome, $apelido, $contacto, $email));
         } else {
-            return 'Escolha o tipo de artista.';
+            return ['erro' => 'Escolha o tipo de artista.'];
         }
 
         if ($id > 0) {
             LogsController::registar('Registou o artista (' . $tipo . '): ' . $nome . ' ' . $apelido);
-            return 'Artista cadastrado.';
+            return ['msg' => 'Artista cadastrado.'];
         }
-        return 'Erro ao cadastrar.';
+        return ['erro' => 'Erro ao cadastrar.'];
     }
 
     private function atualizar($utilizador, $tipo, $post)
     {
         if ($bloqueio = Permissao::bloquear($utilizador, 'editar')) {
-            return $bloqueio;
+            return ['erro' => $bloqueio];
         }
 
         $id = (int) ($post['id'] ?? 0);
@@ -274,7 +277,7 @@ class ArtistasController
         $email = trim($post['email'] ?? '');
 
         if ($id === 0 || $nome === '' || $apelido === '') {
-            return 'Dados inválidos para atualizar.';
+            return ['erro' => 'Dados inválidos para atualizar.'];
         }
 
         if ($tipo === 'musico') {
@@ -285,26 +288,26 @@ class ArtistasController
             foreach (($post['instrumentos'] ?? []) as $cod) {
                 $this->instrumentoController->inserirRelacaoMusicoInstrumento($id, (int) $cod);
             }
-            return $ok ? 'Músico atualizado.' : 'Sem alterações.';
+            return $ok ? ['msg' => 'Músico atualizado.'] : ['msg' => 'Sem alterações.'];
         }
 
         if ($tipo === 'cantor') {
             $ok = $this->cantorController->atualizarCantor(new Cantor($id, $nome, $apelido, $contacto, $email));
-            return $ok ? 'Cantor atualizado.' : 'Sem alterações.';
+            return $ok ? ['msg' => 'Cantor atualizado.'] : ['msg' => 'Sem alterações.'];
         }
 
         if ($tipo === 'compositor') {
             $ok = $this->compositorController->atualizarCompositor(new Compositor($id, $nome, $apelido, $contacto, $email));
-            return $ok ? 'Compositor atualizado.' : 'Sem alterações.';
+            return $ok ? ['msg' => 'Compositor atualizado.'] : ['msg' => 'Sem alterações.'];
         }
 
-        return 'Dados inválidos para atualizar.';
+        return ['erro' => 'Dados inválidos para atualizar.'];
     }
 
     private function remover($utilizador, $tipo, $post)
     {
         if ($bloqueio = Permissao::bloquear($utilizador, 'remover')) {
-            return $bloqueio;
+            return ['erro' => $bloqueio];
         }
 
         // Cada aba selecciona pelo seu próprio name; mantém-se o formato antigo "tipo:id".
@@ -331,6 +334,8 @@ class ArtistasController
             LogsController::registar('Removeu o artista (' . $tipo . ') ID ' . $id);
         }
 
-        return $ok ? 'Artista removido.' : 'Não foi possível remover (seleccione um artista que não esteja em discos).';
+        return $ok
+            ? ['msg' => 'Artista removido.']
+            : ['erro' => 'Não foi possível remover (seleccione um artista que não esteja em discos).'];
     }
 }

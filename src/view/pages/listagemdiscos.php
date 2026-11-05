@@ -28,13 +28,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /* ---------- Estado da página ---------- */
 $estado = $listagemController->prepararEcra($utilizador, $_GET, $_POST);
 if ($resultadoPost !== null) {
-    $estado['mensagem'] = $resultadoPost['mensagem'];
+    foreach (['msg', 'erro'] as $chave) {
+        if (isset($resultadoPost[$chave])) {
+            $estado[$chave] = $resultadoPost[$chave];
+        }
+    }
+
     if (array_key_exists('discoDetalhe', $resultadoPost)) {
         $estado['discoDetalhe'] = $resultadoPost['discoDetalhe'];
     }
 }
 
-$mensagem = $estado['mensagem'];
+$msg = $estado['msg'];
+$erro = $estado['erro'];
 $discoDetalhe = $estado['discoDetalhe'];
 $discoEdicao = $estado['discoEdicao'];
 $discoNovaFaixa = $estado['discoNovaFaixa'];
@@ -126,8 +132,11 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                             aria-label="Pesquisar discos">
                     </div>
 
-                    <?php if ($mensagem): ?>
-                        <div class="alert alert-ok"><?= escaparHtml($mensagem) ?></div>
+                    <?php if (!$discoDetalhe && $msg): ?>
+                        <div class="alert alert-ok"><?= escaparHtml($msg) ?></div>
+                    <?php endif; ?>
+                    <?php if (!$discoDetalhe && $erro): ?>
+                        <div class="alert alert-erro"><?= escaparHtml($erro) ?></div>
                     <?php endif; ?>
 
                     <form method="post" action="listagemdiscos.php" id="form-discos">
@@ -193,10 +202,16 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                 <label for="modal-detalhes-toggle" class="modal-close">&times;</label>
             </div>
             <form method="post" action="listagemdiscos.php" id="form-detalhes">
-                <input type="hidden" name="acao" value="removerfaixa" id="acao-detalhes">
                 <input type="hidden" name="id" value="<?= $discoDetalhe ? $detalheDiscoId : '' ?>">
                 <input type="hidden" name="q" value="<?= escaparHtml($termoPesquisa) ?>">
                 <div class="modal-body">
+                    <?php if ($msg): ?>
+                        <div class="alert alert-ok"><?= escaparHtml($msg) ?></div>
+                    <?php endif; ?>
+                    <?php if ($erro): ?>
+                        <div class="alert alert-erro"><?= escaparHtml($erro) ?></div>
+                    <?php endif; ?>
+
                     <div class="detail-section">
                         <h4>Informações do Disco</h4>
                         <div class="detail-grid">

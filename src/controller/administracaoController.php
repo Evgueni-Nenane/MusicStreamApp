@@ -28,12 +28,12 @@ class AdministracaoController
 
     /**
      * Executa a acção submetida.
-     * Devolve ['msg' => ..., 'tab' => ...].
+     * Devolve ['msg' => ...] ou ['erro' => ...], sempre com 'tab'.
      */
     public function processarPost($utilizador, $post, $tabAtual)
     {
         if ($bloqueio = Permissao::bloquear($utilizador, 'utilizadores')) {
-            return ['msg' => $bloqueio, 'tab' => $tabAtual];
+            return ['erro' => $bloqueio, 'tab' => $tabAtual];
         }
 
         return match ($post['acao'] ?? '') {
@@ -51,9 +51,10 @@ class AdministracaoController
     /**
      * Prepara tudo o que a página precisa para ser desenhada.
      */
-    public function prepararEcra($utilizador, $get, $tabAtual = null, $msgAtual = null)
+    public function prepararEcra($utilizador, $get, $tabAtual = null, $resultadoPost = [])
     {
-        $msg = $msgAtual ?? '';
+        $msg = $resultadoPost['msg'] ?? $get['msg'] ?? '';
+        $erro = $resultadoPost['erro'] ?? $get['erro'] ?? '';
 
         $tab = $tabAtual;
         if (!in_array($tab, ['cad', 'lista', 'perfis'], true)) {
@@ -67,7 +68,7 @@ class AdministracaoController
             $utilizadorEdicao = $this->utilizadorController->listarPorId((int) ($get['sel'] ?? 0));
 
             if (!$utilizadorEdicao) {
-                $msg = 'Seleccione um utilizador.';
+                $erro = 'Seleccione um utilizador.';
             }
         }
 
@@ -78,9 +79,9 @@ class AdministracaoController
             $perfilEdicao = $this->nivelController->buscarPorCodigo((int) ($get['sel_perfil'] ?? 0));
 
             if (!$perfilEdicao) {
-                $msg = 'Seleccione um perfil.';
+                $erro = 'Seleccione um perfil.';
             } elseif ($perfilEdicao['CodigoNivel'] <= 4) {
-                $msg = 'Os perfis base não se editam.';
+                $erro = 'Os perfis base não se editam.';
                 $perfilEdicao = null;
             }
         }
@@ -152,6 +153,7 @@ class AdministracaoController
 
         return [
             'msg' => $msg,
+            'erro' => $erro,
             'tab' => $tab,
             'utilizadorEdicao' => $utilizadorEdicao,
             'perfilEdicao' => $perfilEdicao,
@@ -189,9 +191,8 @@ class AdministracaoController
         }
 
         return [
-            'msg' => $criado
-                ? 'Utilizador criado.'
-                : 'Erro ao criar (o nome de utilizador já existe?).',
+            'msg' => $criado ? 'Utilizador criado.' : '',
+            'erro' => $criado ? '' : 'Erro ao criar (o nome de utilizador já existe?).',
             'tab' => $tabAtual,
         ];
     }
@@ -231,13 +232,13 @@ class AdministracaoController
         $id = (int) ($post['sel'] ?? 0);
 
         if ($id === 0) {
-            return ['msg' => 'Seleccione um utilizador.', 'tab' => 'lista'];
+            return ['erro' => 'Seleccione um utilizador.', 'tab' => 'lista'];
         }
 
         $utilizadorRemovido = $this->utilizadorController->listarPorId($id);
 
         if ($utilizadorRemovido && $utilizadorRemovido->getUserName() === $utilizadorSessao->getUserName()) {
-            return ['msg' => 'Não pode remover o seu próprio utilizador.', 'tab' => 'lista'];
+            return ['erro' => 'Não pode remover o seu próprio utilizador.', 'tab' => 'lista'];
         }
 
         $this->utilizadorController->removerUtilizador($id);
@@ -253,7 +254,7 @@ class AdministracaoController
         $id = (int) ($post['sel'] ?? 0);
 
         if ($id === 0) {
-            return ['msg' => 'Seleccione um utilizador.', 'tab' => 'lista'];
+            return ['erro' => 'Seleccione um utilizador.', 'tab' => 'lista'];
         }
 
         $utilizador = $this->utilizadorController->listarPorId($id);
@@ -270,11 +271,11 @@ class AdministracaoController
         $nome = trim($post['nome_perfil'] ?? '');
 
         if ($nome === '') {
-            return ['msg' => 'O nome do perfil é obrigatório.', 'tab' => 'perfis'];
+            return ['erro' => 'O nome do perfil é obrigatório.', 'tab' => 'perfis'];
         }
 
         if (!$this->nivelController->criar($nome, $post['perm'] ?? [])) {
-            return ['msg' => 'Erro ao criar o perfil.', 'tab' => 'perfis'];
+            return ['erro' => 'Erro ao criar o perfil.', 'tab' => 'perfis'];
         }
 
         LogsController::registar('Criou o perfil: ' . $nome);
@@ -288,11 +289,11 @@ class AdministracaoController
         $nome = trim($post['nome_perfil'] ?? '');
 
         if ($nome === '') {
-            return ['msg' => 'O nome do perfil é obrigatório.', 'tab' => 'perfis'];
+            return ['erro' => 'O nome do perfil é obrigatório.', 'tab' => 'perfis'];
         }
 
         if (!$this->nivelController->atualizar($id, $nome, $post['perm'] ?? [])) {
-            return ['msg' => 'Não foi possível atualizar (os perfis base não se editam).', 'tab' => 'perfis'];
+            return ['erro' => 'Não foi possível atualizar (os perfis base não se editam).', 'tab' => 'perfis'];
         }
 
         LogsController::registar('Actualizou o perfil: ' . $nome);
@@ -305,11 +306,11 @@ class AdministracaoController
         $id = (int) ($post['sel_perfil'] ?? 0);
 
         if ($id === 0) {
-            return ['msg' => 'Seleccione um perfil.', 'tab' => 'perfis'];
+            return ['erro' => 'Seleccione um perfil.', 'tab' => 'perfis'];
         }
 
         if (!$this->nivelController->remover($id)) {
-            return ['msg' => 'Não foi possível remover (perfil base ou com utilizadores associados).', 'tab' => 'perfis'];
+            return ['erro' => 'Não foi possível remover (perfil base ou com utilizadores associados).', 'tab' => 'perfis'];
         }
 
         LogsController::registar('Removeu o perfil ID ' . $id);

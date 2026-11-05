@@ -43,7 +43,15 @@ $artistasController = new ArtistasController();
 /* ---------- Cadastrar / Atualizar / Remover (POST) ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $resultado = $artistasController->processarPost($utilizador, $_POST);
-    header('Location: artistas.php?tab=' . $resultado['aba'] . '&msg=' . urlencode($resultado['msg']));
+    $destino = 'artistas.php?tab=' . urlencode($resultado['aba']);
+
+    if (!empty($resultado['msg'])) {
+        $destino .= '&msg=' . urlencode($resultado['msg']);
+    } elseif (!empty($resultado['erro'])) {
+        $destino .= '&erro=' . urlencode($resultado['erro']);
+    }
+
+    header('Location: ' . $destino);
     exit;
 }
 
@@ -51,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $estado = $artistasController->prepararEcra($_GET);
 
 $msg = $estado['msg'];
+$erro = $estado['erro'];
 $tab = $estado['tab'];
 $artistaEdicao = $estado['artistaEdicao'];
 $tipoArtistaEdicao = $estado['tipoArtistaEdicao'];
@@ -112,6 +121,9 @@ $subtituloPagina = 'Gestão de artistas';
 
                     <?php if ($msg): ?>
                         <div class="alert alert-ok"><?= htmlspecialchars($msg) ?></div>
+                    <?php endif; ?>
+                    <?php if ($erro): ?>
+                        <div class="alert alert-erro"><?= htmlspecialchars($erro) ?></div>
                     <?php endif; ?>
 
                     <!-- Músicos -->

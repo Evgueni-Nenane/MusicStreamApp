@@ -30,7 +30,7 @@ class ProducaoController
     }
 
     /**
-     * Executa a acção submetida e devolve a mensagem a apresentar.
+     * Executa a acção submetida e devolve ['msg' => ...] ou ['erro' => ...].
      */
     public function processarPost($utilizador, $post)
     {
@@ -45,18 +45,18 @@ class ProducaoController
         };
 
         if ($permissaoPedido === '') {
-            return 'Acção inválida.';
+            return ['erro' => 'Acção inválida.'];
         }
 
         if ($bloqueio = Permissao::bloquear($utilizador, $permissaoPedido)) {
-            return $bloqueio;
+            return ['erro' => $bloqueio];
         }
 
         return match ($tipo) {
             'produtor' => $this->processarProdutor($acao, $post),
             'gravadora' => $this->processarGravadora($acao, $post),
             'editora' => $this->processarEditora($acao, $post),
-            default => 'Tipo inválido.',
+            default => ['erro' => 'Tipo inválido.'],
         };
     }
 
@@ -66,6 +66,7 @@ class ProducaoController
     public function prepararEcra($get)
     {
         $msg = $get['msg'] ?? '';
+        $erro = $get['erro'] ?? '';
         $tab = 'prod';
         $produtorEdicao = $gravadoraEdicao = $editoraEdicao = null;
 
@@ -84,7 +85,7 @@ class ProducaoController
                 $tab = 'edit';
             }
             if (!$produtorEdicao && !$gravadoraEdicao && !$editoraEdicao) {
-                $msg = 'Seleccione um registo para editar.';
+                $erro = 'Seleccione um registo para editar.';
             }
         }
 
@@ -140,6 +141,7 @@ class ProducaoController
 
         return [
             'msg' => $msg,
+            'erro' => $erro,
             'tab' => $tab,
             'produtorEdicao' => $produtorEdicao,
             'gravadoraEdicao' => $gravadoraEdicao,
@@ -163,7 +165,9 @@ class ProducaoController
             if ($novo > 0) {
                 LogsController::registar('Registou o produtor: ' . $nome . ' ' . $apelido);
             }
-            return $novo > 0 ? 'Produtor adicionado.' : 'Erro ao adicionar produtor.';
+            return $novo > 0
+                ? ['msg' => 'Produtor adicionado.']
+                : ['erro' => 'Erro ao adicionar produtor.'];
         }
 
         if ($acao === 'atualizar') {
@@ -171,7 +175,9 @@ class ProducaoController
                 (int) $post['id'], trim($post['nome'] ?? ''), trim($post['apelido'] ?? ''),
                 trim($post['contacto'] ?? ''), trim($post['email'] ?? '')
             );
-            return $this->produtorController->atualizarProdutor($p) ? 'Produtor atualizado.' : 'Sem alterações.';
+            return $this->produtorController->atualizarProdutor($p)
+                ? ['msg' => 'Produtor atualizado.']
+                : ['msg' => 'Sem alterações.'];
         }
 
         if ($acao === 'remover') {
@@ -181,11 +187,11 @@ class ProducaoController
                 LogsController::registar('Removeu o produtor ID ' . $id);
             }
             return $removido
-                ? 'Produtor removido.'
-                : 'Seleccione um produtor que não esteja em discos.';
+                ? ['msg' => 'Produtor removido.']
+                : ['erro' => 'Seleccione um produtor que não esteja em discos.'];
         }
 
-        return 'Acção inválida.';
+        return ['erro' => 'Acção inválida.'];
     }
 
     private function processarGravadora($acao, $post)
@@ -199,7 +205,9 @@ class ProducaoController
             if ($novo > 0) {
                 LogsController::registar('Registou a gravadora: ' . $nome);
             }
-            return $novo > 0 ? 'Gravadora adicionada.' : 'Erro ao adicionar gravadora.';
+            return $novo > 0
+                ? ['msg' => 'Gravadora adicionada.']
+                : ['erro' => 'Erro ao adicionar gravadora.'];
         }
 
         if ($acao === 'atualizar') {
@@ -207,7 +215,9 @@ class ProducaoController
                 (int) $post['id'], trim($post['nome'] ?? ''), trim($post['contacto'] ?? ''),
                 trim($post['endereco'] ?? ''), trim($post['email'] ?? '')
             );
-            return $this->gravadoraController->atualizarGravadora($g) ? 'Gravadora atualizada.' : 'Sem alterações.';
+            return $this->gravadoraController->atualizarGravadora($g)
+                ? ['msg' => 'Gravadora atualizada.']
+                : ['msg' => 'Sem alterações.'];
         }
 
         if ($acao === 'remover') {
@@ -217,11 +227,11 @@ class ProducaoController
                 LogsController::registar('Removeu a gravadora ID ' . $id);
             }
             return $removido
-                ? 'Gravadora removida.'
-                : 'Seleccione uma gravadora que não esteja em discos.';
+                ? ['msg' => 'Gravadora removida.']
+                : ['erro' => 'Seleccione uma gravadora que não esteja em discos.'];
         }
 
-        return 'Acção inválida.';
+        return ['erro' => 'Acção inválida.'];
     }
 
     private function processarEditora($acao, $post)
@@ -235,7 +245,9 @@ class ProducaoController
             if ($novo > 0) {
                 LogsController::registar('Registou a editora: ' . $nome);
             }
-            return $novo > 0 ? 'Editora adicionada.' : 'Erro ao adicionar editora.';
+            return $novo > 0
+                ? ['msg' => 'Editora adicionada.']
+                : ['erro' => 'Erro ao adicionar editora.'];
         }
 
         if ($acao === 'atualizar') {
@@ -243,7 +255,9 @@ class ProducaoController
                 (int) $post['id'], trim($post['nome'] ?? ''), trim($post['contacto'] ?? ''),
                 trim($post['email'] ?? ''), trim($post['endereco'] ?? '')
             );
-            return $this->editoraController->atualizarEditora($e) ? 'Editora atualizada.' : 'Sem alterações.';
+            return $this->editoraController->atualizarEditora($e)
+                ? ['msg' => 'Editora atualizada.']
+                : ['msg' => 'Sem alterações.'];
         }
 
         if ($acao === 'remover') {
@@ -253,10 +267,10 @@ class ProducaoController
                 LogsController::registar('Removeu a editora ID ' . $id);
             }
             return $removido
-                ? 'Editora removida.'
-                : 'Seleccione uma editora que não esteja em discos.';
+                ? ['msg' => 'Editora removida.']
+                : ['erro' => 'Seleccione uma editora que não esteja em discos.'];
         }
 
-        return 'Acção inválida.';
+        return ['erro' => 'Acção inválida.'];
     }
 }
