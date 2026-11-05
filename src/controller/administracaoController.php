@@ -168,6 +168,11 @@ class AdministracaoController
     private function criarUtilizador($post, $tabAtual)
     {
         $foto = $this->lerFoto('foto');
+
+        if (isset($foto['erro'])) {
+            return ['erro' => $foto['erro'], 'tab' => $tabAtual];
+        }
+
         $novo = new Utilizador(
             null,
             trim($post['nome'] ?? ''),
@@ -202,6 +207,10 @@ class AdministracaoController
         $id = (int) ($post['id'] ?? 0);
         $utilizadorAtual = $this->utilizadorController->listarPorId($id);
         $foto = $this->lerFoto('foto');
+
+        if (isset($foto['erro'])) {
+            return ['erro' => $foto['erro'], 'tab' => 'lista'];
+        }
 
         $utilizadorEditado = new Utilizador(
             null,
@@ -319,25 +328,40 @@ class AdministracaoController
     }
 
     /**
-     * Lê a foto enviada (valida o conteúdo) e devolve ['dados' => binário, 'tipo' => mime] ou null.
+     * Lê a foto enviada e devolve ['dados' => binário, 'tipo' => mime].
+     * Sem ficheiro devolve []; com ficheiro inválido devolve ['erro' => ...].
      */
     private function lerFoto($campo)
     {
-        if (!isset($_FILES[$campo]) || $_FILES[$campo]['error'] !== UPLOAD_ERR_OK) {
-            return null;
+        $erroUpload = (int) ($_FILES[$campo]['error'] ?? UPLOAD_ERR_NO_FILE);
+
+        if ($erroUpload === UPLOAD_ERR_NO_FILE) {
+            return [];
+        }
+
+        if ($erroUpload === UPLOAD_ERR_INI_SIZE || $erroUpload === UPLOAD_ERR_FORM_SIZE) {
+            return ['erro' => 'A foto não pode exceder 2 MB.'];
+        }
+
+        if ($erroUpload !== UPLOAD_ERR_OK) {
+            return ['erro' => 'Não foi possível enviar a foto. Tente novamente.'];
         }
 
         $tmp = $_FILES[$campo]['tmp_name'];
         $tamanho = (int) $_FILES[$campo]['size'];
         $maximo = 2 * 1024 * 1024; // igual ao upload_max_filesize
 
+        if (!is_uploaded_file($tmp)) {
+            return ['erro' => 'Não foi possível validar a foto enviada.'];
+        }
+
         if ($tamanho <= 0 || $tamanho > $maximo) {
-            return null;
+            return ['erro' => 'A foto não pode exceder 2 MB.'];
         }
 
         $info = @getimagesize($tmp);
         if ($info === false) {
-            return null; // não é uma imagem válida
+            return ['erro' => 'O ficheiro escolhido não é uma imagem válida.'];
         }
 
         $tipos = [
@@ -347,7 +371,7 @@ class AdministracaoController
         ];
 
         if (!isset($tipos[$info[2]])) {
-            return null;
+            return ['erro' => 'Use uma imagem JPEG, PNG ou WEBP.'];
         }
 
         return ['dados' => file_get_contents($tmp), 'tipo' => $tipos[$info[2]]];

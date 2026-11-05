@@ -117,6 +117,7 @@ The UI hides unavailable actions **and** the server re-validates every POST — 
     └── view/
         ├── pages/              # 12 PHP pages (rendering only)
         ├── css/                # one stylesheet per page
+        ├── js/                 # small progressive-enhancement scripts
         └── resources/          # static images (login.png, default avatar)
 ```
 
@@ -179,10 +180,11 @@ Table names are **PascalCase** (`Utilizador`, `Disco_Compacto`, `NivelAcesso`). 
 ## 8. Profile photos
 
 - Stored in `Utilizador.foto` (`longblob`) with the MIME type in `Utilizador.foto_tipo`. No filesystem path is involved.
-- Upload is validated by content (`getimagesize()`), restricted to JPEG/PNG/WEBP and capped at 2 MB (`upload_max_filesize`).
+- Upload is validated by content (`getimagesize()`), restricted to JPEG/PNG/WEBP and capped at 2 MB (`upload_max_filesize`). Invalid or oversized files produce a red error instead of being silently ignored.
 - Written with `mysqli_stmt::send_long_data()`; when no new file is submitted the existing photo is preserved (`UPDATE ... SET` without the `foto` column).
-- Served by `foto.php`, which enforces the same permission rule as the UI: own photo, or any photo for profiles with `utilizadores`. Responses carry `ETag`, `304` revalidation, `Cache-Control: private, max-age=300` and `X-Content-Type-Options: nosniff`.
-- Templates fall back to `src/view/resources/user.png` via `onerror`.
+- Served by `foto.php`, which enforces the same permission rule as the UI: own photo, or any photo for profiles with `utilizadores`. Responses carry `ETag`, `304` revalidation, `Cache-Control: private, no-cache` and `X-Content-Type-Options: nosniff`.
+- Templates fall back to `src/view/resources/user.png` when no photo is stored; `foto.php` serves that fallback itself.
+- The create and edit forms use a small script (`src/view/js/foto-preview.js`) to show the selected image before upload. This is the only JavaScript on the page.
 
 ---
 

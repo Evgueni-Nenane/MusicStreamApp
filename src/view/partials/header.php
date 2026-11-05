@@ -9,6 +9,7 @@
  */
 $tituloPagina = $tituloPagina ?? 'Sistema de Gestão de Discos';
 $subtituloPagina = $subtituloPagina ?? '';
+$codigoFoto = (int) $utilizador->getCodigo();
 ?>
 <header>
     <div class="pagetitle">
@@ -22,7 +23,7 @@ $subtituloPagina = $subtituloPagina ?? '';
             <p><?= htmlspecialchars($utilizador->getPerfil()->getNome()) ?></p>
         </div>
         <img
-            src="foto.php"
+            src="foto.php<?= $codigoFoto > 0 ? '?u=' . $codigoFoto : '' ?>"
             alt="Foto de perfil"
         >
     </div>

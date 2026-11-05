@@ -35,10 +35,19 @@ $foto = $utilizadorDAO->buscarFoto($id);
 // Sem foto guardada: devolve o avatar padrão em vez de uma imagem quebrada.
 if ($foto === null) {
     $avatarPadrao = __DIR__ . '/../resources/user.png';
+    $etag = '"' . md5_file($avatarPadrao) . '"';
+
+    header('ETag: ' . $etag);
+    header('X-Content-Type-Options: nosniff');
+    header('Cache-Control: private, no-cache');
+
+    if (($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag) {
+        http_response_code(304);
+        exit;
+    }
 
     header('Content-Type: image/png');
     header('Content-Length: ' . filesize($avatarPadrao));
-    header('Cache-Control: private, max-age=300');
     readfile($avatarPadrao);
     exit;
 }
@@ -46,6 +55,7 @@ if ($foto === null) {
 $etag = '"' . md5($foto['dados']) . '"';
 header('ETag: ' . $etag);
 header('X-Content-Type-Options: nosniff');
+header('Cache-Control: private, no-cache');
 
 if (($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag) {
     http_response_code(304);
@@ -57,5 +67,4 @@ $tipo = in_array($foto['tipo'], $tiposPermitidos, true) ? $foto['tipo'] : 'appli
 
 header('Content-Type: ' . $tipo);
 header('Content-Length: ' . strlen($foto['dados']));
-header('Cache-Control: private, max-age=300');
 echo $foto['dados'];

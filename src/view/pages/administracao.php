@@ -62,6 +62,7 @@ $subtituloPagina = 'Administração de utilizadores';
     <title>Administração | Sistema de Gestão</title>
     <link rel="stylesheet" href="../css/administracao.css">
     <link rel="stylesheet" href="../css/registro.css">
+    <script src="../js/foto-preview.js" defer></script>
 </head>
 
 <body>
@@ -106,9 +107,10 @@ $subtituloPagina = 'Administração de utilizadores';
                             <input type="hidden" name="acao" value="salvar">
                             <div class="cadastro-layout">
                                 <div class="foto-user">
-                                    <div class="foto-preview"><img src="../resources/user.png" alt="Foto do Utilizador"></div>
+                                    <div class="foto-preview"><img id="cad-foto-preview" src="../resources/user.png" alt="Foto do Utilizador"></div>
                                     <div class="foto-actions">
-                                        <input type="file" id="cad-foto" name="foto" accept="image/*" class="file-hidden">
+                                        <input type="file" id="cad-foto" name="foto" accept="image/*" class="file-hidden"
+                                            data-preview="cad-foto-preview">
                                         <label for="cad-foto" class="btn btn-primary btn-sm">Escolher Foto</label>
                                     </div>
                                 </div>
@@ -311,10 +313,11 @@ $subtituloPagina = 'Administração de utilizadores';
                     <div class="cadastro-layout sm">
                         <div class="foto-user">
                             <div class="foto-preview">
-                                <img src="<?= $utilizadorEdicao ? 'foto.php?u=' . (int) $utilizadorEdicao->getCodigo() : '../resources/user.png' ?>" alt="Foto do Utilizador">
+                                <img id="edit-foto-preview" src="<?= $utilizadorEdicao ? 'foto.php?u=' . (int) $utilizadorEdicao->getCodigo() : '../resources/user.png' ?>" alt="Foto do Utilizador">
                             </div>
                             <div class="foto-actions">
-                                <input type="file" id="edit-foto" name="foto" accept="image/*" class="file-hidden">
+                                <input type="file" id="edit-foto" name="foto" accept="image/*" class="file-hidden"
+                                    data-preview="edit-foto-preview">
                                 <label for="edit-foto" class="btn btn-primary btn-sm">Escolher Foto</label>
                             </div>
                         </div>
