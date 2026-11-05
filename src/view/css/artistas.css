@@ -546,26 +546,6 @@ table tbody tr:hover {
     display: flex;
 }
 
-.instrumento-group .search-add {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.instrumento-group .search-add input {
-    flex: 1;
-    padding: 0.6rem 0.8rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    outline: none;
-    font-family: inherit;
-}
-
-.instrumento-group .search-add input:focus {
-    border-color: #1e1e1e;
-    box-shadow: 0 0 0 3px rgba(30, 30, 30, 0.06);
-}
-
 .instrumento-group .list-box {
     border: 1px solid #e8e8e8;
     border-radius: 8px;
@@ -622,40 +602,16 @@ table tbody tr:hover {
     font-size: 0.8rem;
 }
 
-.mb-1 {
-    margin-bottom: 0.5rem;
-}
-
-.mb-2 {
-    margin-bottom: 1rem;
-}
-
 .flex {
     display: flex;
-}
-
-.justify-between {
-    justify-content: space-between;
 }
 
 .justify-end {
     justify-content: flex-end;
 }
 
-.items-center {
-    align-items: center;
-}
-
-.gap-1 {
-    gap: 0.5rem;
-}
-
 .gap-2 {
     gap: 1rem;
-}
-
-.w-full {
-    width: 100%;
 }
 
 /* ----- SCROLLBAR ----- */

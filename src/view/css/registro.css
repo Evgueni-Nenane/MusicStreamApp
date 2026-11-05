@@ -17,151 +17,10 @@ body {
 }
 
 /* ============================================================ */
-/* CHECKBOX HACK (Controla os Modais e a Navegação)             */
+/* CHECKBOX HACK (Controla os Modais)                           */
 /* ============================================================ */
-.modal-toggle, .nav-toggle {
+.modal-toggle {
     display: none;
-}
-
-/* ============================================================ */
-/* LOGIN PAGE                                                   */
-/* ============================================================ */
-.login-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    height: 100vh;
-    overflow: hidden;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 100;
-}
-
-.login-left {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 3rem;
-    background-color: #ffffff;
-}
-
-.login-left .login-box {
-    width: 100%;
-    max-width: 360px;
-}
-
-.login-left .login-box h1 {
-    font-size: 1.8rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: #1e1e1e;
-    margin-bottom: 2.5rem;
-}
-
-.login-left .login-box .label-group {
-    margin-bottom: 1.2rem;
-}
-
-.login-left .login-box .checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1.8rem;
-    font-size: 0.85rem;
-    color: #4a4a4a;
-}
-
-.login-left .login-box .checkbox-group input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    accent-color: #1e1e1e;
-    cursor: pointer;
-}
-
-.login-left .login-box .btn-login {
-    display: block;
-    width: 100%;
-    padding: 0.8rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    background-color: #1e1e1e;
-    color: #ffffff;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    font-family: inherit;
-    text-align: center;
-    text-decoration: none;
-}
-
-.login-left .login-box .btn-login:hover {
-    background-color: #333333;
-}
-
-.login-right {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-    color: #ffffff;
-}
-
-.login-right .brand {
-    font-size: 4rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    opacity: 0.08;
-    text-transform: uppercase;
-    transform: rotate(-10deg);
-    position: absolute;
-    white-space: nowrap;
-    user-select: none;
-}
-
-.login-right .verse {
-    text-align: center;
-    z-index: 1;
-    padding: 2rem;
-    max-width: 400px;
-}
-
-.login-right .verse p {
-    font-size: 0.9rem;
-    opacity: 0.6;
-    line-height: 1.6;
-    font-style: italic;
-}
-
-.login-right .verse span {
-    display: block;
-    margin-top: 0.8rem;
-    font-size: 0.75rem;
-    opacity: 0.4;
-    font-style: normal;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-/* Lógica de Login (CSS puro) */
-.login-container {
-    display: grid;
-}
-
-.app-container {
-    display: none;
-}
-
-#login-toggle:checked ~ .login-container {
-    display: none;
-}
-
-#login-toggle:checked ~ .app-container {
-    display: grid;
 }
 
 /* ============================================================ */
@@ -420,27 +279,10 @@ main {
     border-color: #d0d0d0;
 }
 
-.btn-outline {
-    background-color: transparent;
-    color: #1e1e1e;
-    border-color: #d0d0d0;
-}
-
-.btn-outline:hover {
-    background-color: #f5f5f5;
-    border-color: #b0b0b0;
-}
-
 .btn-sm {
     padding: 0.4rem 0.8rem;
     font-size: 0.8rem;
     border-radius: 6px;
-}
-
-.btn-xs {
-    padding: 0.25rem 0.6rem;
-    font-size: 0.75rem;
-    border-radius: 4px;
 }
 
 /* ----- CREDIT PANELS ----- */
@@ -489,10 +331,6 @@ main {
     font-size: 0.8rem;
     color: #6b6b6b;
     margin-bottom: 0.4rem;
-}
-
-.credit-panel .selection-info strong {
-    color: #1e1e1e;
 }
 
 .credit-panel ul {
@@ -619,26 +457,6 @@ main {
 }
 
 /* ----- MODAL INTERNALS ----- */
-.search-bar {
-    display: flex;
-    gap: 0.8rem;
-    margin-bottom: 1rem;
-}
-
-.search-bar input {
-    flex: 1;
-    padding: 0.5rem 0.8rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    outline: none;
-    font-family: inherit;
-}
-
-.search-bar input:focus {
-    border-color: #1e1e1e;
-}
-
 .list-box {
     border: 1px solid #e8e8e8;
     border-radius: 8px;
@@ -678,18 +496,6 @@ main {
     flex: 1;
 }
 
-.list-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 0.8rem;
-}
-
-.list-actions .btn-group {
-    display: flex;
-    gap: 0.5rem;
-}
-
 .participant-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -706,25 +512,6 @@ main {
     font-size: 0.85rem;
     font-weight: 600;
     color: #1e1e1e;
-}
-
-.participant-col .search-add {
-    display: flex;
-    gap: 0.4rem;
-}
-
-.participant-col .search-add input {
-    flex: 1;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    outline: none;
-    font-family: inherit;
-}
-
-.participant-col .search-add input:focus {
-    border-color: #1e1e1e;
 }
 
 .participant-col .list-box {
@@ -829,26 +616,6 @@ table tbody tr:hover {
     font-size: 0.8rem;
 }
 
-.mt-1 {
-    margin-top: 0.5rem;
-}
-
-.mt-2 {
-    margin-top: 1rem;
-}
-
-.mb-1 {
-    margin-bottom: 0.5rem;
-}
-
-.mb-2 {
-    margin-bottom: 1rem;
-}
-
-.gap-1 {
-    gap: 0.5rem;
-}
-
 .gap-2 {
     gap: 1rem;
 }
@@ -857,24 +624,8 @@ table tbody tr:hover {
     display: flex;
 }
 
-.flex-col {
-    flex-direction: column;
-}
-
-.items-center {
-    align-items: center;
-}
-
-.justify-between {
-    justify-content: space-between;
-}
-
 .justify-end {
     justify-content: flex-end;
-}
-
-.w-full {
-    width: 100%;
 }
 
 /* ----- SCROLLBAR ----- */
@@ -914,14 +665,6 @@ table tbody tr:hover {
     }
 
     aside {
-        display: none;
-    }
-
-    .login-container {
-        grid-template-columns: 1fr;
-    }
-
-    .login-right {
         display: none;
     }
 

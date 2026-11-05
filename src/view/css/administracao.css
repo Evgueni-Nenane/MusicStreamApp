@@ -368,15 +368,6 @@ label.btn {
     color: #6b6b6b;
 }
 
-.inline {
-    display: flex;
-    gap: .5rem;
-}
-
-.inline input {
-    flex: 1;
-}
-
 .cadastro-layout {
     display: grid;
     grid-template-columns: 200px 1fr;

@@ -213,6 +213,20 @@ main {
     box-shadow: 0 0 0 3px rgba(30, 30, 30, 0.06);
 }
 
+/* Barra de pesquisa ao lado do título do cartão */
+.card-header.com-pesquisa {
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.card-header.com-pesquisa .search-input {
+    width: 100%;
+    max-width: 320px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+}
+
 /* ----- BUTTONS ----- */
 .btn {
     display: inline-flex;
@@ -256,12 +270,6 @@ main {
     padding: 0.4rem 0.8rem;
     font-size: 0.8rem;
     border-radius: 6px;
-}
-
-.btn-xs {
-    padding: 0.25rem 0.6rem;
-    font-size: 0.75rem;
-    border-radius: 4px;
 }
 
 /* ----- TABLE ----- */
@@ -342,8 +350,17 @@ table tbody tr:hover {
 }
 
 /* Mostra o modal quando o checkbox correspondente está marcado */
-#modal-detalhes-toggle:checked ~ .modal-overlay.modal-detalhes, #modal-editar-disco-toggle:checked ~ .modal-overlay.modal-editar-disco, #modal-adicionar-faixa-toggle:checked ~ .modal-overlay.modal-adicionar-faixa, #modal-editar-faixa-toggle:checked ~ .modal-overlay.modal-editar-faixa {
+#modal-detalhes-toggle:checked ~ .modal-overlay.modal-detalhes,
+#modal-editar-disco-toggle:checked ~ .modal-overlay.modal-editar-disco,
+#modal-editar-faixa-toggle:checked ~ .modal-overlay.modal-editar-faixa,
+#modal-adicionar-faixa-toggle:checked ~ .modal-overlay.modal-adicionar-faixa,
+#modal-remover-disco-toggle:checked ~ .modal-overlay.modal-remover-disco,
+#modal-remover-faixa-toggle:checked ~ .modal-overlay.modal-remover-faixa {
     display: flex;
+}
+
+.modal.confirm {
+    max-width: 420px;
 }
 
 .modal {
@@ -484,6 +501,25 @@ table tbody tr:hover {
     max-height: 200px;
 }
 
+.list-box.list-box-tall {
+    max-height: 140px;
+}
+
+.list-box.list-box-short {
+    max-height: 120px;
+}
+
+.duration-fields {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.duration-input {
+    width: 70px;
+    text-align: center;
+}
+
 /* ----- DETAIL VIEW ----- */
 .detail-section {
     margin-bottom: 1.5rem;
@@ -539,40 +575,16 @@ table tbody tr:hover {
     font-size: 0.8rem;
 }
 
-.mb-1 {
-    margin-bottom: 0.5rem;
-}
-
-.mb-2 {
-    margin-bottom: 1rem;
-}
-
 .flex {
     display: flex;
-}
-
-.justify-between {
-    justify-content: space-between;
 }
 
 .justify-end {
     justify-content: flex-end;
 }
 
-.items-center {
-    align-items: center;
-}
-
-.gap-1 {
-    gap: 0.5rem;
-}
-
 .gap-2 {
     gap: 1rem;
-}
-
-.w-full {
-    width: 100%;
 }
 
 /* ----- SCROLLBAR ----- */
