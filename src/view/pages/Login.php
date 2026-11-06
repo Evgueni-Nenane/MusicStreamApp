@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sucesso = $loginController->login($username, $password);
 
     if ($sucesso) {
-        if ($loginController->isPrimeiroAcesso($username, $password)) {
+        if ($loginController->ehPrimeiroAcesso($username, $password)) {
             header('Location: mudar-senha.php');
             exit;
         }
