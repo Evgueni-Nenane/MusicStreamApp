@@ -19,23 +19,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = trim($_POST['password'] ?? '');
     $usernamePreenchido = $username;
 
-    if ($username === '' || $password === '') {
-        $erro = 'Preenche todos campos corretamente.';
-    } else {
-        $loginController = new LoginController();
-        $sucesso = $loginController->login($username, $password);
+    $loginController = new LoginController();
+    $sucesso = $loginController->login($username, $password);
 
-        if ($sucesso) {
-            // Se for o primeiro acesso, obriga a pessoa a mudar a senha antes de continuar
-            if ($loginController->isPrimeiroAcesso($username, $password)) {
-                header('Location: mudar-senha.php');
-                exit;
-            }
-            header('Location: administracao.php');
+    if ($sucesso) {
+        if ($loginController->isPrimeiroAcesso($username, $password)) {
+            header('Location: mudar-senha.php');
             exit;
-        } else {
-            $erro = 'Utilizador ou Palavra-passe incorretos.';
         }
+        header('Location: administracao.php');
+        exit;
+    } else {
+        $erro = 'Utilizador ou Palavra-passe incorretos.';
     }
 }
 ?>
@@ -64,18 +59,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php if ($erro !== ''): ?>
                 <p style="color: red;"><?= htmlspecialchars($erro) ?></p>
             <?php endif; ?>
-            <form method="post">
+            <form method="post" id="formLogin" novalidate>
                 <div class="campo">
                     <label for="username">Nome de utilizador</label>
                     <input type="text" id="username" name="username" placeholder="John Doe">
+                    <small class="erro" id="erroUsername"></small>
                 </div>
 
                 <div class="campo">
                     <label for="password">Palavra-Passe</label>
-                    <input type="text" id="password" name="password" class="pw" placeholder="Tua palavra-passe" autocomplete="off">
+                    <input type="password" id="password" name="password" class="pw" placeholder="Tua palavra-passe" autocomplete="off">
+                    <small class="erro" id="erroPassword"></small>
                     <label class="mostrar">
-                   <input type="checkbox" id="mostrar"> Mostrar senhas</label>
-                   </div>
+                        <input type="checkbox" id="mostrar"> Mostrar senhas</label>
+                </div>
 
 
                 <div class="campo">
@@ -83,11 +80,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <button type="submit">Login</button>
                     </div>
                     <hr>
-                   <!-- <div class="center"><a href="#">Pedir reset de senha</a></div>-->
+                    <!-- <div class="center"><a href="#">Pedir reset de senha</a></div>-->
                 </div>
             </form>
         </div>
     </div>
+    <script src="../js/Login.js"></script>
 </body>
 
 </html>

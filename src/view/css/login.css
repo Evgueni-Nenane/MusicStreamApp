@@ -8,6 +8,8 @@ body {
     font-family: sans-serif;
 }
 
+.erro { color: #d93025; font-size: 13px; display: block; }
+
 .container {
     display: flex;
     justify-content: center;

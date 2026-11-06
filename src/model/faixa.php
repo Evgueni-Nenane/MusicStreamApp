@@ -112,3 +112,4 @@ class Faixa
 		return $this->cantores = $cantores;
 	}
 }
+
