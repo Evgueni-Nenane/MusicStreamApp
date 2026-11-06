@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 require_once __DIR__ . '/../repository/disco.php';
 require_once __DIR__ . '/../repository/gravadora.php';
@@ -44,7 +44,7 @@ class DiscoController
     {
         $codigoDisco = $this->discoDAO->inserir($disco);
 
-        if ($codigoDisco == -1) {
+        if ($codigoDisco === -1) {
             return -1;
         }
 
@@ -138,25 +138,25 @@ class DiscoController
     public function adicionarFaixaAoDisco($codigoDisco, $faixa)
     {
         $idFaixa = $this->faixaDAO->inserir($faixa, $codigoDisco);
-        if ($idFaixa == -1) {
+        if ($idFaixa === -1) {
             return false;
         }
 
         if ($faixa->getCompositores() !== null) {
             foreach ($this->compositorDAO->listarPorCodigo($codigoDisco) as $compositor) {
-                $this->faixaDAO->InserRelacaoCompositor($idFaixa, $compositor->getCodigoCompositor());
+                $this->faixaDAO->inserirRelacaoCompositor($idFaixa, $compositor->getCodigoCompositor());
             }
         }
 
         if ($faixa->getMusicos() !== null) {
             foreach ($this->musicoDAO->listarPorCodigo($codigoDisco) as $musico) {
-                $this->faixaDAO->InserRelacaoMusico($idFaixa, $musico->getCodigoMusico());
+                $this->faixaDAO->inserirRelacaoMusico($idFaixa, $musico->getCodigoMusico());
             }
         }
 
         if ($faixa->getCantores() !== null) {
             foreach ($this->cantorDAO->listarPorCodigo($codigoDisco) as $cantor) {
-                $this->faixaDAO->InserRelacaoCantor($idFaixa, $cantor->getCodigoCantor());
+                $this->faixaDAO->inserirRelacaoCantor($idFaixa, $cantor->getCodigoCantor());
             }
         }
 
@@ -188,7 +188,7 @@ class DiscoController
             }
         }
 
-        if (count($idsFaixas) > 0) {
+        if ($idsFaixas) {
             LogsController::registar('Removeu as faixas ID ' . implode(', ', $idsFaixas));
         }
 

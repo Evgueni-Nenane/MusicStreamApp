@@ -6,7 +6,7 @@ class NivelAcessoDAO
 {
     public function inserir($nome)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO NivelAcesso (NomeNivel) VALUES (?)";
         $ps = $conn->prepare($sql);
         $ps->bind_param("s", $nome);
@@ -22,7 +22,7 @@ class NivelAcessoDAO
     public function listarNiveis()
     {
         $niveis = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT * FROM NivelAcesso";
         $result = $conn->query($sql);
 
@@ -38,7 +38,7 @@ class NivelAcessoDAO
     // Todas as linhas da tabela (com as permissões), para mostrar na aba Perfis
     public function listarPerfis()
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $result = $conn->query("SELECT * FROM NivelAcesso ORDER BY CodigoNivel");
         $perfis = [];
         while ($row = $result->fetch_assoc()) {
@@ -50,7 +50,7 @@ class NivelAcessoDAO
     // Uma linha só (devolve null se não existir)
     public function buscarPorCodigo($codigo)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $ps = $conn->prepare("SELECT * FROM NivelAcesso WHERE CodigoNivel = ?");
         $ps->bind_param("i", $codigo);
         $ps->execute();
@@ -75,15 +75,15 @@ class NivelAcessoDAO
 
     public function criar($nome, $perm)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO NivelAcesso
                 (NomeNivel, PodeLer, PodeAdicionar, PodeEditar, PodeRemover, PodeUtilizadores, PodeLogs)
                 VALUES (?, 1, ?, ?, ?, ?, ?)";
         $ps = $conn->prepare($sql);
 
-        $add  = !empty($perm['adicionar']) ? 1 : 0;
+        $add = !empty($perm['adicionar']) ? 1 : 0;
         $edit = !empty($perm['editar']) ? 1 : 0;
-        $rem  = !empty($perm['remover']) ? 1 : 0;
+        $rem = !empty($perm['remover']) ? 1 : 0;
         $user = !empty($perm['utilizadores']) ? 1 : 0;
         $logs = !empty($perm['logs']) ? 1 : 0;
         $ps->bind_param("siiiii", $nome, $add, $edit, $rem, $user, $logs);
@@ -98,16 +98,19 @@ class NivelAcessoDAO
 
     public function atualizar($codigo, $nome, $perm)
     {
-        if ($codigo <= 4) return false; // perfis base não se editam
+        // Perfis base não se editam.
+        if ($codigo <= 4) {
+            return false;
+        }
 
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "UPDATE NivelAcesso SET NomeNivel=?, PodeAdicionar=?, PodeEditar=?,
                 PodeRemover=?, PodeUtilizadores=?, PodeLogs=? WHERE CodigoNivel=?";
         $ps = $conn->prepare($sql);
 
-        $add  = !empty($perm['adicionar']) ? 1 : 0;
+        $add = !empty($perm['adicionar']) ? 1 : 0;
         $edit = !empty($perm['editar']) ? 1 : 0;
-        $rem  = !empty($perm['remover']) ? 1 : 0;
+        $rem = !empty($perm['remover']) ? 1 : 0;
         $user = !empty($perm['utilizadores']) ? 1 : 0;
         $logs = !empty($perm['logs']) ? 1 : 0;
         $ps->bind_param("siiiiii", $nome, $add, $edit, $rem, $user, $logs, $codigo);
@@ -122,22 +125,27 @@ class NivelAcessoDAO
 
     public function remover($codigo)
     {
-        if ($codigo <= 4) return false; // perfis base não se apagam
+        // Perfis base não se apagam.
+        if ($codigo <= 4) {
+            return false;
+        }
 
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
 
         // Não apaga se houver utilizadores com este perfil.
-        $ps = $conn->prepare("SELECT COUNT(*) AS total FROM utilizador WHERE Perfil = ?");
+        $ps = $conn->prepare("SELECT COUNT(*) AS total FROM Utilizador WHERE Perfil = ?");
         $ps->bind_param("i", $codigo);
         $ps->execute();
         $row = $ps->get_result()->fetch_assoc();
-        if ($row['total'] > 0) return false;
+        if ($row['total'] > 0) {
+            return false;
+        }
 
         $ps = $conn->prepare("DELETE FROM NivelAcesso WHERE CodigoNivel = ?");
         $ps->bind_param("i", $codigo);
         try {
             $ps->execute();
-            return true;    
+            return true;
         } catch (mysqli_sql_exception $e) {
             return false;
         }

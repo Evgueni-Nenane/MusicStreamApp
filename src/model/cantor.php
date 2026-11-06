@@ -9,9 +9,13 @@ class Cantor
     private $emailCantor;
 
 
-    public function __construct($codigoCantor = null, $nomeCantor = null, $apelidoCantor = null,
-     $contactoCantor = null, $emailCantor = null)
-    {
+    public function __construct(
+        $codigoCantor = null,
+        $nomeCantor = null,
+        $apelidoCantor = null,
+        $contactoCantor = null,
+        $emailCantor = null
+    ) {
         $this->codigoCantor = $codigoCantor;
         $this->nomeCantor = $nomeCantor;
         $this->apelidoCantor = $apelidoCantor;

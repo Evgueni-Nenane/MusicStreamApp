@@ -6,7 +6,7 @@ class LogsDAO
 {
     public function inserir($log)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO Logs (nome, apelido, perfil, email, accao, hora) VALUES (?, ?, ?, ?, ?, ?)";
         $ps = $conn->prepare($sql);
 
@@ -29,7 +29,7 @@ class LogsDAO
     public function listarLogs()
     {
         $logs = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT * FROM Logs ORDER BY Hora DESC";
         $result = $conn->query($sql);
 

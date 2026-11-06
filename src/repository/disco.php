@@ -8,7 +8,7 @@ class DiscoDAO
 {
     public function inserir($disco)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO Disco_Compacto (Titulo, Preco, Ano_Edicao) VALUES (?, ?, ?)";
         $ps = $conn->prepare($sql);
         $Titulo = $disco->getTitulo();
@@ -25,11 +25,11 @@ class DiscoDAO
         }
         return -1;
     }
-    
+
     public function listarTodos()
-    { 
+    {
         $discos = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT d.Codigo_Disco, d.Titulo, "
             . "GROUP_CONCAT(g.Nome_Genero SEPARATOR ', ') AS Generos, d.Preco, d.Ano_Edicao"
             . " FROM Disco_Compacto d"
@@ -64,7 +64,7 @@ class DiscoDAO
 
     public function buscarPorCodigo($codigoDisco)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT d.Codigo_Disco, d.Titulo, d.Preco, d.Ano_Edicao FROM Disco_Compacto d WHERE d.Codigo_Disco = ?";
 
         $ps = $conn->prepare($sql);
@@ -95,7 +95,7 @@ class DiscoDAO
 
     public function buscarPorCodigoComEdicao($codigoDisco)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT d.Codigo_Disco, d.Titulo, d.Preco, d.Ano_Edicao, e.Codigo_Editora, e.Data_Edicao"
             . " FROM Disco_Compacto d LEFT JOIN Edicao e ON d.Codigo_Disco = e.Codigo_Disco"
             . " WHERE d.Codigo_Disco = ?";
@@ -133,7 +133,7 @@ class DiscoDAO
 
     public function atualizar($disco)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "UPDATE Disco_Compacto SET Titulo = ?, Preco = ?, Ano_Edicao = ? WHERE Codigo_Disco = ?";
         $ps = $conn->prepare($sql);
         $Titulo = $disco->getTitulo();
@@ -148,7 +148,7 @@ class DiscoDAO
 
     public function remover($codigoDisco)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $conn->begin_transaction();
 
         try {

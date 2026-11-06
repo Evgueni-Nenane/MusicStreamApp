@@ -6,7 +6,7 @@ class Edicao
     private $dataEdicao;
 
     public function __construct($codigoDisco = null, $codigoEditora = null, $dataEdicao = null)
-    { 
+    {
         $this->codigoDisco = $codigoDisco;
         $this->codigoEditora = $codigoEditora;
         $this->dataEdicao = $dataEdicao;

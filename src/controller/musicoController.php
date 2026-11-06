@@ -19,7 +19,7 @@ class MusicoController
     {
         $codigoMusico = $this->musicoDAO->inserir($musico);
 
-        if ($codigoMusico == -1) {
+        if ($codigoMusico === -1) {
             return -1;
         }
 
@@ -27,7 +27,7 @@ class MusicoController
             $this->instrumentoDAO->inserirRelacaoMusicoInstrumento($codigoMusico, $instrumento->getCodigo());
         }
 
-        return 1;
+        return $codigoMusico;
     }
 
     public function listarMusicos()
@@ -53,5 +53,10 @@ class MusicoController
     public function buscarMusicoPorDisco($codigoDisco)
     {
         return $this->musicoDAO->listarPorCodigo($codigoDisco);
+    }
+
+    public function buscarInstrumentosDoMusico($codigoMusico)
+    {
+        return $this->musicoDAO->buscarInstrumentosDoMusico($codigoMusico);
     }
 }

@@ -1,18 +1,18 @@
-<?php 
-include_once __DIR__ . '/../model/instrumento.php';
-include_once __DIR__ . '/connection.php';
+<?php
+
+require_once __DIR__ . '/../model/instrumento.php';
+require_once __DIR__ . '/connection.php';
 
 class InstrumentoDAO
 {
     public function inserir($instrumento)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         // "Codigo" é a chave primária AUTO_INCREMENT: não é inserida.
         $sql = "INSERT INTO Instrumento (NomeInstrumento) VALUES (?)";
         $ps = $conn->prepare($sql);
 
         $nome = $instrumento->getNome();
-
         $ps->bind_param("s", $nome);
 
         try {
@@ -22,13 +22,14 @@ class InstrumentoDAO
         } catch (mysqli_sql_exception $e) {
             return -1;
         }
+
         return -1;
     }
 
     public function listarTodos()
     {
         $instrumentos = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT * FROM Instrumento";
         $ps = $conn->prepare($sql);
         $ps->execute();
@@ -40,15 +41,16 @@ class InstrumentoDAO
                 $row['NomeInstrumento']
             );
         }
+
         return $instrumentos;
     }
 
     public function listarPorMusico($codigoMusico)
     {
         $instrumento = new Instrumento();
-        $conn = connection::connectionDB();
-        $sql = "SELECT i.* FROM Instrumento i INNER JOIN Musico_Instrumento mi " .
-            "ON i.Codigo = mi.Codigo_Instr WHERE mi.Codigo_Musico = ?";
+        $conn = Connection::connectionDB();
+        $sql = "SELECT i.* FROM Instrumento i INNER JOIN Musico_Instrumento mi "
+            . "ON i.Codigo = mi.Codigo_Instr WHERE mi.Codigo_Musico = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigoMusico);
         $ps->execute();
@@ -60,12 +62,13 @@ class InstrumentoDAO
                 $row['NomeInstrumento']
             );
         }
+
         return $instrumento;
     }
 
     public function temRelacionamento($codigo)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT COUNT(*) AS Quantidade FROM Musico_Instrumento WHERE Codigo_Instr = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigo);
@@ -81,17 +84,18 @@ class InstrumentoDAO
             return false;
         }
 
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "DELETE FROM Instrumento WHERE Codigo = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigo);
         $ps->execute();
+
         return $ps->affected_rows > 0;
     }
 
     public function inserirRelacaoMusicoInstrumento($codigoMusico, $codigoInstrumento)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO Musico_Instrumento (Codigo_Instr, Codigo_Musico) VALUES (?, ?)";
         $ps = $conn->prepare($sql);
         $ps->bind_param("ii", $codigoInstrumento, $codigoMusico);
@@ -107,11 +111,11 @@ class InstrumentoDAO
     public function removerRelacoesPorMusico($codigoMusico)
     {
         // Apaga todas as ligações músico↔instrumento (usado ao sincronizar o "Editar").
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "DELETE FROM Musico_Instrumento WHERE Codigo_Musico = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigoMusico);
-        $ps->execute();
-        return $ps->affected_rows >= 0;
+
+        return $ps->execute();
     }
-}		
+}

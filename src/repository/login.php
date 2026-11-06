@@ -11,9 +11,9 @@ class LoginDAO
 
     public function login($username, $senha, $logController)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT Codigo_User, Nome, Apelido, UserName, Genero, Email, Contacto, "
-            . "Foto, Perfil, NomeNivel"
+            . "Perfil, NomeNivel"
             . " FROM Utilizador u"
             . " INNER JOIN NivelAcesso n"
             . " ON u.Perfil = n.CodigoNivel"
@@ -27,8 +27,9 @@ class LoginDAO
         if ($row) {
             $perfil = new NivelAcesso($row['Perfil'], $row['NomeNivel']);
 
+            // A foto (blob) nao vai para a sessao: o avatar e servido por foto.php
             $userSessao = new Utilizador(
-                foto: $row['Foto'],
+                codigo: $row['Codigo_User'],
                 nome: $row['Nome'],
                 apelido: $row['Apelido'],
                 user_name: $row['UserName'],
@@ -57,7 +58,7 @@ class LoginDAO
 
     public function isPrimeiroAcesso($username, $senha)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT Primeiro_Acesso FROM Utilizador WHERE UserName = ? AND Senha = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("ss", $username, $senha);
@@ -69,23 +70,10 @@ class LoginDAO
 
     public function atualizarSenha($username, $senhaAntiga, $novaSenha)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "UPDATE Utilizador SET Senha = ?, Primeiro_Acesso = 0 WHERE BINARY UserName = ? AND BINARY Senha = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("sss", $novaSenha, $username, $senhaAntiga);
-        $ps->execute();
-        return $ps->affected_rows > 0;
-    }
-
-    public function resetarSenha($codigoUser)
-    {
-        $conn = connection::connectionDB();
-        $sql = "UPDATE Utilizador SET Senha = ?, Primeiro_Acesso = 1 WHERE Codigo_User = ?";
-        $ps = $conn->prepare($sql);
-
-        $senhaPadrao = "user258";
-        $ps->bind_param("si", $senhaPadrao, $codigoUser);
-
         $ps->execute();
         return $ps->affected_rows > 0;
     }

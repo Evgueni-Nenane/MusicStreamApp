@@ -6,7 +6,7 @@ class ProdutorDAO
 {
     public function inserir($produtor)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO Produtor (Nome_Prod, Apelido_Produtor, Contacto_Prod, Email_Prod) VALUES (?, ?, ?, ?)";
         $ps = $conn->prepare($sql);
 
@@ -30,7 +30,7 @@ class ProdutorDAO
     public function listarTodos()
     {
         $produtores = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT * FROM Produtor";
         $result = $conn->query($sql);
 
@@ -49,7 +49,7 @@ class ProdutorDAO
     public function listarPorCodigo($codigoDisco)
     {
         $produtores = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT p.* FROM Produtor p INNER JOIN ProDC pd ON p.Codigo_Prod = pd.Codigo_Produtor WHERE pd.Codigo_Disco = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigoDisco);
@@ -71,7 +71,7 @@ class ProdutorDAO
     public function buscarPorCodigo($codigoProdutor)
     {
         $produtor = new Produtor();
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT * FROM Produtor WHERE Codigo_Prod = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigoProdutor);
@@ -92,7 +92,7 @@ class ProdutorDAO
 
     public function atualizar($produtor)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "UPDATE Produtor SET Nome_Prod = ?, Apelido_Produtor = ?, Email_Prod = ?, Contacto_Prod = ? WHERE Codigo_Prod = ?";
         $ps = $conn->prepare($sql);
 
@@ -109,7 +109,7 @@ class ProdutorDAO
 
     public function temRelacionamento($codigo)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT COUNT(*) AS Quantidade FROM ProDC WHERE Codigo_Produtor = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigo);
@@ -125,7 +125,7 @@ class ProdutorDAO
             return false;
         }
 
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "DELETE FROM Produtor WHERE Codigo_Prod = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigo);
@@ -135,7 +135,7 @@ class ProdutorDAO
 
     public function inserirRelacaoDiscoProdutor($codigoDisco, $codigoProdutor)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO ProDC (Codigo_Disco, Codigo_Produtor) VALUES (?, ?)";
         $ps = $conn->prepare($sql);
         $ps->bind_param("ii", $codigoDisco, $codigoProdutor);

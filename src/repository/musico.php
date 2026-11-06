@@ -7,7 +7,7 @@ class MusicoDAO
 {
     public function inserir($musico)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO Musico (Nome_Musico, Apelido_Musico, Contacto_Musico, Email_Musico, Nome_Art_Musico) VALUES (?, ?, ?, ?, ?)";
         $ps = $conn->prepare($sql);
 
@@ -32,7 +32,7 @@ class MusicoDAO
     public function listarTodos()
     {
         $musicos = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT * FROM Musico";
         $result = $conn->query($sql);
 
@@ -45,7 +45,7 @@ class MusicoDAO
     public function listarPorCodigo($codigoDisco)
     {
         $musicos = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT m.* FROM Musico m INNER JOIN Musico_DC md " .
             "ON m.Codigo_Musico = md.Codigo_Musico WHERE md.Codigo_DC = ?";
         $ps = $conn->prepare($sql);
@@ -62,7 +62,7 @@ class MusicoDAO
     public function buscarPorCodigo($codigoMusico)
     {
         $musico = new Musico();
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT * FROM Musico WHERE Codigo_Musico = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigoMusico);
@@ -92,7 +92,7 @@ class MusicoDAO
     public function buscarInstrumentosDoMusico($codigoMusico)
     {
         $instrumentos = [];
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT i.Codigo, i.NomeInstrumento " .
             "FROM Instrumento i " .
             "INNER JOIN Musico_Instrumento mi " .
@@ -114,7 +114,7 @@ class MusicoDAO
 
     public function atualizar($musico)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         // Grava também o nome/apelido para o "Editar" funcionar (tal como nos outros DAOs).
         $sql = "UPDATE Musico SET Nome_Musico = ?, Apelido_Musico = ?, Email_Musico = ?, Contacto_Musico = ?, Nome_Art_Musico = ? WHERE Codigo_Musico = ?";
         $ps = $conn->prepare($sql);
@@ -133,7 +133,7 @@ class MusicoDAO
 
     public function temRelacionamento($codigo)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "SELECT COUNT(*) AS Quantidade FROM Musico_DC WHERE Codigo_Musico = ?";
         $ps = $conn->prepare($sql);
         $ps->bind_param("i", $codigo);
@@ -149,7 +149,7 @@ class MusicoDAO
             return false;
         }
 
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
 
         $ps1 = $conn->prepare("DELETE FROM Musico_Instrumento WHERE Codigo_Musico = ?");
         $ps1->bind_param("i", $codigo);
@@ -164,7 +164,7 @@ class MusicoDAO
 
     public function inserirRelacaoDiscoMusico($codigoDisco, $codigoMusico)
     {
-        $conn = connection::connectionDB();
+        $conn = Connection::connectionDB();
         $sql = "INSERT INTO Musico_DC (Codigo_Musico, Codigo_DC) VALUES (?, ?)";
         $ps = $conn->prepare($sql);
         $ps->bind_param("ii", $codigoMusico, $codigoDisco);

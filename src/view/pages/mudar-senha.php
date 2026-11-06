@@ -6,64 +6,55 @@ Sessao::iniciar();
 
 // Só quem já fez login (mesmo que seja primeiro acesso) pode chegar aqui
 if (!Sessao::estaLogado()) {
-    header('Location: login.php');
+    header('Location: Login.php');
     exit;
 }
 
 $utilizador = Sessao::getUtilizadorLogado();
-$username = $utilizador->getUser_name();
+$username = $utilizador->getUserName();
 
 $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $senhaAtual = $_POST['senha_atual'] ?? '';
-    $novaSenha = $_POST['nova_senha'] ?? '';
-    $confirmarSenha = $_POST['confirmar_senha'] ?? '';
+    $loginController = new LoginController();
+    $resultado = $loginController->alterarSenha(
+        $username,
+        $_POST['senha_atual'] ?? '',
+        $_POST['nova_senha'] ?? '',
+        $_POST['confirmar_senha'] ?? ''
+    );
 
-    if ($senhaAtual === '' || $novaSenha === '' || $confirmarSenha === '') {
-        $erro = 'Preenche todos os campos.';
-    } elseif ($novaSenha !== $confirmarSenha) {
-        $erro = 'A nova senha e a confirmação não coincidem.';
-    } elseif (strlen($novaSenha) < 6) {
-        $erro = 'A nova senha deve ter pelo menos 6 caracteres.';
-    } elseif ($novaSenha === $senhaAtual) {
-        $erro = 'A nova senha não pode ser igual à senha atual.';
-    } else {
-        $loginController = new LoginController();
-        $sucesso = $loginController->atualizarSenha($username, $senhaAtual, $novaSenha);
-
-        if ($sucesso) {
-            header('Location: administracao.php');
-            exit;
-        } else {
-            $erro = 'Não foi possível atualizar a senha. Confirma a senha atual.';
-        }
+    if (isset($resultado['redirect'])) {
+        header('Location: ' . $resultado['redirect']);
+        exit;
     }
+
+    $erro = $resultado['erro'];
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/login.css">
-    <title>Mudar Senha | Spotify</title>
+    <title>Mudar Senha | DiscoGest</title>
 </head>
 
 <body>
     <div class="container">
         <div class="img">
-            <img src="../resources/login.png" alt="bro">
+            <img src="../resources/login.png" alt="Ilustração de um DJ">
         </div>
         <div class="card">
             <div class="title">
                 <h1>Primeiro Acesso</h1>
             </div>
-            <p>Olá, <?= htmlspecialchars($utilizador->getNome()) ?>. Como é o teu primeiro acesso, define uma nova senha.</p>
+            <p class="intro">Olá, <?= htmlspecialchars($utilizador->getNome()) ?>. Como é o teu primeiro acesso, define uma nova senha.</p>
 
             <?php if ($erro !== ''): ?>
-                <p style="color: red;"><?= htmlspecialchars($erro) ?></p>
+                <div class="alert alert-erro"><?= htmlspecialchars($erro) ?></div>
             <?php endif; ?>
 
             <form method="post">
