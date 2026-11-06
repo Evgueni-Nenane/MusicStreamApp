@@ -59,16 +59,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php if ($erro !== ''): ?>
                 <p style="color: red;"><?= htmlspecialchars($erro) ?></p>
             <?php endif; ?>
-            <form method="post" id="formLogin" novalidate>
+            <form method="post" id="formLogin">
                 <div class="campo">
                     <label for="username">Nome de utilizador</label>
-                    <input type="text" id="username" name="username" placeholder="John Doe">
+                    <input type="text" id="username" name="username" placeholder="John Doe" maxlength="50" required>
                     <small class="erro" id="erroUsername"></small>
                 </div>
 
                 <div class="campo">
                     <label for="password">Palavra-Passe</label>
-                    <input type="password" id="password" name="password" class="pw" placeholder="Tua palavra-passe" autocomplete="off">
+                    <input type="password" id="password" name="password" class="pw" placeholder="Tua palavra-passe" autocomplete="off" required>
                     <small class="erro" id="erroPassword"></small>
                     <label class="mostrar">
                         <input type="checkbox" id="mostrar"> Mostrar senhas</label>
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
     </div>
-    <script src="../js/Login.js"></script>
+    <script src="../js/form-validation.js"></script>
 </body>
 
 </html>

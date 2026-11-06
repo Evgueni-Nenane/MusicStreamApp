@@ -313,11 +313,11 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                     <div class="form-grid">
                         <div class="label-group form-grid-full">
                             <label for="edit-titulo">Título</label>
-                            <input type="text" id="edit-titulo" name="titulo" required value="<?= escaparHtml($discoEdicao ? $discoEdicao->getTitulo() : '') ?>">
+                            <input type="text" id="edit-titulo" name="titulo" maxlength="150" required value="<?= escaparHtml($discoEdicao ? $discoEdicao->getTitulo() : '') ?>">
                         </div>
                         <div class="label-group">
                             <label for="edit-preco">Preço</label>
-                            <input type="number" id="edit-preco" name="preco" min="0" step="0.01" value="<?= $discoEdicao ? $discoEdicao->getPreco() : '' ?>">
+                            <input type="number" id="edit-preco" name="preco" min="0" max="99999999.99" step="0.01" value="<?= $discoEdicao ? $discoEdicao->getPreco() : '' ?>">
                         </div>
                         <div class="label-group">
                             <label for="edit-ano">Data de Edição</label>
@@ -364,11 +364,11 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                         <div class="form-grid">
                             <div class="label-group">
                                 <label for="edfaixa-nome">Nome da Faixa</label>
-                                <input type="text" id="edfaixa-nome" name="nome" required value="<?= $faixaEdicao ? escaparHtml($faixaEdicao->getNomeFaixa()) : '' ?>">
+                                <input type="text" id="edfaixa-nome" name="nome" maxlength="150" required value="<?= $faixaEdicao ? escaparHtml($faixaEdicao->getNomeFaixa()) : '' ?>">
                             </div>
                             <div class="label-group">
                                 <label for="edfaixa-artista">Artista Principal</label>
-                                <input type="text" id="edfaixa-artista" name="artista" required value="<?= $faixaEdicao ? escaparHtml($faixaEdicao->getArtistaPrincipal()) : '' ?>">
+                                <input type="text" id="edfaixa-artista" name="artista" maxlength="100" required value="<?= $faixaEdicao ? escaparHtml($faixaEdicao->getArtistaPrincipal()) : '' ?>">
                             </div>
                             <div class="label-group">
                                 <label>Duração (mm:ss)</label>
@@ -447,11 +447,11 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                         <div class="form-grid">
                             <div class="label-group">
                                 <label for="faixa-nome">Nome da Faixa</label>
-                                <input type="text" id="faixa-nome" name="nome" required>
+                                <input type="text" id="faixa-nome" name="nome" maxlength="150" required>
                             </div>
                             <div class="label-group">
                                 <label for="faixa-artista">Artista Principal</label>
-                                <input type="text" id="faixa-artista" name="artista" required>
+                                <input type="text" id="faixa-artista" name="artista" maxlength="100" required>
                             </div>
                             <div class="label-group">
                                 <label>Duração (mm:ss)</label>

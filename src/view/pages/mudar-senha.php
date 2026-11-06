@@ -60,17 +60,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="post">
                 <div class="campo">
                     <label for="senha_atual">Senha atual</label>
-                    <input type="text" id="senha_atual" name="senha_atual" class="pw" placeholder="Senha atual" autocomplete="off">
+                    <input type="text" id="senha_atual" name="senha_atual" class="pw" placeholder="Senha atual" autocomplete="off" required>
                 </div>
 
                 <div class="campo">
                     <label for="nova_senha">Nova senha</label>
-                    <input type="text" id="nova_senha" name="nova_senha" class="pw" placeholder="Nova senha" autocomplete="off">
+                    <input type="text" id="nova_senha" name="nova_senha" class="pw" placeholder="Nova senha" autocomplete="off" minlength="6" required>
                 </div>
 
                 <div class="campo">
                     <label for="confirmar_senha">Confirmar nova senha</label>
-                    <input type="text" id="confirmar_senha" name="confirmar_senha" class="pw" placeholder="Repete a nova senha" autocomplete="off">
+                    <input type="text" id="confirmar_senha" name="confirmar_senha" class="pw" placeholder="Repete a nova senha" autocomplete="off" minlength="6" required>
                 </div>
 
                 <div class="campo">
@@ -85,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
     </div>
+    <script src="../js/form-validation.js"></script>
 </body>
 
 </html>

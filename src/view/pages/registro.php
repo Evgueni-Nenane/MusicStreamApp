@@ -115,7 +115,7 @@ $subtituloPagina = 'Registar disco';
                             </div>
                             <div class="label-group">
                                 <label for="preco">Preço</label>
-                                <input type="number" id="preco" name="preco" min="0" step="0.01"
+                                <input type="number" id="preco" name="preco" min="0" max="99999999.99" step="0.01"
                                     value="<?= htmlspecialchars($_POST['preco'] ?? '') ?>">
                             </div>
                         </div>

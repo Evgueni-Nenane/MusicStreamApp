@@ -117,7 +117,7 @@ The UI hides unavailable actions **and** the server re-validates every POST — 
     └── view/
         ├── pages/              # 12 PHP pages (rendering only)
         ├── css/                # one stylesheet per page
-        ├── js/                 # small progressive-enhancement scripts
+        ├── js/                 # progressive enhancement: photo preview and form validation
         └── resources/          # static images (login.png, default avatar)
 ```
 
@@ -194,7 +194,19 @@ List pages accept `?q=`, applied in PHP over the already-loaded collection (`arr
 
 ---
 
-## 10. Security posture
+## 10. Form validation
+
+Forms use standard HTML constraints (`required`, `type="email"`, `min`, `max`, `maxlength`, `minlength`) plus a single shared script, `src/view/js/form-validation.js`, loaded by the common header and by the login/password pages. On submit the script:
+
+- calls the browser's Constraint Validation API (`checkValidity()` / `reportValidity()`) for the normal fields;
+- blocks list actions when no selection radio (`sel`, `sel_perfil`, ...) is chosen;
+- requires at least one genre when registering a disc.
+
+Search forms have no required fields and remain freely submittable.
+
+---
+
+## 11. Security posture
 
 Known and accepted for an academic context, but not production-ready:
 
@@ -208,7 +220,7 @@ Known and accepted for an academic context, but not production-ready:
 
 ---
 
-## 11. Technical debt / next steps
+## 12. Technical debt / next steps
 
 | Area | Issue |
 |---|---|
@@ -224,7 +236,7 @@ Known and accepted for an academic context, but not production-ready:
 
 ---
 
-## 12. Development
+## 13. Development
 
 ```bash
 # syntax check

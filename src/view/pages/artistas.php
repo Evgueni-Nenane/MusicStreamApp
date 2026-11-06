@@ -233,11 +233,11 @@ $subtituloPagina = 'Gestão de artistas';
                     <div class="form-grid">
                         <div class="label-group">
                             <label for="add-nome">Nome</label>
-                            <input type="text" id="add-nome" name="nome" required>
+                            <input type="text" id="add-nome" name="nome" maxlength="50" required>
                         </div>
                         <div class="label-group">
                             <label for="add-apelido">Apelido</label>
-                            <input type="text" id="add-apelido" name="apelido" required>
+                            <input type="text" id="add-apelido" name="apelido" maxlength="50" required>
                         </div>
 
                         <div class="label-group form-grid-full">
@@ -264,11 +264,11 @@ $subtituloPagina = 'Gestão de artistas';
 
                         <div class="label-group form-grid-full">
                             <label for="add-contacto">Contacto</label>
-                            <input type="text" id="add-contacto" name="contacto">
+                            <input type="text" id="add-contacto" name="contacto" maxlength="20">
                         </div>
                         <div class="label-group form-grid-full">
                             <label for="add-email">E-mail</label>
-                            <input type="email" id="add-email" name="email">
+                            <input type="email" id="add-email" name="email" maxlength="100">
                         </div>
                     </div>
                 </div>
@@ -295,11 +295,11 @@ $subtituloPagina = 'Gestão de artistas';
                     <div class="form-grid">
                         <div class="label-group">
                             <label for="ed-nome">Nome</label>
-                            <input type="text" id="ed-nome" name="nome" required value="<?= htmlspecialchars($artistaEdicaoNome) ?>">
+                            <input type="text" id="ed-nome" name="nome" maxlength="50" required value="<?= htmlspecialchars($artistaEdicaoNome) ?>">
                         </div>
                         <div class="label-group">
                             <label for="ed-apelido">Apelido</label>
-                            <input type="text" id="ed-apelido" name="apelido" required value="<?= htmlspecialchars($artistaEdicaoApelido) ?>">
+                            <input type="text" id="ed-apelido" name="apelido" maxlength="50" required value="<?= htmlspecialchars($artistaEdicaoApelido) ?>">
                         </div>
 
                         <!-- Só para Músico (os outros tipos não têm instrumentos) -->
@@ -320,11 +320,11 @@ $subtituloPagina = 'Gestão de artistas';
 
                         <div class="label-group form-grid-full">
                             <label for="ed-contacto">Contacto</label>
-                            <input type="text" id="ed-contacto" name="contacto" value="<?= htmlspecialchars($artistaEdicaoContacto) ?>">
+                            <input type="text" id="ed-contacto" name="contacto" maxlength="20" value="<?= htmlspecialchars($artistaEdicaoContacto) ?>">
                         </div>
                         <div class="label-group form-grid-full">
                             <label for="ed-email">E-mail</label>
-                            <input type="email" id="ed-email" name="email" value="<?= htmlspecialchars($artistaEdicaoEmail) ?>">
+                            <input type="email" id="ed-email" name="email" maxlength="100" value="<?= htmlspecialchars($artistaEdicaoEmail) ?>">
                         </div>
                     </div>
                 </div>

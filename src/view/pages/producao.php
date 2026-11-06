@@ -244,19 +244,19 @@ $subtituloPagina = 'Gestão de produção';
                     <div class="form-grid">
                         <div class="label-group">
                             <label for="ap-nome">Nome *</label>
-                            <input id="ap-nome" name="nome" type="text" required>
+                            <input id="ap-nome" name="nome" type="text" maxlength="50" required>
                         </div>
                         <div class="label-group">
                             <label for="ap-apelido">Apelido *</label>
-                            <input id="ap-apelido" name="apelido" type="text" required>
+                            <input id="ap-apelido" name="apelido" type="text" maxlength="50" required>
                         </div>
                         <div class="label-group full">
                             <label for="ap-contacto">Contacto</label>
-                            <input id="ap-contacto" name="contacto" type="tel">
+                            <input id="ap-contacto" name="contacto" type="tel" maxlength="20">
                         </div>
                         <div class="label-group full">
                             <label for="ap-email">E-mail</label>
-                            <input id="ap-email" name="email" type="email">
+                            <input id="ap-email" name="email" type="email" maxlength="100">
                         </div>
                     </div>
                 </div>
@@ -283,19 +283,19 @@ $subtituloPagina = 'Gestão de produção';
                     <div class="form-grid">
                         <div class="label-group">
                             <label for="ep-nome">Nome</label>
-                            <input id="ep-nome" name="nome" type="text" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getNomeProdutor() : '') ?>" required>
+                            <input id="ep-nome" name="nome" type="text" maxlength="50" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getNomeProdutor() : '') ?>" required>
                         </div>
                         <div class="label-group">
                             <label for="ep-apelido">Apelido</label>
-                            <input id="ep-apelido" name="apelido" type="text" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getApelidoProdutor() : '') ?>" required>
+                            <input id="ep-apelido" name="apelido" type="text" maxlength="50" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getApelidoProdutor() : '') ?>" required>
                         </div>
                         <div class="label-group full">
                             <label for="ep-contacto">Contacto</label>
-                            <input id="ep-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getContactoProdutor() : '') ?>">
+                            <input id="ep-contacto" name="contacto" type="tel" maxlength="20" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getContactoProdutor() : '') ?>">
                         </div>
                         <div class="label-group full">
                             <label for="ep-email">E-mail</label>
-                            <input id="ep-email" name="email" type="email" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getEmailProdutor() : '') ?>">
+                            <input id="ep-email" name="email" type="email" maxlength="100" value="<?= htmlspecialchars($produtorEdicao ? $produtorEdicao->getEmailProdutor() : '') ?>">
                         </div>
                     </div>
                 </div>
@@ -337,19 +337,19 @@ $subtituloPagina = 'Gestão de produção';
                     <div class="form-grid">
                         <div class="label-group full">
                             <label for="ag-nome">Nome *</label>
-                            <input id="ag-nome" name="nome" type="text" required>
+                            <input id="ag-nome" name="nome" type="text" maxlength="100" required>
                         </div>
                         <div class="label-group full">
                             <label for="ag-contacto">Contacto</label>
-                            <input id="ag-contacto" name="contacto" type="tel">
+                            <input id="ag-contacto" name="contacto" type="tel" maxlength="20">
                         </div>
                         <div class="label-group full">
                             <label for="ag-email">E-mail</label>
-                            <input id="ag-email" name="email" type="email">
+                            <input id="ag-email" name="email" type="email" maxlength="100">
                         </div>
                         <div class="label-group full">
                             <label for="ag-endereco">Endereço</label>
-                            <input id="ag-endereco" name="endereco" type="text">
+                            <input id="ag-endereco" name="endereco" type="text" maxlength="150">
                         </div>
                     </div>
                 </div>
@@ -376,19 +376,19 @@ $subtituloPagina = 'Gestão de produção';
                     <div class="form-grid">
                         <div class="label-group full">
                             <label for="eg-nome">Nome</label>
-                            <input id="eg-nome" name="nome" type="text" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getNomeGravadora() : '') ?>" required>
+                            <input id="eg-nome" name="nome" type="text" maxlength="100" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getNomeGravadora() : '') ?>" required>
                         </div>
                         <div class="label-group full">
                             <label for="eg-contacto">Contacto</label>
-                            <input id="eg-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getContactoGravadora() : '') ?>">
+                            <input id="eg-contacto" name="contacto" type="tel" maxlength="20" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getContactoGravadora() : '') ?>">
                         </div>
                         <div class="label-group full">
                             <label for="eg-email">E-mail</label>
-                            <input id="eg-email" name="email" type="email" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getEmailGravadora() : '') ?>">
+                            <input id="eg-email" name="email" type="email" maxlength="100" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getEmailGravadora() : '') ?>">
                         </div>
                         <div class="label-group full">
                             <label for="eg-endereco">Endereço</label>
-                            <input id="eg-endereco" name="endereco" type="text" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getEnderecoGravadora() : '') ?>">
+                            <input id="eg-endereco" name="endereco" type="text" maxlength="150" value="<?= htmlspecialchars($gravadoraEdicao ? $gravadoraEdicao->getEnderecoGravadora() : '') ?>">
                         </div>
                     </div>
                 </div>
@@ -430,19 +430,19 @@ $subtituloPagina = 'Gestão de produção';
                     <div class="form-grid">
                         <div class="label-group full">
                             <label for="ae-nome">Nome *</label>
-                            <input id="ae-nome" name="nome" type="text" required>
+                            <input id="ae-nome" name="nome" type="text" maxlength="100" required>
                         </div>
                         <div class="label-group full">
                             <label for="ae-contacto">Contacto</label>
-                            <input id="ae-contacto" name="contacto" type="tel">
+                            <input id="ae-contacto" name="contacto" type="tel" maxlength="20">
                         </div>
                         <div class="label-group full">
                             <label for="ae-email">E-mail</label>
-                            <input id="ae-email" name="email" type="email">
+                            <input id="ae-email" name="email" type="email" maxlength="100">
                         </div>
                         <div class="label-group full">
                             <label for="ae-endereco">Endereço</label>
-                            <input id="ae-endereco" name="endereco" type="text">
+                            <input id="ae-endereco" name="endereco" type="text" maxlength="150">
                         </div>
                     </div>
                 </div>
@@ -469,19 +469,19 @@ $subtituloPagina = 'Gestão de produção';
                     <div class="form-grid">
                         <div class="label-group full">
                             <label for="ee-nome">Nome</label>
-                            <input id="ee-nome" name="nome" type="text" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getNomeEditora() : '') ?>" required>
+                            <input id="ee-nome" name="nome" type="text" maxlength="100" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getNomeEditora() : '') ?>" required>
                         </div>
                         <div class="label-group full">
                             <label for="ee-contacto">Contacto</label>
-                            <input id="ee-contacto" name="contacto" type="tel" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getContactoEditora() : '') ?>">
+                            <input id="ee-contacto" name="contacto" type="tel" maxlength="20" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getContactoEditora() : '') ?>">
                         </div>
                         <div class="label-group full">
                             <label for="ee-email">E-mail</label>
-                            <input id="ee-email" name="email" type="email" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getEmailEditora() : '') ?>">
+                            <input id="ee-email" name="email" type="email" maxlength="100" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getEmailEditora() : '') ?>">
                         </div>
                         <div class="label-group full">
                             <label for="ee-endereco">Endereço</label>
-                            <input id="ee-endereco" name="endereco" type="text" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getEndereco() : '') ?>">
+                            <input id="ee-endereco" name="endereco" type="text" maxlength="150" value="<?= htmlspecialchars($editoraEdicao ? $editoraEdicao->getEndereco() : '') ?>">
                         </div>
                     </div>
                 </div>

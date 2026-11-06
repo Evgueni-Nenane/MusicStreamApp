@@ -117,7 +117,7 @@ $subtituloPagina = 'Gestão de géneros musicais';
                                 <div class="form-grid">
                                     <div class="label-group full">
                                         <label for="cad-nome">Nome do Género *</label>
-                                        <input type="text" id="cad-nome" name="nome" placeholder="Ex.: Kizomba" required>
+                                        <input type="text" id="cad-nome" name="nome" placeholder="Ex.: Kizomba" maxlength="50" required>
                                     </div>
                                 </div>
                                 <div class="table-actions">

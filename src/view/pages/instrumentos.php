@@ -116,7 +116,7 @@ $subtituloPagina = 'Gestão de instrumentos musicais';
                             <div class="form-grid">
                                 <div class="label-group full">
                                     <label for="cad-nome">Nome do Instrumento *</label>
-                                    <input type="text" id="cad-nome" name="nome" placeholder="Ex.: Guitarra" required>
+                                    <input type="text" id="cad-nome" name="nome" placeholder="Ex.: Guitarra" maxlength="50" required>
                                 </div>
                             </div>
                             <div class="table-actions">

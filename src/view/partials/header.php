@@ -11,6 +11,7 @@ $tituloPagina = $tituloPagina ?? 'Sistema de Gestão de Discos';
 $subtituloPagina = $subtituloPagina ?? '';
 $codigoFoto = (int) $utilizador->getCodigo();
 ?>
+<script src="../js/form-validation.js" defer></script>
 <header>
     <div class="pagetitle">
         <h2><?= htmlspecialchars($tituloPagina) ?></h2>

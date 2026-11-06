@@ -118,11 +118,11 @@ $subtituloPagina = 'Administração de utilizadores';
                                 <div class="form-grid">
                                     <div class="label-group">
                                         <label for="cad-nome">Primeiro Nome *</label>
-                                        <input type="text" id="cad-nome" name="nome" required>
+                                        <input type="text" id="cad-nome" name="nome" maxlength="50" required>
                                     </div>
                                     <div class="label-group">
                                         <label for="cad-apelido">Último Nome *</label>
-                                        <input type="text" id="cad-apelido" name="apelido" required>
+                                        <input type="text" id="cad-apelido" name="apelido" maxlength="50" required>
                                     </div>
                                     <div class="label-group">
                                         <label for="cad-genero">Género</label>
@@ -141,15 +141,15 @@ $subtituloPagina = 'Administração de utilizadores';
                                     </div>
                                     <div class="label-group full">
                                         <label for="cad-username">Nome de Utilizador *</label>
-                                        <input type="text" id="cad-username" name="username" required>
+                                        <input type="text" id="cad-username" name="username" maxlength="50" required>
                                     </div>
                                     <div class="label-group full">
                                         <label for="cad-email">E-mail Corporativo</label>
-                                        <input type="email" id="cad-email" name="email">
+                                        <input type="email" id="cad-email" name="email" maxlength="100">
                                     </div>
                                     <div class="label-group full">
                                         <label for="cad-tel">Número de Telemóvel</label>
-                                        <input type="tel" id="cad-tel" name="telefone">
+                                        <input type="tel" id="cad-tel" name="telefone" maxlength="20">
                                     </div>
                                 </div>
                             </div>
@@ -211,7 +211,7 @@ $subtituloPagina = 'Administração de utilizadores';
                             <div class="form-grid">
                                 <div class="label-group full">
                                     <label for="perfil-nome">Nome do Novo Perfil *</label>
-                                    <input type="text" id="perfil-nome" name="nome_perfil" required>
+                                    <input type="text" id="perfil-nome" name="nome_perfil" maxlength="50" required>
                                 </div>
                                 <div class="label-group full">
                                     <label>Permissões</label>
@@ -340,11 +340,11 @@ $subtituloPagina = 'Administração de utilizadores';
                             </div>
                             <div class="label-group full">
                                 <label for="eu-email">E-mail Corporativo</label>
-                                <input type="email" id="eu-email" name="email" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getEmail() : '') ?>">
+                                <input type="email" id="eu-email" name="email" maxlength="100" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getEmail() : '') ?>">
                             </div>
                             <div class="label-group full">
                                 <label for="eu-tel">Número de Telemóvel</label>
-                                <input type="tel" id="eu-tel" name="telefone" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getContacto() : '') ?>">
+                                <input type="tel" id="eu-tel" name="telefone" maxlength="20" value="<?= htmlspecialchars($utilizadorEdicao ? $utilizadorEdicao->getContacto() : '') ?>">
                             </div>
                         </div>
                     </div>
@@ -372,7 +372,7 @@ $subtituloPagina = 'Administração de utilizadores';
                     <div class="form-grid">
                         <div class="label-group full">
                             <label for="ep-nome">Nome do Perfil *</label>
-                            <input type="text" id="ep-nome" name="nome_perfil" required value="<?= htmlspecialchars($perfilEdicao ? $perfilEdicao['NomeNivel'] : '') ?>">
+                            <input type="text" id="ep-nome" name="nome_perfil" maxlength="50" required value="<?= htmlspecialchars($perfilEdicao ? $perfilEdicao['NomeNivel'] : '') ?>">
                         </div>
                         <div class="label-group full">
                             <label>Permissões</label>
