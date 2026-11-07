@@ -138,13 +138,13 @@ $subtituloPagina = 'Gestão de artistas';
                                     <tbody>
                                         <?php foreach ($musicos as $musico): ?>
                                             <?php $nomes = array_map(fn($i) => $i->getNome(), $musico->getInstrumento() ?? []); ?>
-                                            <tr>
-                                                <td><input type="radio" name="sel_musico" value="<?= $musico->getCodigoMusico() ?>"></td>
-                                                <td><?= htmlspecialchars($musico->getNomeMusico() . ' ' . $musico->getApelidoMusico()) ?></td>
-                                                <td><?= htmlspecialchars(implode(', ', $nomes)) ?></td>
-                                                <td><?= htmlspecialchars($musico->getEmailMusico()) ?></td>
-                                                <td><?= htmlspecialchars($musico->getContactoMusico()) ?></td>
-                                            </tr>
+                                                <tr>
+                                                    <td><input type="radio" name="sel_musico" id="<?= $musico->getCodigoMusico() ?>" value="<?= $musico->getCodigoMusico() ?>"></td>
+                                                    <td><label for="<?= $musico->getCodigoMusico() ?>"><?= htmlspecialchars($musico->getNomeMusico() . ' ' . $musico->getApelidoMusico()) ?></label></td>
+                                                    <td><label for="<?= $musico->getCodigoMusico() ?>"><?= htmlspecialchars(implode(', ', $nomes)) ?></label></td>
+                                                    <td><label for="<?= $musico->getCodigoMusico() ?>"><?= htmlspecialchars($musico->getEmailMusico()) ?></label></td>
+                                                    <td><label for="<?= $musico->getCodigoMusico() ?>"><?= htmlspecialchars($musico->getContactoMusico()) ?></label></td>
+                                                </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$musicos): ?>
                                             <tr><td colspan="5"><?= $termoPesquisa !== '' ? 'Nenhum músico encontrado.' : 'Nenhum músico cadastrado.' ?></td></tr>
@@ -168,10 +168,10 @@ $subtituloPagina = 'Gestão de artistas';
                                     <tbody>
                                         <?php foreach ($compositores as $compositor): ?>
                                             <tr>
-                                                <td><input type="radio" name="sel_compositor" value="<?= $compositor->getCodigoCompositor() ?>"></td>
-                                                <td><?= htmlspecialchars($compositor->getNomeCompositor() . ' ' . $compositor->getApelidoCompositor()) ?></td>
-                                                <td><?= htmlspecialchars($compositor->getEmailCompositor()) ?></td>
-                                                <td><?= htmlspecialchars($compositor->getContactoCompositor()) ?></td>
+                                                <td><input type="radio" name="sel_compositor" id="<?= $compositor->getApelidoCompositor() ?>" value="<?= $compositor->getCodigoCompositor() ?>"></td>
+                                                <td><label for="<?= $compositor->getNomeCompositor() ?>"><?= htmlspecialchars($compositor->getNomeCompositor() . ' ' . $compositor->getApelidoCompositor()) ?></label></td>
+                                                <td><label for="<?= $compositor->getNomeCompositor() ?>"><?= htmlspecialchars($compositor->getEmailCompositor()) ?></label></td>
+                                                <td><label for="<?= $compositor->getNomeCompositor() ?>"><?= htmlspecialchars($compositor->getContactoCompositor()) ?></label></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$compositores): ?>
@@ -196,10 +196,10 @@ $subtituloPagina = 'Gestão de artistas';
                                     <tbody>
                                         <?php foreach ($cantores as $cantor): ?>
                                             <tr>
-                                                <td><input type="radio" name="sel_cantor" value="<?= $cantor->getCodigoCantor() ?>"></td>
-                                                <td><?= htmlspecialchars($cantor->getNomeCantor() . ' ' . $cantor->getApelidoCantor()) ?></td>
-                                                <td><?= htmlspecialchars($cantor->getEmailCantor()) ?></td>
-                                                <td><?= htmlspecialchars($cantor->getContactoCantor()) ?></td>
+                                                <td><input type="radio" name="sel_cantor" id="<?= $cantor->getNomeCantor() ?>" value="<?= $cantor->getCodigoCantor() ?>"></td>
+                                                <td><label for="<?= $cantor->getNomeCantor() ?>"><?= htmlspecialchars($cantor->getNomeCantor() . ' ' . $cantor->getApelidoCantor()) ?></label></td>
+                                                <td><label for="<?= $cantor->getNomeCantor() ?>"><?= htmlspecialchars($cantor->getEmailCantor()) ?></label></td>
+                                                <td><label for="<?= $cantor->getNomeCantor() ?>"><?= htmlspecialchars($cantor->getContactoCantor()) ?></label></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$cantores): ?>
