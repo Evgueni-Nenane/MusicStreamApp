@@ -75,7 +75,7 @@ class UtilizadorDAO
 
         if ($temNovaFoto) {
             $parametroFoto = null; // o blob segue por send_long_data()
-            $ps->bind_param("bssisi", $parametroFoto, $fotoTipo, $perfil, $email, $contacto, $codigoUtilizador);
+            $ps->bind_param("bsissi", $parametroFoto, $fotoTipo, $perfil, $email, $contacto, $codigoUtilizador);
             $ps->send_long_data(0, $foto);
         } else {
             $ps->bind_param("issi", $perfil, $email, $contacto, $codigoUtilizador);
