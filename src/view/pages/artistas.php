@@ -137,14 +137,18 @@ $subtituloPagina = 'Gestão de artistas';
                                     </thead>
                                     <tbody>
                                         <?php foreach ($musicos as $musico): ?>
-                                            <?php $nomes = array_map(fn($i) => $i->getNome(), $musico->getInstrumento() ?? []); ?>
-                                                <tr>
-                                                    <td><input type="radio" name="sel_musico" id="<?= $musico->getCodigoMusico() ?>" value="<?= $musico->getCodigoMusico() ?>"></td>
-                                                    <td><label for="<?= $musico->getCodigoMusico() ?>"><?= htmlspecialchars($musico->getNomeMusico() . ' ' . $musico->getApelidoMusico()) ?></label></td>
-                                                    <td><label for="<?= $musico->getCodigoMusico() ?>"><?= htmlspecialchars(implode(', ', $nomes)) ?></label></td>
-                                                    <td><label for="<?= $musico->getCodigoMusico() ?>"><?= htmlspecialchars($musico->getEmailMusico()) ?></label></td>
-                                                    <td><label for="<?= $musico->getCodigoMusico() ?>"><?= htmlspecialchars($musico->getContactoMusico()) ?></label></td>
-                                                </tr>
+                                            <?php
+                                            $nomes = array_map(fn($i) => $i->getNome(), $musico->getInstrumento() ?? []);
+                                            $idSelecao = 'sel-musico-' . (int) $musico->getCodigoMusico();
+                                            $nomeMusico = $musico->getNomeMusico() . ' ' . $musico->getApelidoMusico();
+                                            ?>
+                                            <tr>
+                                                <td><input type="radio" name="sel_musico" id="<?= $idSelecao ?>" value="<?= (int) $musico->getCodigoMusico() ?>" aria-label="Selecionar músico <?= htmlspecialchars($nomeMusico) ?>"></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($nomeMusico) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars(implode(', ', $nomes)) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($musico->getEmailMusico()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($musico->getContactoMusico()) ?></label></td>
+                                            </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$musicos): ?>
                                             <tr><td colspan="5"><?= $termoPesquisa !== '' ? 'Nenhum músico encontrado.' : 'Nenhum músico cadastrado.' ?></td></tr>
@@ -167,11 +171,15 @@ $subtituloPagina = 'Gestão de artistas';
                                     </thead>
                                     <tbody>
                                         <?php foreach ($compositores as $compositor): ?>
+                                            <?php
+                                            $idSelecao = 'sel-compositor-' . (int) $compositor->getCodigoCompositor();
+                                            $nomeCompositor = $compositor->getNomeCompositor() . ' ' . $compositor->getApelidoCompositor();
+                                            ?>
                                             <tr>
-                                                <td><input type="radio" name="sel_compositor" id="<?= $compositor->getApelidoCompositor() ?>" value="<?= $compositor->getCodigoCompositor() ?>"></td>
-                                                <td><label for="<?= $compositor->getNomeCompositor() ?>"><?= htmlspecialchars($compositor->getNomeCompositor() . ' ' . $compositor->getApelidoCompositor()) ?></label></td>
-                                                <td><label for="<?= $compositor->getNomeCompositor() ?>"><?= htmlspecialchars($compositor->getEmailCompositor()) ?></label></td>
-                                                <td><label for="<?= $compositor->getNomeCompositor() ?>"><?= htmlspecialchars($compositor->getContactoCompositor()) ?></label></td>
+                                                <td><input type="radio" name="sel_compositor" id="<?= $idSelecao ?>" value="<?= (int) $compositor->getCodigoCompositor() ?>" aria-label="Selecionar compositor <?= htmlspecialchars($nomeCompositor) ?>"></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($nomeCompositor) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($compositor->getEmailCompositor()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($compositor->getContactoCompositor()) ?></label></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$compositores): ?>
@@ -195,11 +203,15 @@ $subtituloPagina = 'Gestão de artistas';
                                     </thead>
                                     <tbody>
                                         <?php foreach ($cantores as $cantor): ?>
+                                            <?php
+                                            $idSelecao = 'sel-cantor-' . (int) $cantor->getCodigoCantor();
+                                            $nomeCantor = $cantor->getNomeCantor() . ' ' . $cantor->getApelidoCantor();
+                                            ?>
                                             <tr>
-                                                <td><input type="radio" name="sel_cantor" id="<?= $cantor->getNomeCantor() ?>" value="<?= $cantor->getCodigoCantor() ?>"></td>
-                                                <td><label for="<?= $cantor->getNomeCantor() ?>"><?= htmlspecialchars($cantor->getNomeCantor() . ' ' . $cantor->getApelidoCantor()) ?></label></td>
-                                                <td><label for="<?= $cantor->getNomeCantor() ?>"><?= htmlspecialchars($cantor->getEmailCantor()) ?></label></td>
-                                                <td><label for="<?= $cantor->getNomeCantor() ?>"><?= htmlspecialchars($cantor->getContactoCantor()) ?></label></td>
+                                                <td><input type="radio" name="sel_cantor" id="<?= $idSelecao ?>" value="<?= (int) $cantor->getCodigoCantor() ?>" aria-label="Selecionar cantor <?= htmlspecialchars($nomeCantor) ?>"></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($nomeCantor) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($cantor->getEmailCantor()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($cantor->getContactoCantor()) ?></label></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$cantores): ?>

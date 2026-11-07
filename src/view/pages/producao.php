@@ -108,11 +108,15 @@ $subtituloPagina = 'Gestão de produção';
                                     </thead>
                                     <tbody>
                                         <?php foreach ($produtores as $produtor): ?>
+                                            <?php
+                                            $idSelecao = 'sel-produtor-' . (int) $produtor->getCodigoProdutor();
+                                            $nomeProdutor = $produtor->getNomeCompleto();
+                                            ?>
                                             <tr>
-                                                <td><input type="radio" name="sel" value="<?= $produtor->getCodigoProdutor() ?>"></td>
-                                                <td><?= htmlspecialchars($produtor->getNomeCompleto()) ?></td>
-                                                <td><?= htmlspecialchars($produtor->getContactoProdutor()) ?></td>
-                                                <td><?= htmlspecialchars($produtor->getEmailProdutor()) ?></td>
+                                                <td><input type="radio" name="sel" id="<?= $idSelecao ?>" value="<?= (int) $produtor->getCodigoProdutor() ?>" aria-label="Selecionar produtor <?= htmlspecialchars($nomeProdutor) ?>"></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($nomeProdutor) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($produtor->getContactoProdutor()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($produtor->getEmailProdutor()) ?></label></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$produtores): ?>
@@ -152,12 +156,16 @@ $subtituloPagina = 'Gestão de produção';
                                     </thead>
                                     <tbody>
                                         <?php foreach ($gravadoras as $gravadora): ?>
+                                            <?php
+                                            $idSelecao = 'sel-gravadora-' . (int) $gravadora->getCodigoGravadora();
+                                            $nomeGravadora = $gravadora->getNomeGravadora();
+                                            ?>
                                             <tr>
-                                                <td><input type="radio" name="sel" value="<?= $gravadora->getCodigoGravadora() ?>"></td>
-                                                <td><?= htmlspecialchars($gravadora->getNomeGravadora()) ?></td>
-                                                <td><?= htmlspecialchars($gravadora->getContactoGravadora()) ?></td>
-                                                <td><?= htmlspecialchars($gravadora->getEmailGravadora()) ?></td>
-                                                <td><?= htmlspecialchars($gravadora->getEnderecoGravadora()) ?></td>
+                                                <td><input type="radio" name="sel" id="<?= $idSelecao ?>" value="<?= (int) $gravadora->getCodigoGravadora() ?>" aria-label="Selecionar gravadora <?= htmlspecialchars($nomeGravadora) ?>"></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($nomeGravadora) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($gravadora->getContactoGravadora()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($gravadora->getEmailGravadora()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($gravadora->getEnderecoGravadora()) ?></label></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$gravadoras): ?>
@@ -197,12 +205,16 @@ $subtituloPagina = 'Gestão de produção';
                                     </thead>
                                     <tbody>
                                         <?php foreach ($editoras as $editora): ?>
+                                            <?php
+                                            $idSelecao = 'sel-editora-' . (int) $editora->getCodigoEditora();
+                                            $nomeEditora = $editora->getNomeEditora();
+                                            ?>
                                             <tr>
-                                                <td><input type="radio" name="sel" value="<?= $editora->getCodigoEditora() ?>"></td>
-                                                <td><?= htmlspecialchars($editora->getNomeEditora()) ?></td>
-                                                <td><?= htmlspecialchars($editora->getContactoEditora()) ?></td>
-                                                <td><?= htmlspecialchars($editora->getEmailEditora()) ?></td>
-                                                <td><?= htmlspecialchars($editora->getEndereco()) ?></td>
+                                                <td><input type="radio" name="sel" id="<?= $idSelecao ?>" value="<?= (int) $editora->getCodigoEditora() ?>" aria-label="Selecionar editora <?= htmlspecialchars($nomeEditora) ?>"></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($nomeEditora) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($editora->getContactoEditora()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($editora->getEmailEditora()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($editora->getEndereco()) ?></label></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$editoras): ?>

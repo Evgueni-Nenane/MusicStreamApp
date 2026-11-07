@@ -155,12 +155,16 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                                 </thead>
                                 <tbody>
                                     <?php foreach ($discos as $disco): ?>
+                                        <?php
+                                        $idSelecao = 'sel-disco-' . (int) $disco->getCodigoDisco();
+                                        $tituloDisco = $disco->getTitulo();
+                                        ?>
                                         <tr>
-                                            <td><input type="radio" name="sel" value="<?= $disco->getCodigoDisco() ?>"></td>
-                                            <td><?= escaparHtml($disco->getTitulo()) ?></td>
-                                            <td><?= escaparHtml($disco->getGeneroMusicalTxt()) ?></td>
-                                            <td><?= number_format($disco->getPreco(), 2, ',', '.') ?></td>
-                                            <td><?= escaparHtml($disco->getAnoEdicao()) ?></td>
+                                            <td><input type="radio" name="sel" id="<?= $idSelecao ?>" value="<?= (int) $disco->getCodigoDisco() ?>" aria-label="Selecionar disco <?= escaparHtml($tituloDisco) ?>"></td>
+                                            <td><label for="<?= $idSelecao ?>"><?= escaparHtml($tituloDisco) ?></label></td>
+                                            <td><label for="<?= $idSelecao ?>"><?= escaparHtml($disco->getGeneroMusicalTxt()) ?></label></td>
+                                            <td><label for="<?= $idSelecao ?>"><?= number_format($disco->getPreco(), 2, ',', '.') ?></label></td>
+                                            <td><label for="<?= $idSelecao ?>"><?= escaparHtml($disco->getAnoEdicao()) ?></label></td>
                                         </tr>
                                     <?php endforeach; ?>
                                     <?php if (!$discos): ?>
@@ -271,12 +275,16 @@ $subtituloPagina = 'Listagem de discos cadastrados';
                                 </thead>
                                 <tbody>
                                     <?php if ($discoDetalhe): foreach ($detalheFaixas as $faixa): ?>
+                                            <?php
+                                            $idSelecao = 'sel-faixa-' . (int) $faixa->getIdFaixa();
+                                            $nomeFaixa = $faixa->getNomeFaixa();
+                                            ?>
                                             <tr>
-                                                <td><input type="radio" name="sel_faixa" value="<?= $faixa->getIdFaixa() ?>" <?= $podeSelFaixa ? '' : 'disabled' ?>></td>
-                                                <td><?= escaparHtml($faixa->getNumeroFaixa()) ?></td>
-                                                <td><?= escaparHtml($faixa->getNomeFaixa()) ?></td>
-                                                <td><?= escaparHtml($faixa->getArtistaPrincipal()) ?></td>
-                                                <td><?= escaparHtml(formatarDuracao($faixa->getDuracao())) ?></td>
+                                                <td><input type="radio" name="sel_faixa" id="<?= $idSelecao ?>" value="<?= (int) $faixa->getIdFaixa() ?>" <?= $podeSelFaixa ? '' : 'disabled' ?> aria-label="Selecionar faixa <?= escaparHtml($nomeFaixa) ?>"></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= escaparHtml($faixa->getNumeroFaixa()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= escaparHtml($nomeFaixa) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= escaparHtml($faixa->getArtistaPrincipal()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= escaparHtml(formatarDuracao($faixa->getDuracao())) ?></label></td>
                                             </tr>
                                     <?php endforeach;
                                     endif; ?>

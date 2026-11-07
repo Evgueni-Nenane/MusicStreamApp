@@ -84,10 +84,14 @@ $subtituloPagina = 'Gestão de instrumentos musicais';
                                     </thead>
                                     <tbody>
                                         <?php foreach ($instrumentos as $instrumento): ?>
+                                            <?php
+                                            $idSelecao = 'sel-instrumento-' . (int) $instrumento->getCodigo();
+                                            $nomeInstrumento = $instrumento->getNome();
+                                            ?>
                                             <tr>
-                                                <td><input type="radio" name="sel" value="<?= $instrumento->getCodigo() ?>"></td>
-                                                <td><?= $instrumento->getCodigo() ?></td>
-                                                <td><?= htmlspecialchars($instrumento->getNome()) ?></td>
+                                                <td><input type="radio" name="sel" id="<?= $idSelecao ?>" value="<?= (int) $instrumento->getCodigo() ?>" aria-label="Selecionar instrumento <?= htmlspecialchars($nomeInstrumento) ?>"></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= (int) $instrumento->getCodigo() ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($nomeInstrumento) ?></label></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$instrumentos): ?>

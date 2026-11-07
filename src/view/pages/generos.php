@@ -84,10 +84,14 @@ $subtituloPagina = 'Gestão de géneros musicais';
                                     </thead>
                                     <tbody>
                                         <?php foreach ($generos as $genero): ?>
+                                            <?php
+                                            $idSelecao = 'sel-genero-' . (int) $genero->getCodigoGenero();
+                                            $nomeGenero = $genero->getNomeGenero();
+                                            ?>
                                             <tr>
-                                                <td><input type="radio" name="sel" value="<?= $genero->getCodigoGenero() ?>"></td>
-                                                <td><?= $genero->getCodigoGenero() ?></td>
-                                                <td><?= htmlspecialchars($genero->getNomeGenero()) ?></td>
+                                                <td><input type="radio" name="sel" id="<?= $idSelecao ?>" value="<?= (int) $genero->getCodigoGenero() ?>" aria-label="Selecionar género <?= htmlspecialchars($nomeGenero) ?>"></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= (int) $genero->getCodigoGenero() ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($nomeGenero) ?></label></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$generos): ?>

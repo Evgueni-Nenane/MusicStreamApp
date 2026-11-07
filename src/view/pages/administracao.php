@@ -177,14 +177,18 @@ $subtituloPagina = 'Administração de utilizadores';
                                     </thead>
                                     <tbody>
                                         <?php foreach ($lista as $utilizadorLista): ?>
+                                            <?php
+                                            $idSelecao = 'sel-utilizador-' . (int) $utilizadorLista->getCodigo();
+                                            $nomeUtilizador = $utilizadorLista->getNomeCompleto();
+                                            ?>
                                             <tr>
-                                                <td><input type="radio" name="sel" value="<?= $utilizadorLista->getCodigo() ?>"></td>
-                                                <td><?= $utilizadorLista->getCodigo() ?></td>
-                                                <td><?= htmlspecialchars($utilizadorLista->getNomeCompleto()) ?></td>
-                                                <td><?= htmlspecialchars($utilizadorLista->getEmail()) ?></td>
-                                                <td><?= htmlspecialchars($utilizadorLista->getGenero()) ?></td>
-                                                <td><?= htmlspecialchars($utilizadorLista->getPerfil()->getNome()) ?></td>
-                                                <td><?= htmlspecialchars($utilizadorLista->getContacto()) ?></td>
+                                                <td><input type="radio" name="sel" id="<?= $idSelecao ?>" value="<?= (int) $utilizadorLista->getCodigo() ?>" aria-label="Selecionar utilizador <?= htmlspecialchars($nomeUtilizador) ?>"></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= $utilizadorLista->getCodigo() ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($nomeUtilizador) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($utilizadorLista->getEmail()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($utilizadorLista->getGenero()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($utilizadorLista->getPerfil()->getNome()) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($utilizadorLista->getContacto()) ?></label></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$lista): ?>
@@ -267,16 +271,20 @@ $subtituloPagina = 'Administração de utilizadores';
                                     </thead>
                                     <tbody>
                                         <?php foreach ($perfis as $perfilLista): ?>
+                                            <?php
+                                            $idSelecao = 'sel-perfil-' . (int) $perfilLista['CodigoNivel'];
+                                            $nomePerfil = $perfilLista['NomeNivel'];
+                                            ?>
                                             <tr>
-                                                <td><input type="radio" name="sel_perfil" value="<?= $perfilLista['CodigoNivel'] ?>"></td>
-                                                <td><?= $perfilLista['CodigoNivel'] ?></td>
-                                                <td><?= htmlspecialchars($perfilLista['NomeNivel']) ?></td>
-                                                <td><?= formatarSimNao($perfilLista['PodeLer']) ?></td>
-                                                <td><?= formatarSimNao($perfilLista['PodeAdicionar']) ?></td>
-                                                <td><?= formatarSimNao($perfilLista['PodeEditar']) ?></td>
-                                                <td><?= formatarSimNao($perfilLista['PodeRemover']) ?></td>
-                                                <td><?= formatarSimNao($perfilLista['PodeUtilizadores']) ?></td>
-                                                <td><?= formatarSimNao($perfilLista['PodeLogs']) ?></td>
+                                                <td><input type="radio" name="sel_perfil" id="<?= $idSelecao ?>" value="<?= (int) $perfilLista['CodigoNivel'] ?>" aria-label="Selecionar perfil <?= htmlspecialchars($nomePerfil) ?>"></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= (int) $perfilLista['CodigoNivel'] ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= htmlspecialchars($nomePerfil) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= formatarSimNao($perfilLista['PodeLer']) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= formatarSimNao($perfilLista['PodeAdicionar']) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= formatarSimNao($perfilLista['PodeEditar']) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= formatarSimNao($perfilLista['PodeRemover']) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= formatarSimNao($perfilLista['PodeUtilizadores']) ?></label></td>
+                                                <td><label for="<?= $idSelecao ?>"><?= formatarSimNao($perfilLista['PodeLogs']) ?></label></td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if (!$perfis): ?>
