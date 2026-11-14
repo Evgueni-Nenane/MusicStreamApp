@@ -1,12 +1,4 @@
 <?php
-/**
- * Menu lateral comum a todas as páginas autenticadas.
- *
- * Variáveis esperadas:
- * - $paginaAtiva      (string) chave da página atual, usada para marcar o link ativo
- * - $podeUtilizadores (bool)   mostra a entrada "Administração"
- * - $podeLogs         (bool)   mostra a entrada "Logs"
- */
 $paginaAtiva = $paginaAtiva ?? '';
 $podeUtilizadores = $podeUtilizadores ?? false;
 $podeLogs = $podeLogs ?? false;
@@ -34,25 +26,19 @@ if ($podeLogs) {
 
 $itensMenu[] = ['chave' => 'logout', 'href' => 'LogOut.php', 'texto' => 'Sair'];
 ?>
-<aside>
-    <div class="title">
-        <h1>DiscoGest</h1>
-    </div>
+<aside class="col-12 col-md-3 col-lg-2 bg-white border-end p-3">
+    <h1 class="fs-4 fw-bold mb-4 px-2">DiscoGest</h1>
 
-    <nav>
-        <ul>
-            <?php foreach ($itensMenu as $item): ?>
-                <?php if (isset($item['secao'])): ?>
-                    <li class="secnav"><?= htmlspecialchars($item['secao']) ?></li>
-                <?php else: ?>
-                    <?php $classeAtiva = $item['chave'] === $paginaAtiva ? ' class="active"' : ''; ?>
-                    <li>
-                        <a href="<?= htmlspecialchars($item['href']) ?>"<?= $classeAtiva ?>>
-                            <?= htmlspecialchars($item['texto']) ?>
-                        </a>
-                    </li>
-                <?php endif; ?>
-            <?php endforeach; ?>
-        </ul>
+    <nav class="nav nav-pills flex-column gap-1">
+        <?php foreach ($itensMenu as $item): ?>
+            <?php if (isset($item['secao'])): ?>
+                <span class="text-uppercase text-muted small fw-semibold px-2 mt-3 mb-1"><?= htmlspecialchars($item['secao']) ?></span>
+            <?php else: ?>
+                <?php $classeAtiva = $item['chave'] === $paginaAtiva ? 'active' : 'text-dark'; ?>
+                <a class="nav-link <?= $classeAtiva ?>" href="<?= htmlspecialchars($item['href']) ?>">
+                    <?= htmlspecialchars($item['texto']) ?>
+                </a>
+            <?php endif; ?>
+        <?php endforeach; ?>
     </nav>
 </aside>

@@ -52,6 +52,15 @@ Defaults to `admin` / `admin123`. The script is idempotent (it checks the userna
 
 Password length is validated at 8 characters. The password is stored in clear text, matching the current authentication implementation (see §10).
 
+For a demo with one ready-to-use account per profile, run `php seeds/demo.php`:
+
+| Profile | Username | Password |
+|---|---|---|
+| Administrador | `admin` | `admin123` |
+| Operador | `operador` | `operador123` |
+| SuperOperador | `superoperador` | `super123` |
+| Auditor | `auditor` | `auditor123` |
+
 ### 2.4 Run
 
 ```bash
@@ -109,14 +118,14 @@ The UI hides unavailable actions **and** the server re-validates every POST — 
 ├── index.php                   # entry point: session check + redirect
 ├── Dump20261101.sql            # schema + reference/demo data (no users)
 ├── seeds/
-│   └── seed.php                # CLI: creates the initial administrator
+│   ├── seed.php                # CLI: creates the initial administrator
+│   └── demo.php                # CLI: creates demonstration accounts for each profile
 └── src/
     ├── controller/             # 19 controllers (5 page controllers + 14 entity controllers)
     ├── model/                  # 14 entities + Sessao + Permissao
     ├── repository/             # 15 DAOs + connection.php
     └── view/
         ├── pages/              # 12 PHP pages (rendering only)
-        ├── css/                # one stylesheet per page
         ├── js/                 # progressive enhancement: photo preview and form validation
         └── resources/          # static images (login.png, default avatar)
 ```
@@ -184,7 +193,7 @@ Table names are **PascalCase** (`Utilizador`, `Disco_Compacto`, `NivelAcesso`). 
 - Written with `mysqli_stmt::send_long_data()`; when no new file is submitted the existing photo is preserved (`UPDATE ... SET` without the `foto` column).
 - Served by `foto.php`, which enforces the same permission rule as the UI: own photo, or any photo for profiles with `utilizadores`. Responses carry `ETag`, `304` revalidation, `Cache-Control: private, no-cache` and `X-Content-Type-Options: nosniff`.
 - Templates fall back to `src/view/resources/user.png` when no photo is stored; `foto.php` serves that fallback itself.
-- The create and edit forms use a small script (`src/view/js/foto-preview.js`) to show the selected image before upload. This is the only JavaScript on the page.
+- The create and edit forms use a small script (`src/view/js/foto-preview.js`) to show the selected image before upload. The interface uses Bootstrap 5 via CDN for layout, components and modals.
 
 ---
 
